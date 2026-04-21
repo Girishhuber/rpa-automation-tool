@@ -1,11 +1,3 @@
-"""
-ScreenCapture — full screen + element-level crops with visual hash.
-
-New:
-  - capture_element(): crop just the element's bounding box
-  - visual_hash(): fast perceptual hash for change detection
-  - compare_visual_hash(): quick "did the UI change?" without full CV
-"""
 
 from __future__ import annotations
 from pathlib import Path

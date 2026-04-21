@@ -104,6 +104,7 @@ class UITarget(BaseModel):
 
     confidence_score: float = 0.0
     confidence_reason: Optional[str] = None
+    is_editable:Optional[bool] = None
 
     def build_selectors(self) -> None:
        

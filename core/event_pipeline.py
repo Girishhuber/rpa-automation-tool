@@ -1,14 +1,3 @@
-"""
-EventPipeline — normalises, compresses, and tags events before storage.
-
-Improvements:
-  - Scroll event compression: consecutive scrolls in same direction merged
-  - Text typing compression: rapid keystrokes batched into single TypeTextEvent
-  - Event intent tagging: navigation / input / selection / system / clipboard
-  - Structured log line per event: type | intent | target summary
-  - Debounce applies only to scroll (never to clicks)
-"""
-
 from __future__ import annotations
 import time
 from datetime import datetime, timezone
@@ -23,11 +12,6 @@ from models.event import (
 )
 from models.target import UITarget
 from utils.logger import logger
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Intent classification
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _classify_intent(payload) -> str:
     ptype = str(getattr(payload, "type", ""))

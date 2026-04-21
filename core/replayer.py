@@ -1,15 +1,3 @@
-"""
-ReplayEngine — self-healing execution with full structured logging.
-
-Key additions:
-  - Self-healing loop: on failure tries next strategy automatically
-  - Post-action validation: checks UI actually changed (text appeared, button gone)
-  - Confidence-based execution: low confidence → tries 2 strategies before acting
-  - State-awareness: skip step if UI already in desired state
-  - Structured [REPLAY] log: shows which strategy succeeded, score, timing
-  - Strategy feedback: updates matcher's learning state on success/failure
-"""
-
 from __future__ import annotations
 import ctypes
 import re
@@ -43,11 +31,16 @@ from models.target import TargetBackend
 from .matcher import ElementMatcher
 from .browser_bridge import BrowserBridge
 from .overlay import RecordingOverlay
+from .screenshot import ScreenCapture
 
 try:
-    from pywinauto import Application, Desktop
+    from pywinauto import Application
     from pywinauto.keyboard import send_keys
     from pywinauto.findwindows import find_windows
+    try:
+        from pywinauto import Desktop
+    except ImportError:
+        from pywinauto.desktop import Desktop
     UIA_OK = True
 except ImportError:
     UIA_OK = False
@@ -71,16 +64,41 @@ _MOD_NORMALIZE = {
     "ctrl":"ctrl","shift":"shift","alt":"alt",
 }
 _MOD_PREFIX = {"ctrl":"^","alt":"%","shift":"+"}
+
+# Verified against pywinauto 0.6.x keyboard.CODES dict
 _KEY_MAP = {
-    "enter":"{ENTER}","return":"{ENTER}","tab":"{TAB}",
-    "backspace":"{BACKSPACE}","delete":"{DELETE}",
-    "escape":"{ESCAPE}","home":"{HOME}","end":"{END}",
-    "page_up":"{PGUP}","page_down":"{PGDN}","space":" ",
-    "insert":"{INSERT}",
-    "left":"{LEFT}","right":"{RIGHT}","up":"{UP}","down":"{DOWN}",
-    **{f"f{i}": f"{{F{i}}}" for i in range(1, 13)},
+    "enter":     "{ENTER}",
+    "return":    "{ENTER}",
+    "tab":       "{TAB}",
+    "space":     " ",
+    "escape":    "{ESC}",       # NOTE: must be {ESC} not {ESCAPE}
+    "backspace": "{BACKSPACE}",
+    "delete":    "{DELETE}",
+    "insert":    "{INSERT}",
+    "home":      "{HOME}",
+    "end":       "{END}",
+    "page_up":   "{PGUP}",
+    "page_down": "{PGDN}",
+    "left":      "{LEFT}",
+    "right":     "{RIGHT}",
+    "up":        "{UP}",
+    "down":      "{DOWN}",
+    **{f"f{i}": f"{{F{i}}}" for i in range(1, 25)},
 }
+
 _EXCEL_PROCS = {"excel.exe"}
+
+# BUG-9: control types that can accept text input
+_EDITABLE_CONTROL_TYPES = {
+    "Edit", "Document", "DataItem", "SpreadsheetItem", "Cell",
+    "RichEdit", "Text", "TextBox", "ComboBox",
+}
+# Definitely non-editable — never attempt set_edit_text on these
+_NON_EDITABLE_CONTROL_TYPES = {
+    "Button", "SplitButton", "MenuItem", "TabItem", "ListItem",
+    "TreeItem", "Pane", "ToolBar", "StatusBar", "ScrollBar",
+    "TitleBar", "MenuBar", "Menu",
+}
 
 
 class ReplayEngine:
@@ -92,13 +110,14 @@ class ReplayEngine:
         on_progress: Optional[Callable[[int,int], None]] = None,
         overlay: Optional[RecordingOverlay] = None,
     ):
-        self._config   = config
-        self._scr_dir  = screenshot_base_dir
+        self._config      = config
+        self._scr_dir     = screenshot_base_dir
         self._on_progress = on_progress
-        self._overlay  = overlay
-        self._abort    = threading.Event()
+        self._overlay     = overlay
+        self._abort       = threading.Event()
         self._browser: Optional[BrowserBridge] = None
         self._matcher: Optional[ElementMatcher] = None
+        self._capture: Optional[ScreenCapture]  = None
         self._current_hwnd: int = 0
         self._last_mouse_pos: Optional[tuple[int,int]] = None
 
@@ -113,8 +132,11 @@ class ReplayEngine:
         connected = self._browser.connect()
         logger.info("[REPLAY] Browser CDP: {}", "connected" if connected else "NOT connected")
 
+        scr_dir = self._scr_dir / session.id / "screenshots"
+        self._capture = ScreenCapture(scr_dir)
+
         self._matcher = ElementMatcher(
-            screenshot_base_dir=self._scr_dir / session.id / "screenshots",
+            screenshot_base_dir=scr_dir,
             browser=self._browser,
         )
 
@@ -141,15 +163,16 @@ class ReplayEngine:
 
             is_screenshot = isinstance(event.payload, ScreenshotCheckpointEvent)
 
-            # User interference
             if self._detect_interference():
-                logger.warning("[REPLAY] Mouse interference detected — pausing 1s")
+                logger.warning("[REPLAY] Mouse interference — pausing 1s")
                 time.sleep(1.0)
 
-            logger.info("[REPLAY] Event #{}/{} type={} ts={}ms",
-                        event.id, total, event.payload.type, event.timestamp_ms)
+            logger.info("[REPLAY] Event #{}/{} type={} intent={} group={} ts={}ms",
+                        event.id, total, event.payload.type,
+                        event.intent or "?", event.action_group or "?",
+                        event.timestamp_ms)
 
-            success = self._execute_with_retry(event)
+            success, used_fallback = self._execute_with_adaptive_retry(event)
             if not success:
                 self._cleanup()
                 return ReplayResult(
@@ -158,9 +181,13 @@ class ReplayEngine:
                     events_total=total,
                     events_completed=completed,
                     failed_event_id=event.id,
-                    error_message=f"Event #{event.id} ({event.payload.type}) failed after retries",
+                    error_message=f"Event #{event.id} ({event.payload.type}) failed after all retries",
                     duration_ms=self._now_ms() - start_ms,
                 )
+
+            if used_fallback:
+                logger.warning("[REPLAY] Event #{} succeeded via COORD FALLBACK (element not found by selectors)",
+                               event.id)
 
             if not is_screenshot:
                 completed += 1
@@ -170,8 +197,7 @@ class ReplayEngine:
 
         self._cleanup()
         duration_ms = self._now_ms() - start_ms
-        logger.info("[REPLAY] Complete: {}/{} events in {:.1f}s",
-                    completed, total, duration_ms/1000)
+        logger.info("[REPLAY] Done: {}/{} in {:.1f}s", completed, total, duration_ms/1000)
         return ReplayResult(
             replayed_at=datetime.now(timezone.utc).isoformat(),
             success=True,
@@ -189,49 +215,70 @@ class ReplayEngine:
             self._overlay.set_replaying(False)
 
     # ──────────────────────────────────────────────────────────────────
-    # Retry with per-event timeout + self-healing
+    # BUG-11: Adaptive retry — returns (success, used_fallback)
     # ──────────────────────────────────────────────────────────────────
 
-    def _execute_with_retry(self, event: Event) -> bool:
-        attempts = self._config.replay.retry_attempts
+    def _execute_with_adaptive_retry(self, event: Event) -> tuple[bool, bool]:
+        """
+        BUG-11 FIX: Returns (success, used_coord_fallback).
+        attempt 1 → normal element match
+        attempt 2 → force window focus + re-match
+        attempt 3 → coordinate click (coord fallback)
+        """
+        attempts     = self._config.replay.retry_attempts
+        used_fallback = False
+
         for attempt in range(1, attempts + 1):
-            result_ok  = [False]
-            exc_holder = [None]
-
-            def _run():
-                try:
+            try:
+                if attempt == 1:
                     self._dispatch(event)
-                    result_ok[0] = True
-                except Exception as e:
-                    exc_holder[0] = e
+                elif attempt == 2:
+                    # Focus first then retry
+                    p = event.payload
+                    if hasattr(p, "target") and p.target and p.target.window_title:
+                        self._smart_focus_window(p.target.window_title, event.id)
+                        time.sleep(0.3)
+                    self._dispatch(event)
+                else:
+                    # BUG-11: coord fallback — mark it
+                    used_fallback = True
+                    self._dispatch_coord_fallback(event)
 
-            t = threading.Thread(target=_run, daemon=True)
-            t.start()
-            t.join(timeout=self._config.replay.wait_timeout_ms / 1000)
+                logger.info("[REPLAY] Event #{} ✓ attempt={} fallback={}",
+                            event.id, attempt, used_fallback)
+                return True, used_fallback
 
-            if t.is_alive():
-                logger.warning("[REPLAY] Event #{} attempt {} timed out", event.id, attempt)
+            except (ElementNotFoundError, ElementNotInteractableError, ReplayTimeoutError) as exc:
+                logger.warning("[REPLAY] Event #{} attempt {}/{}: {}",
+                               event.id, attempt, attempts, exc)
                 if attempt < attempts:
                     time.sleep(0.5 * attempt)
-                continue
-
-            if exc_holder[0]:
-                exc = exc_holder[0]
-                if isinstance(exc, (ElementNotFoundError, ElementNotInteractableError,
-                                    ReplayTimeoutError)):
-                    logger.warning("[REPLAY] Event #{} attempt {}/{}: {}",
-                                   event.id, attempt, attempts, exc)
-                    if attempt < attempts:
-                        time.sleep(0.6 * attempt)
-                    continue
+            except Exception as exc:
                 logger.error("[REPLAY] Event #{} unexpected error: {}", event.id, exc)
-                return False
-
-            logger.info("[REPLAY] Event #{} succeeded (attempt {})", event.id, attempt)
-            return True
+                if attempt < attempts:
+                    time.sleep(0.5 * attempt)
+                else:
+                    return False, used_fallback
 
         logger.error("[REPLAY] Event #{} FAILED after {} attempts", event.id, attempts)
-        return False
+        return False, used_fallback
+
+    def _dispatch_coord_fallback(self, event: Event) -> None:
+        """Direct coordinate-based execution when element match fails."""
+        p = event.payload
+        if isinstance(p, (MouseClickEvent, MouseDoubleClickEvent, MouseRightClickEvent)):
+            x, y = p.x, p.y
+            if isinstance(p, MouseDoubleClickEvent):
+                self._sendinput_click(x, y, double=True)
+            elif isinstance(p, MouseRightClickEvent):
+                self._sendinput_right_click(x, y)
+            else:
+                self._sendinput_click(x, y)
+            self._flash(x, y)
+        elif isinstance(p, TypeTextEvent):
+            self._type_at_current_focus(p.text)
+        else:
+            self._dispatch(event)
 
     # ──────────────────────────────────────────────────────────────────
     # Dispatcher
@@ -240,226 +287,180 @@ class ReplayEngine:
     def _dispatch(self, event: Event) -> None:
         p = event.payload
 
-        # ── System ───────────────────────────────────────────────────
         if isinstance(p, ScreenshotCheckpointEvent):
             return
         if isinstance(p, ExplicitWaitEvent):
-            delay = max(p.duration_ms/1000/self._config.replay.speed, 0.05)
-            logger.debug("[REPLAY] Explicit wait {:.2f}s", delay)
-            time.sleep(delay)
+            time.sleep(max(p.duration_ms/1000/self._config.replay.speed, 0.05))
             return
         if isinstance(p, ProcessLaunchEvent):
             import subprocess
-            logger.info("[REPLAY] Launch process: {} {}", p.executable, p.arguments)
+            logger.info("[REPLAY] Launch: {} {}", p.executable, p.arguments)
             subprocess.Popen([p.executable] + p.arguments)
             if p.wait_for_window_title:
                 self._wait_for_window(p.wait_for_window_title, event.id)
             return
 
-        # ── Window focus ──────────────────────────────────────────────
         if isinstance(p, WindowFocusEvent):
-            logger.info("[REPLAY] Focus window: '{}'", p.window_title[:40])
             self._smart_focus_window(p.window_title, event.id)
             return
 
-        # ── Browser ───────────────────────────────────────────────────
-        if isinstance(p, BrowserNavigateEvent):
-            if self._browser and self._browser.is_connected:
-                logger.info("[REPLAY] Browser navigate → {}", p.url)
-                self._browser.navigate(p.url, wait=p.wait_for_load,
-                                        timeout_ms=self._config.replay.wait_timeout_ms)
-            return
-        if isinstance(p, BrowserTabSwitchEvent):
-            if self._browser and p.tab_url:
-                logger.info("[REPLAY] Browser tab switch → {}", p.tab_url[:50])
-                for tab in self._browser.get_tab_list():
-                    if tab.get("url","").startswith(p.tab_url[:40]):
-                        self._browser.switch_to_tab(tab["id"])
-                        time.sleep(0.3)
-                        break
-            return
-        if isinstance(p, BrowserBackEvent):
-            if self._browser and self._browser.is_connected:
-                self._browser._send("Page.goBack", {}); self._browser.wait_for_load()
-            return
-        if isinstance(p, BrowserForwardEvent):
-            if self._browser and self._browser.is_connected:
-                self._browser._send("Page.goForward", {}); self._browser.wait_for_load()
-            return
-        if isinstance(p, BrowserRefreshEvent):
-            if self._browser and self._browser.is_connected:
-                self._browser._send("Page.reload", {}); self._browser.wait_for_load()
-            return
-        if isinstance(p, BrowserWaitLoadEvent):
-            if self._browser and self._browser.is_connected:
-                self._browser.wait_for_load(p.timeout_ms)
-            return
-
-        # ── Clipboard ─────────────────────────────────────────────────
+        # Clipboard
         if isinstance(p, ClipboardCopyEvent):
-            logger.info("[REPLAY] Clipboard copy")
             self._send_combo(["ctrl","c"]); return
         if isinstance(p, ClipboardCutEvent):
-            logger.info("[REPLAY] Clipboard cut")
             self._send_combo(["ctrl","x"]); return
         if isinstance(p, ClipboardPasteEvent):
-            logger.info("[REPLAY] Clipboard paste: '{}'", (p.content or "")[:30])
             if p.content is not None and WIN32_OK:
                 self._set_clipboard(p.content)
             self._send_combo(["ctrl","v"]); return
         if isinstance(p, ClipboardPasteSpecialEvent):
             self._send_combo(["ctrl","v"]); return
 
-        # ── Excel ─────────────────────────────────────────────────────
+        # Excel
         if isinstance(p, ExcelCellSelectEvent):
-            logger.info("[REPLAY] Excel navigate to cell: {}", p.cell_ref)
             self._excel_navigate_to_cell(p.cell_ref, event.id); return
         if isinstance(p, ExcelRangeSelectEvent):
-            logger.info("[REPLAY] Excel range: {}", p.range_ref)
             self._excel_navigate_to_cell(p.range_ref, event.id); return
         if isinstance(p, ExcelSheetSwitchEvent):
-            logger.info("[REPLAY] Excel sheet: {}", p.sheet_name)
             self._excel_switch_sheet(p.sheet_name, event.id); return
 
-        # ── Dialogs ───────────────────────────────────────────────────
+        # Dialogs
         if isinstance(p, DialogResponseEvent):
-            logger.info("[REPLAY] Dialog '{}' → {}", p.dialog_title, p.response)
             self._handle_dialog(p, event.id); return
         if isinstance(p, FileDialogEvent):
-            logger.info("[REPLAY] File dialog → {}", p.path)
             self._handle_file_dialog(p, event.id); return
         if isinstance(p, DropdownSelectEvent):
-            logger.info("[REPLAY] Dropdown select: '{}'", p.selected_text)
             self._handle_dropdown(p, event.id); return
         if isinstance(p, CheckboxToggleEvent):
-            logger.info("[REPLAY] Checkbox → {}", p.checked)
             self._handle_checkbox(p, event.id); return
 
-        # ── Keyboard ──────────────────────────────────────────────────
+        # Keyboard
         if isinstance(p, KeyPressEvent):
-            logger.info("[REPLAY] Key: {}", p.key)
-            send_keys(_KEY_MAP.get(p.key.lower(), p.key)); return
+            key_str = _KEY_MAP.get(p.key.lower())
+            if key_str is None:
+                logger.warning("[REPLAY] Unknown key '{}' — skipping", p.key)
+                return
+            if UIA_OK:
+                send_keys(key_str)
+            return
         if isinstance(p, KeyComboEvent):
-            logger.info("[REPLAY] Key combo: {}", "+".join(p.keys))
             self._send_combo(p.keys); return
         if isinstance(p, TypeTextEvent):
-            logger.info("[REPLAY] Type text: '{}...' into target={}",
-                        p.text[:30], self._tlabel_payload(p.target))
+            logger.info("[REPLAY] Type: '{}...' into target={}",
+                        p.text[:30], self._tlabel(p.target))
             self._do_type(p, event.id); return
 
-        # ── Mouse ─────────────────────────────────────────────────────
+        # Mouse
         if isinstance(p, MouseClickEvent):
-            logger.info("[REPLAY] Click @ ({},{}) target={}",
-                        p.x, p.y, self._tlabel_payload(p.target))
+            logger.info("[REPLAY] Click @ ({},{}) target={}", p.x, p.y, self._tlabel(p.target))
             self._do_click(p, event.id); return
         if isinstance(p, MouseDoubleClickEvent):
-            logger.info("[REPLAY] Double-click @ ({},{})", p.x, p.y)
             self._do_double_click(p, event.id); return
         if isinstance(p, MouseRightClickEvent):
-            logger.info("[REPLAY] Right-click @ ({},{})", p.x, p.y)
             self._do_right_click(p, event.id); return
         if isinstance(p, MouseScrollEvent):
-            logger.info("[REPLAY] Scroll dy={} @ ({},{})", p.dy, p.x, p.y)
             self._move_mouse(p.x, p.y); self._scroll(p.dy); return
         if isinstance(p, MouseDragEvent):
-            logger.info("[REPLAY] Drag ({},{})→({},{})", p.start_x, p.start_y, p.end_x, p.end_y)
             self._drag(p.start_x, p.start_y, p.end_x, p.end_y); return
 
     # ──────────────────────────────────────────────────────────────────
-    # Excel
+    # BUG-9: Type with target validation
     # ──────────────────────────────────────────────────────────────────
 
-    def _excel_navigate_to_cell(self, cell_ref: str, event_id: int) -> None:
+    def _do_type(self, p: TypeTextEvent, event_id: int) -> None:
+        """
+        BUG-9 FIX: Validate target is editable before attempting element-based input.
+        If target is Button/ListItem/Pane etc. → type at current OS focus instead.
+        If target is None (e.g. search query) → type at current OS focus.
+        """
+        # No target or explicitly None → type at current focus
+        if p.target is None:
+            logger.info("[REPLAY] TypeText: target=None → typing at current OS focus")
+            self._type_at_current_focus(p.text)
+            return
+
+        # BUG-9: Check if target is actually editable
+        ctrl = getattr(p.target, "control_type", None) or ""
+        if ctrl in _NON_EDITABLE_CONTROL_TYPES:
+            logger.warning(
+                "[REPLAY] BUG-9: TypeText target is non-editable {} '{}' — "
+                "typing at current OS focus instead",
+                ctrl, (p.target.name or "")[:30]
+            )
+            self._type_at_current_focus(p.text)
+            return
+
+        # Excel cell
+        if p.target and self._is_excel_target(p.target):
+            try:
+                elem = self._matcher.find(p.target, event_id)
+                if not isinstance(elem, tuple):
+                    self._excel_type_into_cell(p.text, elem, event_id)
+                    return
+            except ElementNotFoundError:
+                pass
+            self._ensure_window_focus(p.target)
+            send_keys("{F2}")
+            time.sleep(0.05)
+            if WIN32_OK:
+                self._set_clipboard(p.text)
+                send_keys("^v")
+            else:
+                send_keys(self._escape_sk(p.text), with_spaces=True)
+            send_keys("{TAB}")
+            return
+
+        # Standard UIA (editable element)
+        if p.target:
+            try:
+                elem = self._matcher.find(p.target, event_id)
+                if not isinstance(elem, tuple):
+                    self._wait_ready(elem, event_id)
+                    if p.clear_first:
+                        try:
+                            elem.set_text("")
+                        except Exception:
+                            elem.triple_click_input(); time.sleep(0.04)
+                    try:
+                        elem.set_edit_text(p.text)
+                        return
+                    except Exception:
+                        pass
+                    if WIN32_OK:
+                        self._set_clipboard(p.text)
+                        elem.click_input(); time.sleep(0.05)
+                        send_keys("^a^v")
+                        return
+                    elem.click_input(); time.sleep(0.04)
+                    send_keys(self._escape_sk(p.text), with_spaces=True)
+                    return
+            except ElementNotFoundError:
+                logger.debug("[REPLAY] Element not found for type — using OS focus fallback")
+
+        # Final fallback: type at current focus
+        self._type_at_current_focus(p.text)
+
+    def _type_at_current_focus(self, text: str) -> None:
+        """Type text at whatever currently has OS keyboard focus."""
         if not UIA_OK:
             return
-        self._focus_window_by_process("excel.exe", event_id)
-        time.sleep(0.1)
-        send_keys("{ESCAPE}")
-        time.sleep(0.05)
-        try:
-            desktop = Desktop(backend="uia")
-            boxes   = desktop.find_elements(auto_id="Box", control_type="Edit")
-            if boxes:
-                name_box = boxes[0].wrapper_object()
-                name_box.click_input()
-                time.sleep(0.08)
-                if WIN32_OK:
-                    self._set_clipboard(cell_ref)
-                    send_keys("^a^v")
-                else:
-                    send_keys("^a{DELETE}")
-                    send_keys(self._cell_ref_safe(cell_ref))
-                send_keys("{ENTER}")
-                time.sleep(0.1)
-                logger.info("[REPLAY] Excel navigated to {}", cell_ref)
-                return
-        except Exception as exc:
-            logger.warning("[REPLAY] Name Box navigation failed: {}", exc)
-        send_keys("^g")
-        time.sleep(0.3)
-        if WIN32_OK:
-            self._set_clipboard(cell_ref)
-            send_keys("^a^v")
-        else:
-            send_keys(self._cell_ref_safe(cell_ref))
-        send_keys("{ENTER}")
-
-    def _excel_type_into_cell(self, text: str, elem, event_id: int) -> None:
-        send_keys("{ESCAPE}"); time.sleep(0.05)
-        try:
-            elem.click_input(); time.sleep(0.08)
-        except Exception:
-            pass
-        send_keys("{F2}"); time.sleep(0.05)
-        send_keys("^a{DELETE}"); time.sleep(0.03)
-        if WIN32_OK and text:
+        logger.debug("[REPLAY] Typing {} chars at current focus", len(text))
+        if WIN32_OK and len(text) > 3:
             self._set_clipboard(text)
             send_keys("^v")
         else:
             send_keys(self._escape_sk(text), with_spaces=True)
-        send_keys("{TAB}"); time.sleep(0.05)
-
-    def _excel_switch_sheet(self, sheet_name: str, event_id: int) -> None:
-        if not UIA_OK:
-            return
-        self._focus_window_by_process("excel.exe", event_id)
-        time.sleep(0.1)
-        try:
-            tabs = Desktop(backend="uia").find_elements(
-                title=sheet_name, control_type="TabItem"
-            )
-            if tabs:
-                tabs[0].wrapper_object().click_input()
-        except Exception:
-            pass
-
-    @staticmethod
-    def _cell_ref_safe(ref: str) -> str:
-        return "".join(f"{{{c}}}" if c.isupper() else c for c in ref)
 
     # ──────────────────────────────────────────────────────────────────
-    # Click handlers — self-healing: UIA fails → relaxed → bbox → coords
+    # BUG-10: Click with visual validation
     # ──────────────────────────────────────────────────────────────────
 
     def _do_click(self, p: MouseClickEvent, event_id: int) -> None:
-        # Browser path
-        if (p.target and p.target.backend == TargetBackend.BROWSER
-                and self._browser and self._browser.is_connected):
-            if p.target.browser:
-                self._browser.wait_for_dom_stable(stable_ms=250, max_wait_ms=2000)
-                self._browser.wait_for_element(
-                    p.target.browser, timeout_ms=self._config.replay.wait_timeout_ms
-                )
-            coords = self._matcher.find(p.target, event_id)
-            if isinstance(coords, tuple):
-                self._browser.bring_to_front()
-                self._browser.click_at_viewport(*coords)
-                self._flash(p.x, p.y)
-                time.sleep(self._config.replay.browser_action_delay_ms / 1000)
-                logger.info("[REPLAY] Browser click done @ viewport {}", coords)
-                return
+        """BUG-10: Capture visual hash before click, validate after."""
+        # Capture pre-click hash for validation
+        pre_hash = self._capture_visual_hash()
 
-        # UIA path — self-healing
+        # Perform the click
         if p.target and p.target.backend != TargetBackend.BROWSER:
             try:
                 elem = self._matcher.find(p.target, event_id)
@@ -469,19 +470,52 @@ class ReplayEngine:
                     elem.click_input()
                     self._flash(p.x, p.y)
                     time.sleep(0.06)
-                    logger.info("[REPLAY] UIA click done strategy={}",
-                                self._matcher._get_stats("automation_id").successes)
+                    # BUG-10: post-click visual validation
+                    self._validate_visual_change(pre_hash, event_id, "click")
                     return
                 self._sendinput_click(*elem)
                 self._flash(*elem)
+                self._validate_visual_change(pre_hash, event_id, "click_coord")
                 return
-            except ElementNotFoundError as exc:
-                logger.warning("[REPLAY] UIA element not found, coord fallback: {}", exc)
+            except ElementNotFoundError:
+                logger.debug("[REPLAY] Element not found for click — coord fallback")
 
-        # Coordinate fallback (last resort)
-        logger.warning("[REPLAY] Using raw coord fallback @ ({},{})", p.x, p.y)
+        # Coord fallback
         self._sendinput_click(p.x, p.y)
         self._flash(p.x, p.y)
+        self._validate_visual_change(pre_hash, event_id, "click_raw_coord")
+
+    def _capture_visual_hash(self) -> Optional[str]:
+        """BUG-10: Capture current screen hash for change detection."""
+        if not self._capture:
+            return None
+        try:
+            path = self._capture.capture_full(0)
+            if path:
+                return self._capture.visual_hash(path)
+        except Exception:
+            pass
+        return None
+
+    def _validate_visual_change(self, pre_hash: Optional[str], event_id: int, action: str) -> None:
+        """
+        BUG-10 FIX: Compare pre/post hashes. If UI didn't change after a click,
+        log a warning — the click may have missed or had no effect.
+        """
+        if pre_hash is None:
+            return
+        time.sleep(0.15)   # brief wait for UI to update
+        post_hash = self._capture_visual_hash()
+        if post_hash is None:
+            return
+        changed = not self._capture.compare_visual_hash(pre_hash, post_hash)
+        if changed:
+            logger.debug("[REPLAY] Event #{} {}: UI changed ✓", event_id, action)
+        else:
+            logger.warning(
+                "[REPLAY] Event #{} {}: UI DID NOT CHANGE — click may have missed target",
+                event_id, action,
+            )
 
     def _do_double_click(self, p: MouseDoubleClickEvent, event_id: int) -> None:
         if p.target:
@@ -510,74 +544,83 @@ class ReplayEngine:
         self._sendinput_right_click(p.x, p.y)
 
     # ──────────────────────────────────────────────────────────────────
-    # Text input
+    # Excel helpers
     # ──────────────────────────────────────────────────────────────────
 
-    def _do_type(self, p: TypeTextEvent, event_id: int) -> None:
-        # Browser
-        if (p.target and p.target.backend == TargetBackend.BROWSER
-                and p.target.browser and self._browser and self._browser.is_connected):
-            self._browser.bring_to_front()
-            ok = self._browser.set_value(p.target.browser, p.text)
-            if not ok:
-                logger.warning("[REPLAY] set_value failed, using type_text_at")
-                self._browser.type_text_at(p.text, human_like=True)
+    def _excel_navigate_to_cell(self, cell_ref: str, event_id: int) -> None:
+        if not UIA_OK:
             return
+        self._focus_window_by_process("excel.exe", event_id)
+        time.sleep(0.1)
+        send_keys("{ESC}")
+        time.sleep(0.05)
+        try:
+            for hwnd in find_windows(title_re=".*"):
+                try:
+                    app  = Application(backend="uia").connect(handle=hwnd)
+                    win  = app.window(handle=hwnd)
+                    descs = win.descendants(auto_id="Box", control_type="Edit")
+                    if descs:
+                        name_box = descs[0].wrapper_object() if hasattr(descs[0], "wrapper_object") else descs[0]
+                        name_box.click_input(); time.sleep(0.08)
+                        if WIN32_OK:
+                            self._set_clipboard(cell_ref)
+                            send_keys("^a^v")
+                        else:
+                            send_keys("^a{DELETE}")
+                            send_keys(self._cell_ref_safe(cell_ref))
+                        send_keys("{ENTER}"); time.sleep(0.1)
+                        return
+                except Exception:
+                    continue
+        except Exception as exc:
+            logger.warning("[REPLAY] Excel Name Box failed: {}", exc)
+        send_keys("^g"); time.sleep(0.3)
+        if WIN32_OK:
+            self._set_clipboard(cell_ref)
+            send_keys("^a^v")
+        else:
+            send_keys(self._cell_ref_safe(cell_ref))
+        send_keys("{ENTER}")
 
-        # Excel cell
-        if p.target and self._is_excel_target(p.target):
-            try:
-                elem = self._matcher.find(p.target, event_id)
-                if not isinstance(elem, tuple):
-                    self._excel_type_into_cell(p.text, elem, event_id)
-                    return
-            except ElementNotFoundError:
-                pass
-            self._ensure_window_focus(p.target)
-            send_keys("{F2}")
-            time.sleep(0.05)
-            if WIN32_OK:
-                self._set_clipboard(p.text)
-                send_keys("^v")
-            else:
-                send_keys(self._escape_sk(p.text), with_spaces=True)
-            send_keys("{TAB}")
+    def _excel_type_into_cell(self, text: str, elem, event_id: int) -> None:
+        send_keys("{ESC}"); time.sleep(0.05)
+        try:
+            elem.click_input(); time.sleep(0.08)
+        except Exception:
+            pass
+        send_keys("{F2}"); time.sleep(0.05)
+        send_keys("^a{DELETE}"); time.sleep(0.03)
+        if WIN32_OK and text:
+            self._set_clipboard(text)
+            send_keys("^v")
+        else:
+            send_keys(self._escape_sk(text), with_spaces=True)
+        send_keys("{TAB}"); time.sleep(0.05)
+
+    def _excel_switch_sheet(self, sheet_name: str, event_id: int) -> None:
+        if not UIA_OK:
             return
-
-        # Standard UIA
-        if p.target:
-            try:
-                elem = self._matcher.find(p.target, event_id)
-                if not isinstance(elem, tuple):
-                    self._wait_ready(elem, event_id)
-                    if p.clear_first:
-                        try:
-                            elem.set_text("")
-                        except Exception:
-                            elem.triple_click_input(); time.sleep(0.04)
-                    try:
-                        elem.set_edit_text(p.text)
+        self._focus_window_by_process("excel.exe", event_id)
+        time.sleep(0.1)
+        try:
+            for hwnd in find_windows(title_re=".*"):
+                try:
+                    app  = Application(backend="uia").connect(handle=hwnd)
+                    win  = app.window(handle=hwnd)
+                    tabs = win.descendants(title=sheet_name, control_type="TabItem")
+                    if tabs:
+                        wrapper = tabs[0].wrapper_object() if hasattr(tabs[0], "wrapper_object") else tabs[0]
+                        wrapper.click_input()
                         return
-                    except Exception:
-                        pass
-                    if WIN32_OK:
-                        self._set_clipboard(p.text)
-                        elem.click_input(); time.sleep(0.05)
-                        send_keys("^a^v")
-                        return
-                    elem.click_input(); time.sleep(0.04)
-                    send_keys(self._escape_sk(p.text), with_spaces=True)
-                    return
-            except ElementNotFoundError:
-                pass
+                except Exception:
+                    continue
+        except Exception:
+            pass
 
-        # Current focus fallback
-        if UIA_OK:
-            if WIN32_OK and len(p.text) > 3:
-                self._set_clipboard(p.text)
-                send_keys("^v")
-            else:
-                send_keys(self._escape_sk(p.text), with_spaces=True)
+    @staticmethod
+    def _cell_ref_safe(ref: str) -> str:
+        return "".join(f"{{{c}}}" if c.isupper() else c for c in ref)
 
     # ──────────────────────────────────────────────────────────────────
     # Window helpers
@@ -596,7 +639,7 @@ class ReplayEngine:
             app = Application(backend="uia").connect(handle=handles[0])
             app.window(handle=handles[0]).set_focus()
             self._current_hwnd = handles[0]
-            time.sleep(0.12)
+            time.sleep(0.15)
         except Exception as exc:
             logger.debug("[REPLAY] smart_focus_window '{}': {}", title, exc)
 
@@ -613,8 +656,7 @@ class ReplayEngine:
             if handles:
                 app = Application(backend="uia").connect(handle=handles[0])
                 app.window(handle=handles[0]).set_focus()
-                time.sleep(0.1)
-                logger.debug("[REPLAY] Re-focused window: {}", target.window_title[:30])
+                time.sleep(0.12)
         except Exception:
             pass
 
@@ -661,9 +703,16 @@ class ReplayEngine:
                 return
             app = Application(backend="uia").connect(handle=handles[0])
             win = app.window(handle=handles[0])
-            btn = win.child_window(title=p.response, control_type="Button")
-            if btn.exists(timeout=3):
-                btn.click_input()
+            try:
+                btn = win.child_window(title=p.response, control_type="Button")
+                if btn.exists(timeout=2):
+                    btn.click_input(); return
+            except Exception:
+                pass
+            descs = win.descendants(title=p.response, control_type="Button")
+            if descs:
+                wrapper = descs[0].wrapper_object() if hasattr(descs[0], "wrapper_object") else descs[0]
+                wrapper.click_input()
         except Exception as exc:
             logger.warning("[REPLAY] Dialog '{}' failed: {}", p.dialog_title, exc)
 
@@ -685,9 +734,10 @@ class ReplayEngine:
             win = app.window(handle=handles[0])
             for aid in ("1148", "1001"):
                 try:
-                    fn = win.child_window(auto_id=aid, control_type="Edit")
-                    if fn.exists(timeout=1):
-                        fn.set_edit_text(p.path)
+                    descs = win.descendants(auto_id=aid, control_type="Edit")
+                    if descs:
+                        wrapper = descs[0].wrapper_object() if hasattr(descs[0], "wrapper_object") else descs[0]
+                        wrapper.set_edit_text(p.path)
                         time.sleep(0.1)
                         send_keys("{ENTER}")
                         return
@@ -818,7 +868,9 @@ class ReplayEngine:
         try:
             cur = ctypes.wintypes.POINT()
             ctypes.windll.user32.GetCursorPos(ctypes.byref(cur))
-            if abs(cur.x - self._last_mouse_pos[0]) + abs(cur.y - self._last_mouse_pos[1]) > 15:
+            dx = abs(cur.x - self._last_mouse_pos[0])
+            dy = abs(cur.y - self._last_mouse_pos[1])
+            if dx + dy > 15:
                 self._last_mouse_pos = (cur.x, cur.y)
                 return True
         except Exception:
@@ -838,7 +890,7 @@ class ReplayEngine:
         return (target.process_name or "").lower() in _EXCEL_PROCS
 
     @staticmethod
-    def _tlabel_payload(target) -> str:
+    def _tlabel(target) -> str:
         if not target:
             return "(none)"
         if hasattr(target, "browser") and target.browser and target.browser.inner_text:
@@ -859,8 +911,8 @@ class ReplayEngine:
             gap_ms = 150
         extra = 0
         etype = str(event.payload.type).lower()
-        if "browser" in etype:   extra = self._config.replay.browser_action_delay_ms
-        elif "excel" in etype or "cell" in etype: extra = self._config.replay.excel_action_delay_ms
+        if "excel" in etype or "cell" in etype:
+            extra = self._config.replay.excel_action_delay_ms
         delay = max(
             (gap_ms + extra) / 1000 / self._config.replay.speed,
             self._config.replay.min_delay_ms / 1000,
