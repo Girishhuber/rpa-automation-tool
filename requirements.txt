@@ -1,0 +1,47 @@
+# Core dependencies — Windows activity recorder & replayer
+# Install with: pip install -r requirements.txt
+
+# Input capture (recording hooks)
+pynput==1.7.7
+
+# UI Automation — element capture and replay injection
+pywinauto==0.6.8
+
+# Windows API access (SendInput, clipboard, process info, DPI)
+# NOTE: pywin32 wheels are Python-version specific; 3.14+ currently ships newer wheels.
+# Keep a minimum version but allow pip to pick a compatible build for your Python.
+pywin32>=306
+
+# Process name lookup for UIA enrichment
+psutil==5.9.8
+
+# Fast screen capture (multi-monitor)
+mss==9.0.1
+
+# Image processing — comparison, cropping, saving
+Pillow==10.3.0
+
+# Visual template matching (screenshot fallback strategy)
+opencv-python==4.9.0.80
+numpy==1.26.4
+
+# Data modelling and validation
+pydantic==2.7.0
+
+# Structured logging with rotation
+loguru==0.7.2
+
+# System tray icon
+pystray==0.19.5
+
+# TOML config parsing (Python < 3.11 only — stdlib for 3.11+)
+tomli==2.0.1; python_version < "3.11"
+
+# Packaging — produces a standalone .exe
+pyinstaller==6.6.0
+
+# Testing
+pytest==8.2.0
+pytest-mock==3.14.0
+
+websocket-client

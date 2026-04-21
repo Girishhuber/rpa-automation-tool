@@ -1,0 +1,120 @@
+{
+  "id": "fixture-session-001",
+  "name": "Sample Excel workflow",
+  "description": "Opens Excel, fills cells, saves",
+  "tags": ["excel", "fixture"],
+  "created_at": "2024-04-01T09:00:00+00:00",
+  "updated_at": "2024-04-01T09:01:30+00:00",
+  "duration_ms": 90000,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.22621",
+    "screen_width": 1920,
+    "screen_height": 1080,
+    "dpi_scale": 1.0,
+    "monitor_count": 1,
+    "python_version": "3.11.0",
+    "schema_version": "1.0"
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true,
+  "replay_history": [],
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 0,
+      "wall_time": "2024-04-01T09:00:00+00:00",
+      "payload": {
+        "type": "window_focus",
+        "window_title": "Book1 - Microsoft Excel",
+        "process_name": "EXCEL.EXE",
+        "x": 0, "y": 0, "width": 1920, "height": 1080
+      }
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 1200,
+      "wall_time": "2024-04-01T09:00:01+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 320,
+        "y": 210,
+        "button": "left",
+        "target": {
+          "automation_id": "CellB2",
+          "name": "B2",
+          "control_type": "Edit",
+          "class_name": "EXCEL7",
+          "window_title": "Book1 - Microsoft Excel",
+          "process_name": "EXCEL.EXE",
+          "bbox": { "left": 300, "top": 200, "right": 380, "bottom": 220 },
+          "screenshot_ref": null,
+          "monitor_index": 0,
+          "dpi_scale": 1.0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 1800,
+      "wall_time": "2024-04-01T09:00:01+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Monthly Sales",
+        "target": {
+          "automation_id": "CellB2",
+          "name": "B2",
+          "control_type": "Edit",
+          "class_name": "EXCEL7",
+          "window_title": "Book1 - Microsoft Excel",
+          "process_name": "EXCEL.EXE",
+          "bbox": { "left": 300, "top": 200, "right": 380, "bottom": 220 },
+          "screenshot_ref": null,
+          "monitor_index": 0,
+          "dpi_scale": 1.0
+        },
+        "clear_first": false
+      }
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 2500,
+      "wall_time": "2024-04-01T09:00:02+00:00",
+      "payload": {
+        "type": "key_press",
+        "key": "tab",
+        "target": null
+      }
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 3000,
+      "wall_time": "2024-04-01T09:00:03+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "42500",
+        "target": null,
+        "clear_first": false
+      }
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 4200,
+      "wall_time": "2024-04-01T09:00:04+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": ["ctrl", "s"],
+        "target": null
+      }
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 5000,
+      "wall_time": "2024-04-01T09:00:05+00:00",
+      "payload": {
+        "type": "wait",
+        "duration_ms": 500
+      }
+    }
+  ]
+}

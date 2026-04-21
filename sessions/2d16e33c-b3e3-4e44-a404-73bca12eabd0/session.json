@@ -1,0 +1,2201 @@
+{
+  "id": "2d16e33c-b3e3-4e44-a404-73bca12eabd0",
+  "name": "My workflow2",
+  "description": "",
+  "tags": [],
+  "created_at": "2026-04-21T09:16:49.344800+00:00",
+  "updated_at": "2026-04-21T09:17:52.932615+00:00",
+  "duration_ms": 63587,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.26200",
+    "screen_width": 1920,
+    "screen_height": 1200,
+    "dpi_scale": 1.25,
+    "monitor_count": 1,
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "machine_name": null,
+    "cpu_info": null,
+    "gpu_info": null,
+    "schema_version": "2.0"
+  },
+  "environment": null,
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 6717,
+      "wall_time": "2026-04-21T09:16:56.053908+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 609,
+        "y": 1161,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 920,
+            "right": 614,
+            "bottom": 952
+          },
+          "screen_x": 609,
+          "screen_y": 1161,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 6825,
+      "wall_time": "2026-04-21T09:16:56.170590+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763016053.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 10731,
+      "wall_time": "2026-04-21T09:17:00.075226+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "word",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 920,
+            "right": 614,
+            "bottom": 952
+          },
+          "screen_x": 609,
+          "screen_y": 1161,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        },
+        "clear_first": false,
+        "method": "keys"
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 12022,
+      "wall_time": "2026-04-21T09:17:01.365460+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 658,
+        "y": 382,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "CoreInput",
+          "control_type": "Pane",
+          "class_name": "Windows.UI.Core.CoreComponentInputSource",
+          "window_title": "Search",
+          "process_name": "SearchHost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 174,
+            "right": 1169,
+            "bottom": 899
+          },
+          "screen_x": 658,
+          "screen_y": 382,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:\"Search\"",
+            "Dialog:Search",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 12244,
+      "wall_time": "2026-04-21T09:17:01.588068+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763021365.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 15068,
+      "wall_time": "2026-04-21T09:17:04.401309+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 347,
+        "y": 245,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 347,
+          "screen_y": 245,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 15193,
+      "wall_time": "2026-04-21T09:17:04.529272+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763024401.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 8,
+      "timestamp_ms": 17197,
+      "wall_time": "2026-04-21T09:17:06.542866+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Hey",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 347,
+          "screen_y": 245,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        },
+        "clear_first": false,
+        "method": "keys"
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 9,
+      "timestamp_ms": 17197,
+      "wall_time": "2026-04-21T09:17:06.542866+00:00",
+      "payload": {
+        "type": "key_press",
+        "key": "space",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 347,
+          "screen_y": 245,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 10,
+      "timestamp_ms": 18635,
+      "wall_time": "2026-04-21T09:17:07.967505+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Just",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 347,
+          "screen_y": 245,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        },
+        "clear_first": false,
+        "method": "keys"
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 11,
+      "timestamp_ms": 18641,
+      "wall_time": "2026-04-21T09:17:07.986107+00:00",
+      "payload": {
+        "type": "key_press",
+        "key": "space",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 347,
+          "screen_y": 245,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 12,
+      "timestamp_ms": 21665,
+      "wall_time": "2026-04-21T09:17:11.008937+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Testing",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 347,
+          "screen_y": 245,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        },
+        "clear_first": false,
+        "method": "keys"
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 13,
+      "timestamp_ms": 25583,
+      "wall_time": "2026-04-21T09:17:14.920636+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1919,
+        "y": 0,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Close",
+          "control_type": "Button",
+          "class_name": "NetUIAppFrameHelper",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 1490,
+            "top": 0,
+            "right": 1536,
+            "bottom": 31
+          },
+          "screen_x": 1919,
+          "screen_y": 0,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Ribbon",
+            "Pane:",
+            "Pane:",
+            "Pane:Ribbon"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 14,
+      "timestamp_ms": 25704,
+      "wall_time": "2026-04-21T09:17:15.046593+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763034920.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 15,
+      "timestamp_ms": 27587,
+      "wall_time": "2026-04-21T09:17:16.926465+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1072,
+        "y": 714,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Don't Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 799,
+            "top": 564,
+            "right": 887,
+            "bottom": 588
+          },
+          "screen_x": 1072,
+          "screen_y": 714,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:",
+            "Dialog:Save your changes to this file",
+            "Pane:",
+            "Dialog:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 16,
+      "timestamp_ms": 27734,
+      "wall_time": "2026-04-21T09:17:17.078004+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763036926.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 17,
+      "timestamp_ms": 29617,
+      "wall_time": "2026-04-21T09:17:18.951825+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 663,
+        "y": 1164,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 920,
+            "right": 614,
+            "bottom": 952
+          },
+          "screen_x": 663,
+          "screen_y": 1164,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 18,
+      "timestamp_ms": 29722,
+      "wall_time": "2026-04-21T09:17:19.066821+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763038951.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 19,
+      "timestamp_ms": 31792,
+      "wall_time": "2026-04-21T09:17:21.137476+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "ppt",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 920,
+            "right": 614,
+            "bottom": 952
+          },
+          "screen_x": 663,
+          "screen_y": 1164,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        },
+        "clear_first": false,
+        "method": "keys"
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 20,
+      "timestamp_ms": 32760,
+      "wall_time": "2026-04-21T09:17:22.098848+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 707,
+        "y": 383,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "CoreInput",
+          "control_type": "Pane",
+          "class_name": "Windows.UI.Core.CoreComponentInputSource",
+          "window_title": "Search",
+          "process_name": "SearchHost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 174,
+            "right": 1169,
+            "bottom": 899
+          },
+          "screen_x": 707,
+          "screen_y": 383,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:\"Search\"",
+            "Dialog:Search",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 21,
+      "timestamp_ms": 32974,
+      "wall_time": "2026-04-21T09:17:22.316605+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763042098.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 22,
+      "timestamp_ms": 35082,
+      "wall_time": "2026-04-21T09:17:24.427642+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 376,
+        "y": 261,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank Presentation",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 376,
+          "screen_y": 261,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 23,
+      "timestamp_ms": 35207,
+      "wall_time": "2026-04-21T09:17:24.551027+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763044427.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 24,
+      "timestamp_ms": 38153,
+      "wall_time": "2026-04-21T09:17:27.488119+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 157,
+        "y": 70,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "TabInsert",
+          "name": "Insert",
+          "control_type": "TabItem",
+          "class_name": "NetUIRibbonTab",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 115,
+            "top": 34,
+            "right": 166,
+            "bottom": 65
+          },
+          "screen_x": 157,
+          "screen_y": 70,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "TabControl:Ribbon Tabs",
+            "Pane:Ribbon",
+            "Pane:",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 25,
+      "timestamp_ms": 38307,
+      "wall_time": "2026-04-21T09:17:27.647065+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763047498.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 26,
+      "timestamp_ms": 39402,
+      "wall_time": "2026-04-21T09:17:28.738319+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 193,
+        "y": 147,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "FlyoutAnchorInsertPictures",
+          "name": "Pictures",
+          "control_type": "MenuItem",
+          "class_name": "NetUIAnchor",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 124,
+            "top": 67,
+            "right": 170,
+            "bottom": 137
+          },
+          "screen_x": 193,
+          "screen_y": 147,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Images",
+            "GroupBox:Insert",
+            "Pane:Lower Ribbon",
+            "Pane:Ribbon"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 27,
+      "timestamp_ms": 39548,
+      "wall_time": "2026-04-21T09:17:28.891118+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763048738.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 28,
+      "timestamp_ms": 40685,
+      "wall_time": "2026-04-21T09:17:30.023821+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 215,
+        "y": 213,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "This Device...",
+          "control_type": "MenuItem",
+          "class_name": "NetUITWBtnMenuItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 126,
+            "top": 166,
+            "right": 266,
+            "bottom": 190
+          },
+          "screen_x": 215,
+          "screen_y": 213,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Insert Picture From",
+            "Menu:Pictures",
+            "Menu:Pictures",
+            "MenuItem:Pictures:FlyoutAnchorInsertPictures"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 29,
+      "timestamp_ms": 40895,
+      "wall_time": "2026-04-21T09:17:30.230363+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763050023.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 30,
+      "timestamp_ms": 42956,
+      "wall_time": "2026-04-21T09:17:32.300792+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 114,
+        "y": 309,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Documents (pinned)",
+          "control_type": "TreeItem",
+          "class_name": null,
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 60,
+            "top": 242,
+            "right": 123,
+            "bottom": 274
+          },
+          "screen_x": 114,
+          "screen_y": 309,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "TreeItem:Desktop",
+            "TreeView:Navigation Pane:100",
+            "Pane:Control Host:ProperTreeHost",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 31,
+      "timestamp_ms": 43181,
+      "wall_time": "2026-04-21T09:17:32.519509+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763052301.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 32,
+      "timestamp_ms": 44038,
+      "wall_time": "2026-04-21T09:17:33.373930+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 297,
+            "right": 439,
+            "bottom": 316
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:dapr-poc:5",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 33,
+      "timestamp_ms": 44109,
+      "wall_time": "2026-04-21T09:17:33.454590+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 288,
+            "right": 439,
+            "bottom": 307
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:IISExpress:7",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 34,
+      "timestamp_ms": 44721,
+      "wall_time": "2026-04-21T09:17:34.055865+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 288,
+            "right": 439,
+            "bottom": 307
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:IISExpress:7",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 35,
+      "timestamp_ms": 44772,
+      "wall_time": "2026-04-21T09:17:34.103201+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -3,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 288,
+            "right": 439,
+            "bottom": 307
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:My Web Sites:10",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 36,
+      "timestamp_ms": 46390,
+      "wall_time": "2026-04-21T09:17:35.730706+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 290,
+            "right": 439,
+            "bottom": 310
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:SQL Server Management Studio 2:16",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 37,
+      "timestamp_ms": 46427,
+      "wall_time": "2026-04-21T09:17:35.762755+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -2,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 290,
+            "right": 439,
+            "bottom": 310
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:SQL Server Management Studio 2:16",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 38,
+      "timestamp_ms": 46527,
+      "wall_time": "2026-04-21T09:17:35.857822+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 295,
+        "y": 372,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 290,
+            "right": 439,
+            "bottom": 310
+          },
+          "screen_x": 295,
+          "screen_y": 372,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:SQL Server Management Studio 2:16",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 39,
+      "timestamp_ms": 48141,
+      "wall_time": "2026-04-21T09:17:37.474336+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 104,
+        "y": 274,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Downloads (pinned)",
+          "control_type": "TreeItem",
+          "class_name": null,
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 60,
+            "top": 210,
+            "right": 123,
+            "bottom": 242
+          },
+          "screen_x": 104,
+          "screen_y": 274,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "TreeItem:Desktop",
+            "TreeView:Navigation Pane:100",
+            "Pane:Control Host:ProperTreeHost",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 40,
+      "timestamp_ms": 48267,
+      "wall_time": "2026-04-21T09:17:37.611995+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763057474.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 41,
+      "timestamp_ms": 49214,
+      "wall_time": "2026-04-21T09:17:38.554137+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 339,
+        "y": 315,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "UIGroupHeader",
+          "name": "Yesterday",
+          "control_type": "GroupBox",
+          "class_name": "UIGroupHeader",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 167,
+            "top": 231,
+            "right": 794,
+            "bottom": 258
+          },
+          "screen_x": 339,
+          "screen_y": 315,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Yesterday:1",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 42,
+      "timestamp_ms": 49306,
+      "wall_time": "2026-04-21T09:17:38.649297+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 339,
+        "y": 315,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "3",
+          "name": "Earlier this month",
+          "control_type": "GroupBox",
+          "class_name": "UIGroupItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 167,
+            "top": 199,
+            "right": 794,
+            "bottom": 344
+          },
+          "screen_x": 339,
+          "screen_y": 315,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:",
+            "Dialog:Insert Picture"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 43,
+      "timestamp_ms": 49379,
+      "wall_time": "2026-04-21T09:17:38.715462+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 339,
+        "y": 315,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "3",
+          "name": "Screenshot_9-4-2026_103424_localhost",
+          "control_type": "ListItem",
+          "class_name": "UIItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 182,
+            "top": 229,
+            "right": 779,
+            "bottom": 254
+          },
+          "screen_x": 339,
+          "screen_y": 315,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Earlier this month:3",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 44,
+      "timestamp_ms": 49463,
+      "wall_time": "2026-04-21T09:17:38.807734+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 339,
+        "y": 315,
+        "dx": 0,
+        "dy": -1,
+        "target": {
+          "backend": "uia",
+          "automation_id": "3",
+          "name": "Screenshot_9-4-2026_103424_localhost",
+          "control_type": "ListItem",
+          "class_name": "UIItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 182,
+            "top": 229,
+            "right": 779,
+            "bottom": 254
+          },
+          "screen_x": 339,
+          "screen_y": 315,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Earlier this month:3",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview",
+            "Pane:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 45,
+      "timestamp_ms": 50734,
+      "wall_time": "2026-04-21T09:17:40.073513+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 273,
+        "y": 216,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "System.ItemNameDisplay",
+          "name": "Name",
+          "control_type": "Edit",
+          "class_name": "UIProperty",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 204,
+            "top": 173,
+            "right": 439,
+            "bottom": 192
+          },
+          "screen_x": 273,
+          "screen_y": 216,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListItem:Screenshot_11-4-2026_102323_lo:1",
+            "GroupBox:Earlier this month:3",
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 46,
+      "timestamp_ms": 50892,
+      "wall_time": "2026-04-21T09:17:40.224505+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763060073.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 47,
+      "timestamp_ms": 53247,
+      "wall_time": "2026-04-21T09:17:42.586658+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 713,
+        "y": 543,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "1",
+          "name": "Insert",
+          "control_type": "SplitButton",
+          "class_name": "Button",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 556,
+            "top": 430,
+            "right": 644,
+            "bottom": 456
+          },
+          "screen_x": 713,
+          "screen_y": 543,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Insert Picture",
+            "Dialog:Presentation1 - PowerPoint",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 48,
+      "timestamp_ms": 53401,
+      "wall_time": "2026-04-21T09:17:42.747153+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763062586.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 49,
+      "timestamp_ms": 56514,
+      "wall_time": "2026-04-21T09:17:45.859525+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1919,
+        "y": 0,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Close",
+          "control_type": "Button",
+          "class_name": "NetUIAppFrameHelper",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 1490,
+            "top": 0,
+            "right": 1536,
+            "bottom": 31
+          },
+          "screen_x": 1919,
+          "screen_y": 0,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Ribbon",
+            "Pane:",
+            "Pane:",
+            "Pane:Ribbon"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 50,
+      "timestamp_ms": 56693,
+      "wall_time": "2026-04-21T09:17:46.032367+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763065859.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 51,
+      "timestamp_ms": 57961,
+      "wall_time": "2026-04-21T09:17:47.305783+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1029,
+        "y": 717,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Don't Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 799,
+            "top": 564,
+            "right": 887,
+            "bottom": 588
+          },
+          "screen_x": 1029,
+          "screen_y": 717,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:",
+            "Dialog:Save your changes to this file",
+            "Pane:",
+            "Dialog:"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 52,
+      "timestamp_ms": 58193,
+      "wall_time": "2026-04-21T09:17:47.538199+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763067306.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 53,
+      "timestamp_ms": 62103,
+      "wall_time": "2026-04-21T09:17:51.448586+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 800,
+        "y": 791,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1023,
+            "bottom": 646
+          },
+          "screen_x": 800,
+          "screen_y": 791,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 54,
+      "timestamp_ms": 62110,
+      "wall_time": "2026-04-21T09:17:51.451415+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1023,
+            "bottom": 646
+          },
+          "screen_x": 800,
+          "screen_y": 791,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 55,
+      "timestamp_ms": 62238,
+      "wall_time": "2026-04-21T09:17:51.579979+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776763071448.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 56,
+      "timestamp_ms": 63186,
+      "wall_time": "2026-04-21T09:17:52.530429+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1023,
+            "bottom": 646
+          },
+          "screen_x": 800,
+          "screen_y": 791,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    }
+  ],
+  "replay_history": [],
+  "session_setings": {
+    "screenshot_on_click": true,
+    "capture_scroll_events": true,
+    "replay_mode": "adaptive",
+    "failure_strategy": "retry",
+    "max_retries": 2,
+    "retry_interval_ms": 500,
+    "default_timeout_ms": 5000,
+    "use_ocr_fallback": true,
+    "use_image_fallback": true,
+    "use_bbox_fallback": true,
+    "speed_factor": 1.0
+  },
+  "stats": {
+    "total_events": 0,
+    "click_count": 0,
+    "typing_count": 0,
+    "scroll_count": 0,
+    "error_count": 0,
+    "avg_event_interval_ms": null
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true
+}

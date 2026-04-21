@@ -1,0 +1,52 @@
+# RPA Tool — configuration file
+# Edit these values to customise behaviour.
+# All settings have sensible defaults if this file is missing.
+
+debug = false
+
+[hotkeys]
+# pynput key format: <ctrl>, <shift>, <alt>, <cmd>
+start_recording = "<ctrl>+<shift>+r"
+stop_recording  = "<ctrl>+<shift>+s"
+start_replay    = "<ctrl>+<shift>+p"
+abort_replay    = "<ctrl>+<shift>+q"
+
+[recorder]
+# Take a screenshot on every click (used as visual reference for replay matching)
+capture_screenshots = true
+
+# Record mouse scroll wheel events
+capture_scroll = true
+
+# Screenshot file format: "png" or "jpg"
+screenshot_format = "png"
+
+# Ignore duplicate events within this many milliseconds (prevents event flooding)
+debounce_ms = 50
+
+# Safety limit — auto-stop recording after this many minutes
+max_session_minutes = 120
+
+[replay]
+# Playback speed multiplier: 1.0 = original timing, 2.0 = twice as fast
+speed = 1.0
+
+# Minimum delay between injected events (ms) — prevents overwhelming the target app
+min_delay_ms = 80
+
+# How long to wait for a UI element to become ready before declaring timeout (ms)
+wait_timeout_ms = 10000
+
+# Number of times to retry a failed event before stopping the replay
+retry_attempts = 3
+
+# Save a screenshot to the session folder when an event fails
+screenshot_on_failure = true
+
+[storage]
+sessions_dir = "sessions"
+logs_dir     = "logs"
+db_path      = "sessions/index.db"
+
+# Maximum number of sessions to keep — oldest are deleted when limit is exceeded
+max_sessions = 500

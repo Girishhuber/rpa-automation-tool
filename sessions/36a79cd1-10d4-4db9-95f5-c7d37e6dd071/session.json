@@ -1,0 +1,576 @@
+{
+  "id": "36a79cd1-10d4-4db9-95f5-c7d37e6dd071",
+  "name": "My workflow1",
+  "description": "",
+  "tags": [],
+  "created_at": "2026-04-21T08:28:51.105502+00:00",
+  "updated_at": "2026-04-21T08:29:20.952834+00:00",
+  "duration_ms": 29842,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.26200",
+    "screen_width": 1920,
+    "screen_height": 1200,
+    "dpi_scale": 1.25,
+    "monitor_count": 1,
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "machine_name": null,
+    "cpu_info": null,
+    "gpu_info": null,
+    "schema_version": "2.0"
+  },
+  "environment": null,
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 6813,
+      "wall_time": "2026-04-21T08:28:57.921833+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 648,
+        "y": 1160,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 920,
+            "right": 614,
+            "bottom": 952
+          },
+          "screen_x": 648,
+          "screen_y": 1160,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 6920,
+      "wall_time": "2026-04-21T08:28:58.029217+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776760137921.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 10356,
+      "wall_time": "2026-04-21T08:29:01.466071+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "ppt",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 920,
+            "right": 614,
+            "bottom": 952
+          },
+          "screen_x": 648,
+          "screen_y": 1160,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        },
+        "clear_first": false,
+        "method": "keys"
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 11846,
+      "wall_time": "2026-04-21T08:29:02.951419+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 648,
+        "y": 394,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "CoreInput",
+          "control_type": "Pane",
+          "class_name": "Windows.UI.Core.CoreComponentInputSource",
+          "window_title": "Search",
+          "process_name": "SearchHost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 394,
+            "top": 174,
+            "right": 1169,
+            "bottom": 899
+          },
+          "screen_x": 648,
+          "screen_y": 394,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:\"Search\"",
+            "Dialog:Search",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 12041,
+      "wall_time": "2026-04-21T08:29:03.146847+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776760142951.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 15371,
+      "wall_time": "2026-04-21T08:29:06.479774+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 364,
+        "y": 275,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank Presentation",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 364,
+          "screen_y": 275,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 15537,
+      "wall_time": "2026-04-21T08:29:06.643594+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776760146479.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 8,
+      "timestamp_ms": 19636,
+      "wall_time": "2026-04-21T08:29:10.743137+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1310,
+        "y": 1169,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Appid: Microsoft.VisualStudioCode",
+          "name": "Visual Studio Code - 1 running window",
+          "control_type": "Button",
+          "class_name": "Taskbar.TaskListButtonAutomationPeer",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 1021,
+            "top": 912,
+            "right": 1065,
+            "bottom": 960
+          },
+          "screen_x": 1310,
+          "screen_y": 1169,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame",
+            "Pane:",
+            "Pane:Taskbar",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 9,
+      "timestamp_ms": 19829,
+      "wall_time": "2026-04-21T08:29:10.932336+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776760150743.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 10,
+      "timestamp_ms": 22437,
+      "wall_time": "2026-04-21T08:29:13.539432+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1459,
+        "y": 1060,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": null,
+          "control_type": "Pane",
+          "class_name": "Windows.UI.Input.InputSite.WindowClass",
+          "window_title": null,
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 0,
+            "top": 0,
+            "right": 1229,
+            "bottom": 768
+          },
+          "screen_x": 1459,
+          "screen_y": 1060,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 11,
+      "timestamp_ms": 22760,
+      "wall_time": "2026-04-21T08:29:13.863661+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776760153539.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 12,
+      "timestamp_ms": 28120,
+      "wall_time": "2026-04-21T08:29:19.223939+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 497,
+        "y": 837,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 179,
+            "top": 179,
+            "right": 1074,
+            "bottom": 697
+          },
+          "screen_x": 497,
+          "screen_y": 837,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 13,
+      "timestamp_ms": 28130,
+      "wall_time": "2026-04-21T08:29:19.234517+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 179,
+            "top": 179,
+            "right": 1074,
+            "bottom": 697
+          },
+          "screen_x": 497,
+          "screen_y": 837,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 14,
+      "timestamp_ms": 28247,
+      "wall_time": "2026-04-21T08:29:19.348167+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1776760159223.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    },
+    {
+      "id": 15,
+      "timestamp_ms": 29440,
+      "wall_time": "2026-04-21T08:29:20.536434+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": {
+            "left": 179,
+            "top": 179,
+            "right": 1074,
+            "bottom": 697
+          },
+          "screen_x": 497,
+          "screen_y": 837,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window",
+            "Pane:Desktop 1"
+          ],
+          "selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null
+        }
+      },
+      "note": null,
+      "intent": null,
+      "action_group": null
+    }
+  ],
+  "replay_history": [],
+  "session_setings": {
+    "screenshot_on_click": true,
+    "capture_scroll_events": true,
+    "replay_mode": "adaptive",
+    "failure_strategy": "retry",
+    "max_retries": 2,
+    "retry_interval_ms": 500,
+    "default_timeout_ms": 5000,
+    "use_ocr_fallback": true,
+    "use_image_fallback": true,
+    "use_bbox_fallback": true,
+    "speed_factor": 1.0
+  },
+  "stats": {
+    "total_events": 0,
+    "click_count": 0,
+    "typing_count": 0,
+    "scroll_count": 0,
+    "error_count": 0,
+    "avg_event_interval_ms": null
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true
+}
