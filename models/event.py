@@ -145,6 +145,9 @@ class TypeTextEvent(BaseModel):
     target: Optional[UITarget] = None
     clear_first: bool = False
     method: str = "keys"   # "keys" | "clipboard" | "set_value"
+    cell_ref: Optional[str] = None
+    sheet_name: Optional[str] = None
+    force_plain_text: bool = False
 
 class ClipboardCopyEvent(BaseModel):
     type: Literal[EventType.CLIPBOARD_COPY] = EventType.CLIPBOARD_COPY

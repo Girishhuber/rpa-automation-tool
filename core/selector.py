@@ -27,14 +27,14 @@ ATTR_SCORES: dict[str, int] = {
 
 
 _UNSTABLE_PATTERNS = [
-    re.compile(r"^[0-9]{6,}$"),               # S-1: pure numeric 6+ digits
-    re.compile(r"\b[a-f0-9]{8,}\b"),          # SEL-4: hex hash (whole word)
-    re.compile(r"^_\w+\d{4,}$"),              # underscore + 4+ digit suffix
-    re.compile(r"-[a-f0-9]{6,}$"),            # CSS module hash suffix (e.g. "btn-a1b2c3")
-    re.compile(r"_[a-f0-9]{6,}$"),            # JS module hash suffix
+    re.compile(r"^[0-9]{6,}$"),               
+    re.compile(r"\b[a-f0-9]{8,}\b"),         
+    re.compile(r"^_\w+\d{4,}$"),              
+    re.compile(r"-[a-f0-9]{6,}$"),         
+    re.compile(r"_[a-f0-9]{6,}$"),           
 ]
 
-# S-1: whitelist of known stable short numeric IDs (Windows dialog resource IDs)
+
 _KNOWN_STABLE_IDS = {
     "1148", "1001", "1000", "100", "101", "1", "2", "3", "4",
     "200", "201", "300", "1003", "1004", "1005",
@@ -59,9 +59,6 @@ def _is_unstable(value: str) -> bool:
     return False
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Data classes
-# ─────────────────────────────────────────────────────────────────────────────
 
 @dataclass
 class SelectorAttribute:
@@ -157,7 +154,7 @@ class AnchorElement:
 
 
 # SEL-2: Current schema version — bump when Selector fields change
-SELECTOR_SCHEMA_VERSION = "2.1"
+SELECTOR_SCHEMA_VERSION = "2.2"   # bumped: added element_hash, role, visibility, relative pos
 
 # SEL-1: How many seconds before confidence starts decaying
 _DECAY_HALF_LIFE_DAYS = 30.0
@@ -166,13 +163,7 @@ _DECAY_HALF_LIFE_S    = _DECAY_HALF_LIFE_DAYS * 86400
 
 @dataclass
 class Selector:
-    """
-    Complete element identity. Stored alongside every recorded event.
-
-    SEL-1: recorded_at + time_decay_score() for confidence decay.
-    SEL-2: selector_version + per-strategy success_rate tracking.
-    SEL-3: anchor_elements for disambiguation.
-    """
+  
     strategies:       list[SelectorStrategy]
     process_name:     Optional[str] = None
     window_title:     Optional[str] = None
@@ -196,6 +187,22 @@ class Selector:
     # SEL-3: anchor elements for disambiguation
     anchor_elements:  list[AnchorElement] = field(default_factory=list)
 
+   
+    element_hash:     Optional[str]  = None
+  
+    element_role:     Optional[str]  = None
+    
+    confidence_level: Optional[str]  = None
+   
+    visibility_score: Optional[str]  = None
+    # IMP-9: window handle for active-window matching
+    window_handle:    int = 0
+    # IMP-8: raw absolute bbox (pixel-exact, no DPI normalisation)
+    raw_bbox:         Optional[dict] = None   # {"left":…,"top":…,"right":…,"bottom":…}
+   
+    relative_to_window: Optional[dict] = None 
+    relative_to_parent: Optional[dict] = None  
+
 
     @property
     def success_rate(self) -> float:
@@ -204,11 +211,7 @@ class Selector:
         return self.replay_successes / total if total > 0 else 1.0
 
     def time_decay_score(self) -> float:
-        """
-        SEL-1: Confidence penalty based on age.
-        Returns multiplier 1.0 (fresh) → ~0.5 (one half-life old) → ~0.25 (two).
-        Uses exponential decay: score = 0.5^(age_seconds / half_life).
-        """
+        
         age_s = time.time() - self.recorded_at
         if age_s <= 0:
             return 1.0
@@ -267,27 +270,45 @@ class Selector:
             "replay_failures":   self.replay_failures,
             "last_strategy_used": self.last_strategy_used,
             "anchor_elements":   [a.to_dict() for a in self.anchor_elements],
+            # New in 2.2
+            "element_hash":      self.element_hash,
+            "element_role":      self.element_role,
+            "confidence_level":  self.confidence_level,
+            "visibility_score":  self.visibility_score,
+            "window_handle":     self.window_handle,
+            "raw_bbox":          self.raw_bbox,
+            "relative_to_window": self.relative_to_window,
+            "relative_to_parent": self.relative_to_parent,
         }
 
     @classmethod
     def from_dict(cls, d: dict) -> "Selector":
         return cls(
-            selector_version   = d.get("selector_version", "1.0"),
-            strategies         = [SelectorStrategy.from_dict(s) for s in d.get("strategies", [])],
-            process_name       = d.get("process_name"),
-            window_title       = d.get("window_title"),
-            semantic_role      = d.get("semantic_role"),
-            is_editable        = d.get("is_editable", False),
-            is_clickable       = d.get("is_clickable", True),
-            confidence         = d.get("confidence", 0.0),
-            screen_x           = d.get("screen_x"),
-            screen_y           = d.get("screen_y"),
-            recorded_at        = d.get("recorded_at", time.time()),
-            last_used_at       = d.get("last_used_at"),
-            replay_successes   = d.get("replay_successes", 0),
-            replay_failures    = d.get("replay_failures",  0),
-            last_strategy_used = d.get("last_strategy_used"),
-            anchor_elements    = [AnchorElement.from_dict(a) for a in d.get("anchor_elements", [])],
+            selector_version    = d.get("selector_version", "1.0"),
+            strategies          = [SelectorStrategy.from_dict(s) for s in d.get("strategies", [])],
+            process_name        = d.get("process_name"),
+            window_title        = d.get("window_title"),
+            semantic_role       = d.get("semantic_role"),
+            is_editable         = d.get("is_editable", False),
+            is_clickable        = d.get("is_clickable", True),
+            confidence          = d.get("confidence", 0.0),
+            screen_x            = d.get("screen_x"),
+            screen_y            = d.get("screen_y"),
+            recorded_at         = d.get("recorded_at", time.time()),
+            last_used_at        = d.get("last_used_at"),
+            replay_successes    = d.get("replay_successes", 0),
+            replay_failures     = d.get("replay_failures",  0),
+            last_strategy_used  = d.get("last_strategy_used"),
+            anchor_elements     = [AnchorElement.from_dict(a) for a in d.get("anchor_elements", [])],
+            # New in 2.2
+            element_hash        = d.get("element_hash"),
+            element_role        = d.get("element_role"),
+            confidence_level    = d.get("confidence_level"),
+            visibility_score    = d.get("visibility_score"),
+            window_handle       = d.get("window_handle", 0),
+            raw_bbox            = d.get("raw_bbox"),
+            relative_to_window  = d.get("relative_to_window"),
+            relative_to_parent  = d.get("relative_to_parent"),
         )
 
     def is_stale(self, threshold_days: float = 90.0) -> bool:
@@ -306,20 +327,29 @@ class SelectorBuilder:
 
     @staticmethod
     def from_uia(
-        automation_id:   Optional[str],
-        name:            Optional[str],
-        control_type:    Optional[str],
-        class_name:      Optional[str],
-        window_title:    Optional[str],
-        process_name:    Optional[str],
-        bbox:            Optional[Any],
-        ancestor_chain:  list[str],
-        sibling_index:   Optional[int],
-        screen_x:        Optional[int],
-        screen_y:        Optional[int],
-        dpi_scale:       float = 1.0,
-        capabilities:    Optional[dict] = None,
-        anchor_elements: Optional[list[AnchorElement]] = None,
+        automation_id:      Optional[str],
+        name:               Optional[str],
+        control_type:       Optional[str],
+        class_name:         Optional[str],
+        window_title:       Optional[str],
+        process_name:       Optional[str],
+        bbox:               Optional[Any],
+        ancestor_chain:     list[str],
+        sibling_index:      Optional[int],
+        screen_x:           Optional[int],
+        screen_y:           Optional[int],
+        dpi_scale:          float = 1.0,
+        capabilities:       Optional[dict] = None,
+        anchor_elements:    Optional[list[AnchorElement]] = None,
+        # New in 2.2 (from uia_enricher)
+        element_hash:       Optional[str] = None,
+        element_role:       Optional[str] = None,
+        confidence_level:   Optional[str] = None,
+        visibility_score:   Optional[str] = None,
+        window_handle:      int = 0,
+        raw_bbox:           Optional[Any] = None,
+        relative_to_window: Optional[dict] = None,
+        relative_to_parent: Optional[dict] = None,
     ) -> Selector:
         caps = capabilities or {}
         raw: list[SelectorAttribute] = []
@@ -394,17 +424,28 @@ class SelectorBuilder:
         confidence   = min(actual / max_possible, 1.0)
 
         return Selector(
-            strategies      = strategies,
-            process_name    = process_name,
-            window_title    = window_title,
-            semantic_role   = _detect_semantic_role_uia(control_type, name, caps),
-            is_editable     = caps.get("is_editable", False),
-            is_clickable    = caps.get("is_clickable", True),
-            confidence      = confidence,
-            screen_x        = screen_x,
-            screen_y        = screen_y,
-            recorded_at     = time.time(),
-            anchor_elements = anchor_elements or [],
+            strategies          = strategies,
+            process_name        = process_name,
+            window_title        = window_title,
+            semantic_role       = _detect_semantic_role_uia(control_type, name, caps),
+            is_editable         = caps.get("is_editable", False),
+            is_clickable        = caps.get("is_clickable", True),
+            confidence          = confidence,
+            screen_x            = screen_x,
+            screen_y            = screen_y,
+            recorded_at         = time.time(),
+            anchor_elements     = anchor_elements or [],
+            # New in 2.2
+            element_hash        = element_hash,
+            element_role        = element_role,
+            confidence_level    = confidence_level,
+            visibility_score    = visibility_score,
+            window_handle       = window_handle,
+            raw_bbox            = ({"left": raw_bbox.left, "top": raw_bbox.top,
+                                    "right": raw_bbox.right, "bottom": raw_bbox.bottom}
+                                   if raw_bbox else None),
+            relative_to_window  = relative_to_window,
+            relative_to_parent  = relative_to_parent,
         )
 
     @staticmethod
