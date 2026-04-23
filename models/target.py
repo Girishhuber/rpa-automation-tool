@@ -99,12 +99,28 @@ class UITarget(BaseModel):
 
     ancestor_chain: List[str] = Field(default_factory=list)
 
-   
+    # Stub selectors built by build_selectors() during recording
     selectors: List[Selector] = Field(default_factory=list)
+
+    # Full selector.py Selector objects (type Any to avoid circular import)
+    # Populated by UIAEnricher.get_selector_at() via _build_target_at()
+    rich_selectors: List[Any] = Field(default_factory=list)
 
     confidence_score: float = 0.0
     confidence_reason: Optional[str] = None
-    is_editable:Optional[bool] = None
+    is_editable: Optional[bool] = None
+
+    # ── Fields populated by UIAEnricher._build_uia_target() ──────────────
+    # These MUST be declared here so Pydantic preserves them across
+    # serialization/deserialization (session save/load).
+    raw_bbox:           Optional[BoundingBox] = None   # absolute pixel bbox, no DPI
+    element_hash:       Optional[str]         = None   # stable 16-char identity hash
+    element_role:       Optional[str]         = None   # semantic role (button/input/…)
+    confidence_level:   Optional[str]         = None   # high / medium / low
+    visibility_score:   Optional[str]         = None   # full / partial / offscreen / hidden
+    is_active_window:   Optional[bool]        = None   # True if window is foreground
+    relative_to_window: Optional[Dict]        = None   # {x,y,w,h,win_w,win_h}
+    relative_to_parent: Optional[Dict]        = None   # {x,y,w,h}
 
     def build_selectors(self) -> None:
        

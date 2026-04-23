@@ -5,6 +5,7 @@ import ctypes
 import re
 import threading
 import time
+import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -43,13 +44,49 @@ _BROWSER_PROCS     = {"chrome.exe", "msedge.exe", "firefox.exe", "brave.exe"}
 _SYSTEM_PROCS      = {"explorer.exe", "searchhost.exe", "searchapp.exe",
                        "shellexperiencehost.exe", "startmenuexperiencehost.exe"}
 
-MAX_WINDOW_SCAN    = 25     # max windows 
-MAX_DESC_SEARCH    = 50     # max descendants to inspect per window
-MAX_STATS          = 300    # LRU cap on _stats dict (BUG-3)
-DESC_TIMEOUT_S     = 1.5    # per-window descendants timeout
+_ELEMENT_TYPE_PRIORITY: dict[str, int] = {
+    "Button":      90,
+    "SplitButton": 88,
+    "Edit":        85,
+    "Document":    85,
+    "ComboBox":    80,
+    "CheckBox":    80,
+    "RadioButton": 80,
+    "ListItem":    70,
+    "TreeItem":    70,
+    "TabItem":     65,
+    "MenuItem":    65,
+    "Text":        40,
+    "Label":       40,
+    "StaticText":  40,
+    "Pane":        30,
+    "Group":       25,
+    "ToolBar":     20,
+    "StatusBar":   15,
+    "ScrollBar":   10,
+}
 
 
-STABILITY_WAIT_MS  = 80     
+_ROLE_SCORE_BOOST: dict[str, float] = {
+    "button":    2.0,
+    "input":     3.0,   
+    "checkbox":  2.0,
+    "radio":     2.0,
+    "dropdown":  2.0,
+    "label":    -5.0,   
+    "container": -8.0,
+    "unknown":   0.0,
+}
+
+MAX_WINDOW_SCAN    = 25      
+MAX_DESC_SEARCH    = 50     
+MAX_STATS          = 300    
+DESC_TIMEOUT_S     = 1.5    
+
+
+STABILITY_WAIT_MS  = 80  
+STABILITY_CHECK_ENABLED = True   
+MAX_REFRESH_ATTEMPTS   = 2     
 
 
 
@@ -73,19 +110,16 @@ def _primary_dpi() -> float:
 
 
 def _dpi_for_point(x: int, y: int) -> float:
-  
     try:
         MonitorFromPoint = ctypes.windll.user32.MonitorFromPoint
         GetDpiForMonitor = ctypes.windll.shcore.GetDpiForMonitor
 
         class POINT(ctypes.Structure):
             _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
-
-        hmon = MonitorFromPoint(POINT(x, y), 2)  # MONITOR_DEFAULTTONEAREST
-        dpi_x = ctypes.c_uint()
-        dpi_y = ctypes.c_uint()
-        hr    = GetDpiForMonitor(hmon, 0, ctypes.byref(dpi_x), ctypes.byref(dpi_y))
-        if hr == 0:
+        hmon  = ctypes.windll.user32.MonitorFromPoint(POINT(x, y), 2)
+        dpi_x = ctypes.c_uint(); dpi_y = ctypes.c_uint()
+        if ctypes.windll.shcore.GetDpiForMonitor(
+                hmon, 0, ctypes.byref(dpi_x), ctypes.byref(dpi_y)) == 0:
             return dpi_x.value / 96.0
     except Exception:
         pass
@@ -97,6 +131,7 @@ class MatchResult:
     score:     float
     strategy:  str
     is_unique: bool = True
+    elem_hash:str = ""
 
     @property
     def is_wrapper(self) -> bool:
@@ -105,7 +140,6 @@ class MatchResult:
 
 @dataclass
 class StrategyStats:
-    """Per-strategy statistics for adaptive ordering (ADV-1 / BUG-3)."""
     successes:       int   = 0
     failures:        int   = 0
     total_ms:        float = 0.0   
@@ -135,10 +169,8 @@ class StrategyStats:
         self.last_used_ts   = time.monotonic()
 
 def _text_similarity(a: str, b: str) -> float:
-
     if not a or not b:
         return 0.0
-    # Normalise
     def norm(s: str) -> str:
         return re.sub(r"[^\w\s]", " ", s.lower()).strip()
     a, b = norm(a), norm(b)
@@ -148,13 +180,11 @@ def _text_similarity(a: str, b: str) -> float:
         return 1.0
     if a in b or b in a:
         return 0.85
-    # Token overlap
     ta, tb = set(a.split()), set(b.split())
     if ta and tb:
         overlap = len(ta & tb) / len(ta | tb)
         if overlap >= 0.6:
             return overlap
-    # Bigram fallback
     def bigrams(s: str):
         return set(s[i:i+2] for i in range(len(s)-1))
     ba, bb = bigrams(a), bigrams(b)
@@ -162,7 +192,6 @@ def _text_similarity(a: str, b: str) -> float:
 
 
 def _spatial_score(elem, orig_bbox, weight: float = 1.0) -> float:
- 
     if not orig_bbox:
         return 0.0
     try:
@@ -176,23 +205,33 @@ def _spatial_score(elem, orig_bbox, weight: float = 1.0) -> float:
     except Exception:
         return 0.0
 
+def _composite_score(text_sim, spatial, strategy_rate, boost,
+                      sel_conf=0.5, rb=0.0, tp=0.0) -> float:
+    return (text_sim * 95*0.45 + (spatial/20)*95*0.20 +
+            strategy_rate*95*0.15 + sel_conf*95*0.15 +
+            tp*95*0.05 + boost + rb)
 
-def _composite_score(
-    text_sim: float,
-    spatial:  float,
-    strategy_conf: float,
-    boost:    float,
-) -> float:
- 
-    return (
-        text_sim      * 95.0 * 0.50 +
-        (spatial/20.0)* 95.0 * 0.30 +
-        strategy_conf * 95.0 * 0.20 +
-        boost
-    )
+def _tp(ctrl: Optional[str]) -> float:
+    return _ELEMENT_TYPE_PRIORITY.get(ctrl, 50) / 100.0 if ctrl else 0.5
+
+
+def _role_boost(ctrl_type: Optional[str], role: Optional[str]) -> float:
+    if role:
+        return _ROLE_SCORE_BOOST.get(role, 0.0)
+    if not ctrl_type:
+        return 0.0
+    ct = ctrl_type.lower()
+    if "button" in ct:    return _ROLE_SCORE_BOOST["button"]
+    if "edit" in ct:      return _ROLE_SCORE_BOOST["input"]
+    if "document" in ct:  return _ROLE_SCORE_BOOST["input"]
+    if "label" in ct or "text" == ct or "statictext" in ct:
+        return _ROLE_SCORE_BOOST["label"]
+    if "pane" in ct or "group" in ct:
+        return _ROLE_SCORE_BOOST["container"]
+    return 0.0
+
 
 def _validate_wrapper(wrapper) -> bool:
-    """True if wrapper is a real, usable UIA element."""
     if wrapper is None:
         return False
     if not callable(getattr(wrapper, "rectangle", None)):
@@ -204,23 +243,40 @@ def _validate_wrapper(wrapper) -> bool:
         return False
 
 
+
 def _elem_visible(wrapper) -> bool:
- 
+    
+    vis = getattr(wrapper, "visibility_score", None)
+    if vis is not None:
+        return vis not in ("hidden", "offscreen")
+
     try:
         if not wrapper.is_visible():
             return False
         r = wrapper.rectangle()
-        if r.right  - r.left <= 0 or r.bottom - r.top <= 0:
+        if r.right - r.left <= 0 or r.bottom - r.top <= 0:
             return False
-        # Offscreen check — not entirely to left or above screen
         if r.right < -50 or r.bottom < -50:
             return False
-        # Very large coords suggest hidden/virtual elements
         if r.left > 16000 or r.top > 16000:
+            return False
+        if r.left == 0 and r.top == 0 and r.right == 0 and r.bottom == 0:
             return False
         return True
     except Exception:
-        return True   # assume visible on exception
+        return True
+    
+def _elem_hash(w) -> str:
+    try:
+        r = w.rectangle()
+        key = f"{r.left},{r.top},{r.right},{r.bottom}"
+        try:
+            aid = w.automation_id() if callable(getattr(w,"automation_id",None)) else ""
+            if aid: key += f"|{aid}"
+        except Exception: pass
+        return hashlib.md5(key.encode()).hexdigest()[:12]
+    except Exception:
+        return str(id(w))
 
 
 def _refresh_wrapper(wrapper, app_cache: dict, hwnd: int, auto_id: Optional[str] = None,
@@ -250,24 +306,19 @@ def _refresh_wrapper(wrapper, app_cache: dict, hwnd: int, auto_id: Optional[str]
     return wrapper  
 
 
-
 def _title_variants(window_title: str) -> list[str]:
- 
     if not window_title:
         return []
     variants = [window_title]
-    # Split on " - " which is Windows standard app title separator
     parts = [p.strip() for p in window_title.split(" - ")]
     for p in parts:
         if p and p not in variants:
             variants.append(p)
-    # Also add a 30-char prefix for very long titles
     if len(window_title) > 30:
         prefix = window_title[:30]
         if prefix not in variants:
             variants.append(prefix)
     return variants
-
 
 def _find_window_handles(window_title: str, process_name: Optional[str] = None,
                           max_results: int = 10) -> list[int]:
@@ -286,6 +337,13 @@ def _find_window_handles(window_title: str, process_name: Optional[str] = None,
             continue
 
     return handles[:max_results]
+def _active_window_bonus(target: UITarget) -> float:
+    is_active = getattr(target, "is_active_window", None)
+    if is_active is True:
+        return 5.0
+    if is_active is False:
+        return -10.0
+    return 0.0
 
 class ElementMatcher:
 
@@ -308,7 +366,6 @@ class ElementMatcher:
     def _get_stats(self, strategy: str) -> StrategyStats:
         with self._stats_lock:
             if strategy not in self._stats:
-                # BUG-3: evict LRU entry if at cap
                 if len(self._stats) >= MAX_STATS:
                     oldest = min(self._stats, key=lambda k: self._stats[k].last_used_ts)
                     del self._stats[oldest]
@@ -318,7 +375,6 @@ class ElementMatcher:
             return s
 
     def _ordered_strategies(self, candidates: list[str]) -> list[str]:
-       
         def sort_key(name: str):
             with self._stats_lock:
                 s = self._stats.get(name)
@@ -326,13 +382,80 @@ class ElementMatcher:
                 return (0.5, 999.0)
             return (-s.success_rate, s.avg_ms)
         return sorted(candidates, key=sort_key)
+    def _sel_conf(self, target: UITarget) -> float:
+        # Prefer full Selector objects (selector.py) over stub selectors
+        rich = getattr(target, "rich_selectors", None)
+        if rich:
+            try:
+                val = max((s.effective_confidence() for s in rich
+                           if hasattr(s, "effective_confidence")), default=None)
+                if val is not None:
+                    return val
+            except Exception:
+                pass
+        sels = getattr(target, "selectors", None)
+        if not sels:
+            return 0.5
+        try:
+            return max((s.effective_confidence() for s in sels
+                        if hasattr(s, "effective_confidence")), default=0.5)
+        except Exception:
+            return 0.5
 
-    def find(self, target: UITarget, event_id: int = 0):
+    def _notify_selector(self, target: UITarget, strategy: str, success: bool):
+        # Prefer rich_selectors; fall back to stub selectors
+        rich = getattr(target, "rich_selectors", None)
+        sels = rich if rich else getattr(target, "selectors", None)
+        if not sels:
+            return
+        mapping = {
+            "automation_id": "strict", "automation_id_wide": "strict",
+            "semantic":      "semantic", "semantic_desc":    "semantic",
+            "relaxed":       "relaxed",  "relaxed_desc":     "relaxed",
+            "classname":     "classname", "ancestor":         "ancestor",
+            "coord":         "positional", "bbox":            "positional",
+        }
+        sel_name = mapping.get(strategy, strategy)
+        try:
+            for sel in sels:
+                if hasattr(sel, "record_replay"):
+                    sel.record_replay(sel_name, success)
+        except Exception:
+            pass
+
+    def _selector_order(self, target: UITarget) -> list[str]:
+        """M11: preferred strategy order from selector history (rich_selectors first)."""
+        rich = getattr(target, "rich_selectors", None)
+        sels = rich if rich else getattr(target, "selectors", None)
+        if not sels:
+            return []
+        try:
+            best = max(
+                (s for s in sels if hasattr(s, "ordered_strategies")),
+                key=lambda s: (s.effective_confidence()
+                               if hasattr(s, "effective_confidence") else 0),
+                default=None,
+            )
+            return [st.name for st in best.ordered_strategies()] if best else []
+        except Exception:
+            return []
+
+    def _combined_order(self, names: list[str], pref: list[str]) -> list[str]:
+        pref_boost = {n: (len(pref)-i)*0.1 for i,n in enumerate(pref)}
+        def key(n):
+            with self._stats_lock: s = self._stats.get(n)
+            rate = s.success_rate if s else 0.5
+            ms   = s.avg_ms       if s else 999.0
+            return (-(rate + pref_boost.get(n,0.0)), ms)
+        return sorted(names, key=key)
+
+
+    def find(self, target: UITarget, event_id: int = 0, action_intent: Optional[str]=None):
 
         t = copy.copy(target)
         if t.backend == TargetBackend.BROWSER:
             return self._find_browser(t, event_id)
-        return self._find_uia(t, event_id)
+        return self._find_uia(t, event_id,action_intent)
 
     def find_with_wait(
         self,
@@ -340,6 +463,7 @@ class ElementMatcher:
         event_id: int = 0,
         timeout_ms: int = 10_000,
         poll_ms:    int = 300,
+        action_intent: Optional[str]=None
     ):
         deadline = time.monotonic() + timeout_ms / 1000
         last_exc = None
@@ -347,8 +471,7 @@ class ElementMatcher:
         while time.monotonic() < deadline:
             attempt += 1
             try:
-                result = self.find(target, event_id)
-                # Check visibility for UIA wrappers
+                result = self.find(target, event_id,action_intent)
                 if not isinstance(result, tuple):
                     if _elem_visible(result):
                         if attempt > 1:
@@ -356,10 +479,8 @@ class ElementMatcher:
                                          event_id, attempt)
                         return result
                     else:
-                        logger.debug("[MATCH] Event #{} found but not visible yet (attempt {})",
-                                     event_id, attempt)
+                        logger.debug("[MATCH] Event #{} found but not visible (attempt {})",                               event_id, attempt)
                 else:
-                    # coord result — just return it
                     return result
             except ElementNotFoundError as exc:
                 last_exc = exc
@@ -431,72 +552,97 @@ class ElementMatcher:
         return (best.cx, best.cy)
 
 
-    def _find_uia(self, target: UITarget, event_id: int):
+    def _find_uia(self, target: UITarget, event_id: int,action_intent: Optional[str]=None):
         if not UIA_OK:
             return self._coord_fallback(target, event_id)
-
-        logger.info(
-            "[MATCH] Event #{} UIA search → auto_id={} name='{}' ctrl_type={} "
-            "class={} window='{}' app={}",
-            event_id,
-            target.automation_id, (target.name or "")[:30], target.control_type,
-            target.class_name, (target.window_title or "")[:30], target.process_name,
+        proc  = (target.process_name or "").lower()
+        cls   = (target.class_name   or "")
+        is_electron = proc in _ELECTRON_PROCS or cls in _ELECTRON_CLASSES
+        is_system   = proc in _SYSTEM_PROCS
+        
+        if is_electron:
+            logger.info("[MATCH] Event #{} ELECTRON → image/coord", event_id)
+            coords = self._by_screenshot_cropped(target)
+            if coords:
+                return coords
+            return self._coord_fallback(target, event_id)
+        
+        confidence_level = getattr(target, "confidence_level", "medium")
+        strict_thresh = (
+            self.STRICT_THRESHOLD + 5 if confidence_level == "high"
+            else self.STRICT_THRESHOLD
         )
 
+        active_bonus = _active_window_bonus(target)
+        if active_bonus < 0:
+            logger.debug("[MATCH] Event #{} target window not active (penalty {:.0f})",
+                         event_id, active_bonus)
+        sel_conf     = self._sel_conf(target)          # M7
+        pref_order   = self._selector_order(target)    # M11
+       
+        conf_level   = getattr(target, "confidence_level", "medium")
+        strict_th    = self.STRICT_THRESHOLD + (5 if conf_level == "high" else 0)
+        logger.info("[MATCH] Event #{} UIA → auto_id={} name='{}' ctrl={} win='{}' "
+                    "intent={} sel_conf={:.2f}",
+                    event_id, target.automation_id or "(none)",
+                    (target.name or "")[:30], target.control_type or "?",
+                    (target.window_title or "")[:30],
+                    action_intent or "any", sel_conf)
+
         results: list[MatchResult] = []
-        errors   = []
+        errors :list[str]  = []
         active_strategies = self._ordered_strategies(
             ["automation_id", "semantic", "relaxed", "classname", "ancestor"]
         )
         def run(name: str, fn):
             t0 = time.monotonic()
             try:
-                r = fn()
-                ms = (time.monotonic() - t0) * 1000
+                r = fn(); ms = (time.monotonic()-t0)*1000
                 if r:
-                    rs = r if isinstance(r, list) else [r]
-                    for x in rs:
-                        self._get_stats(name).record_success(ms)
+                    rs = r if isinstance(r,list) else [r]
+                    for x in rs: self._get_stats(name).record_success(ms)
                     return rs
             except Exception as exc:
-                ms = (time.monotonic() - t0) * 1000
+                ms = (time.monotonic()-t0)*1000
                 self._get_stats(name).record_failure(ms)
                 errors.append(f"{name}: {exc}")
                 logger.debug("[MATCH] Event #{} {} error: {}", event_id, name, exc)
             return []
 
-        if target.automation_id and "automation_id" in active_strategies[:3]:
+        if target.automation_id and "automation_id":
             for r in run("automation_id", lambda: self._by_automation_id(target)):
+                r.score += active_bonus
                 results.append(r)
                 logger.info("[MATCH] Event #{} auto_id='{}' → score={:.0f}",
                             event_id, target.automation_id, r.score)
 
         # ── 2. Semantic (name + ctrl) ─────────────────────────────────
-        if target.name and target.control_type and "semantic" in active_strategies[:4]:
+        if target.name and target.control_type:
             for r in run("semantic", lambda: self._by_name_type(target, exact=True)):
+                r.score += active_bonus
                 results.append(r)
                 logger.info("[MATCH] Event #{} semantic '{}' ctrl={} → score={:.0f}",
                             event_id, (target.name or "")[:30], target.control_type, r.score)
 
-        # Early exit: strict unique + cross-validated
         best_strict = self._pick_best(results, self.STRICT_THRESHOLD)
         if best_strict and best_strict.is_unique:
             if self._cross_validate(best_strict, target):
-                # ADV-2: stability check — re-validate after brief wait
+               
                 if self._stability_check(best_strict.element):
                     logger.info("[MATCH] Event #{} STRICT ✓ strategy={} score={:.0f}",
                                 event_id, best_strict.strategy, best_strict.score)
-                    return best_strict.element
+                    return self._wrap_safe(best_strict.element, target)
                 else:
                     logger.warning("[MATCH] Event #{} stability check FAILED — retrying",
                                    event_id)
-                    results.clear()   # element moved/changed — start fresh
+                    results.clear()   
             else:
                 logger.warning("[MATCH] Event #{} cross-validation FAILED — relaxing", event_id)
 
         # ── 3. Relaxed (name fuzzy) ───────────────────────────────────
         if target.name and "relaxed" in active_strategies:
             for r in run("relaxed", lambda: self._by_name_type(target, exact=False)):
+                r.score += active_bonus
                 results.append(r)
                 logger.info("[MATCH] Event #{} relaxed '{}' → score={:.0f}",
                             event_id, (target.name or "")[:30], r.score)
@@ -504,19 +650,29 @@ class ElementMatcher:
         # ── 4. ClassName ──────────────────────────────────────────────
         if target.class_name and target.window_title and "classname" in active_strategies:
             for r in run("classname", lambda: self._by_classname(target)):
+                r.score += active_bonus
                 results.append(r)
 
         # ── 5. Ancestor ───────────────────────────────────────────────
         if target.ancestor_chain and "ancestor" in active_strategies:
             for r in run("ancestor", lambda: self._by_ancestor(target)):
+                r.score += active_bonus
                 results.append(r)
 
-        # Pick best relaxed match
+        # ── Apply intent filter to focus on role-appropriate elements ─────
+        if action_intent:
+            results = self._intent_filter(results, action_intent)
+
         best = self._pick_best(results, self.RELAXED_THRESHOLD)
         if best:
             logger.info("[MATCH] Event #{} RELAXED ✓ strategy={} score={:.0f} unique={}",
                         event_id, best.strategy, best.score, best.is_unique)
-            return best.element
+            return self._wrap_safe(best.element, target)
+
+        # ── Self-heal before falling to geometry ──────────────────────────
+        healed = self._self_heal(target, event_id, active_bonus)
+        if healed is not None:
+            return healed
 
         # ── 6. BBox ───────────────────────────────────────────────────
         if target.bbox:
@@ -544,33 +700,83 @@ class ElementMatcher:
         raise ElementNotFoundError(
             f"Event #{event_id}: all strategies failed", event_id
         )
+        
+    def _deduplicate(self, results: list[MatchResult]) -> list[MatchResult]:
+        seen: dict[str, MatchResult] = {}
+        for r in results:
+            key = str(r.element) if not r.is_wrapper else (r.elem_hash or _elem_hash(r.element))
+            if key not in seen or r.score > seen[key].score:
+                seen[key] = r
+        return list(seen.values())
 
-    def _by_automation_id(self, t: UITarget) -> list[MatchResult]:
+    # ── Intent filter ────────────────────────────────────────────────
+
+    def _intent_filter(self, results: list[MatchResult],
+                        intent: str) -> list[MatchResult]:
+        if intent not in ("type","click","select"):
+            return results
+        out = []
+        for r in results:
+            score = r.score
+            if r.is_wrapper:
+                try:
+                    raw = r.element.raw() if hasattr(r.element,"raw") else r.element
+                    ct  = (raw.friendly_class_name()
+                           if callable(getattr(raw,"friendly_class_name",None)) else "") or ""
+                    ct = ct.lower()
+                    if intent == "type":
+                        if any(x in ct for x in ("edit","document","richtext")): score += 10
+                        elif any(x in ct for x in ("button","label","pane")):    score -= 15
+                    elif intent == "click":
+                        if any(x in ct for x in ("button","menuitem","tabitem")): score += 5
+                        elif any(x in ct for x in ("label","statictext")):        score -= 8
+                    elif intent == "select":
+                        if any(x in ct for x in ("combobox","listitem","list")):  score += 10
+                except Exception:
+                    pass
+            out.append(MatchResult(r.element, score, r.strategy, r.is_unique, r.elem_hash))
+        return out
+    def _wrap_safe(self, element, target: UITarget):
+       
+        if isinstance(element, tuple):
+            return element
+        try:
+            from .uia_enricher import SafeElement
+            hwnd = getattr(target, "window_handle", 0) or 0
+            return SafeElement(
+                wrapper  = element,
+                hwnd     = hwnd,
+                auto_id  = target.automation_id or "",
+                name     = target.name or "",
+            )
+        except ImportError:
+            return element
+
+    def _by_automation_id(self, t: UITarget, sc: float=0.5) -> list[MatchResult]:
         boost = self._get_stats("automation_id").priority_boost
         found: list[MatchResult] = []
 
-        handles = _find_window_handles(t.window_title or "", t.process_name)
-        for hwnd in handles:
+        for hwnd in _find_window_handles(t.window_title or "", t.process_name):
             try:
-                app = self._app_cache.get(hwnd) or Application(backend="uia").connect(handle=hwnd)
+                app = (self._app_cache.get(hwnd) or
+                       Application(backend="uia").connect(handle=hwnd))
                 self._app_cache[hwnd] = app
-                win  = app.window(handle=hwnd)
-                elem = win.child_window(auto_id=t.automation_id)
+                elem = app.window(handle=hwnd).child_window(auto_id=t.automation_id)
                 if elem.exists(timeout=0.5):
-                    wrapper = elem.wrapper_object()
-                    if not _validate_wrapper(wrapper):
-                        continue
-                    if not _elem_visible(wrapper):  
-                        logger.debug("[MATCH] auto_id found but not visible — skipping")
-                        continue
-                    spatial = _spatial_score(wrapper, t.bbox)
-                    score   = 100.0 + boost + spatial
-                    found.append(MatchResult(wrapper, score, "automation_id", is_unique=True))
-                    return found   # window-scoped unique match — return immediately
+                    w = elem.wrapper_object()
+                    if _validate_wrapper(w) and _elem_visible(w):
+                        sp  = _spatial_score(w, t.bbox)
+                        rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                        tp  = _tp(t.control_type)
+                        sc_ = _composite_score(1.0, sp,
+                              self._get_stats("automation_id").success_rate,
+                              boost, sc, rb, tp)
+                        found.append(MatchResult(w, sc_, "automation_id",
+                                                  is_unique=True, elem_hash=_elem_hash(w)))
+                        # M1: no return — continue to other windows
             except Exception:
                 continue
 
-        
         if not found:
             try:
                 for hwnd in find_windows(title_re=".*")[:MAX_WINDOW_SCAN]:
@@ -578,157 +784,186 @@ class ElementMatcher:
                         app = (self._app_cache.get(hwnd) or
                                Application(backend="uia").connect(handle=hwnd))
                         self._app_cache[hwnd] = app
-                        win  = app.window(handle=hwnd)
-                        # Filter by process if available (PERF-1)
+                        win = app.window(handle=hwnd)
                         if t.process_name:
                             try:
                                 import psutil
-                                pid   = win.process_id()
-                                pname = psutil.Process(pid).name().lower()
-                                if t.process_name.lower() not in pname:
-                                    continue
-                            except Exception:
-                                pass
+                                pname = psutil.Process(win.process_id()).name().lower()
+                                if t.process_name.lower() not in pname: continue
+                            except Exception: pass
                         descs = win.descendants(auto_id=t.automation_id)
                         for d in descs[:5]:
-                            wrapper = d.wrapper_object() if hasattr(d, "wrapper_object") else d
-                            if not _validate_wrapper(wrapper) or not _elem_visible(wrapper):
-                                continue
-                            # Window title filter (CRIT-6 — partial match)
+                            w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
+                            if not _validate_wrapper(w) or not _elem_visible(w): continue
                             if t.window_title:
                                 try:
-                                    win_text = wrapper.top_level_parent().window_text() or ""
-                                    if not any(v.lower() in win_text.lower()
+                                    wt = w.top_level_parent().window_text() or ""
+                                    if not any(v.lower() in wt.lower()
                                                for v in _title_variants(t.window_title)):
                                         continue
-                                except Exception:
-                                    pass
-                            spatial   = _spatial_score(wrapper, t.bbox)
-                            is_unique = len(descs) == 1
-                            score     = 90.0 + boost + spatial - (0 if is_unique else 15)
-                            found.append(MatchResult(wrapper, score, "automation_id_wide", is_unique=is_unique))
-                        if found:
-                            break
-                    except Exception:
-                        continue
-            except Exception:
-                pass
+                                except Exception: pass
+                            sp  = _spatial_score(w, t.bbox)
+                            rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                            tp  = _tp(t.control_type)
+                            uniq= len(descs)==1
+                            sc_ = _composite_score(1.0, sp,
+                                  self._get_stats("automation_id_wide").success_rate,
+                                  boost-10, sc, rb, tp)
+                            found.append(MatchResult(w, sc_, "automation_id_wide",
+                                                      is_unique=uniq, elem_hash=_elem_hash(w)))
+                        # M1: no break — keep scanning
+                    except Exception: continue
+            except Exception: pass
 
         return found
 
-    def _by_name_type(self, t: UITarget, exact: bool = True) -> list[MatchResult]:
-
-        results = []
-        boost   = self._get_stats("semantic" if exact else "relaxed").priority_boost
-        name    = t.name or ""
+    def _by_name_type(self, t: UITarget, exact: bool=True,
+                       sc: float=0.5) -> list[MatchResult]:
+        """M2: collects from child_window AND descendants — no early returns."""
+        results  = []
         strategy = "semantic" if exact else "relaxed"
-        conf_min = 0.85 if exact else 0.60
+        boost    = self._get_stats(strategy).priority_boost
+        name     = t.name or ""; conf_min = 0.85 if exact else 0.60
         name_re  = re.escape(name)
 
-        handles = _find_window_handles(t.window_title or "", t.process_name)
-
-        for hwnd in handles:
+        for hwnd in _find_window_handles(t.window_title or "", t.process_name):
             try:
                 app = (self._app_cache.get(hwnd) or
                        Application(backend="uia").connect(handle=hwnd))
                 self._app_cache[hwnd] = app
                 win = app.window(handle=hwnd)
 
-                # child_window path (fast)
+                # child_window — M2: no early return
                 try:
-                    kwargs = {}
-                    if t.control_type:
-                        kwargs["control_type"] = t.control_type
-                    elem = win.child_window(title_re=f".*{name_re}.*", **kwargs)
+                    kw = {"control_type": t.control_type} if t.control_type else {}
+                    elem = win.child_window(title_re=f".*{name_re}.*", **kw)
                     if elem.exists(timeout=0.4):
-                        wrapper = elem.wrapper_object()
-                        if _validate_wrapper(wrapper) and _elem_visible(wrapper):
-                            sim  = _text_similarity(name, wrapper.window_text() or "")
+                        w = elem.wrapper_object()
+                        if _validate_wrapper(w) and _elem_visible(w):
+                            sim = _text_similarity(name, w.window_text() or "")
                             if sim >= conf_min:
-                                spatial = _spatial_score(wrapper, t.bbox)
-                                score   = _composite_score(sim, spatial, self._get_stats(strategy).success_rate, boost)
-                                results.append(MatchResult(wrapper, score, strategy, is_unique=True))
-                                return results   # first window-scoped hit
-                except Exception:
-                    pass
+                                sp  = _spatial_score(w, t.bbox)
+                                rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                                tp  = _tp(t.control_type)
+                                sc_ = _composite_score(sim, sp,
+                                      self._get_stats(strategy).success_rate,
+                                      boost, sc, rb, tp)
+                                results.append(MatchResult(w, sc_, strategy,
+                                    is_unique=True, elem_hash=_elem_hash(w)))
+                                # M2: continue — still run descendants
+                except Exception: pass
 
-                # descendants fallback (PERF-2: capped)
+                # Descendants — M2: always, not just fallback
                 try:
-                    kwargs = {}
-                    if t.control_type:
-                        kwargs["control_type"] = t.control_type
-                    descs = win.descendants(**kwargs) if kwargs else win.descendants()
+                    kw = {"control_type": t.control_type} if t.control_type else {}
+                    descs = win.descendants(**kw) if kw else win.descendants()
                     for d in descs[:MAX_DESC_SEARCH]:
                         try:
-                            wrapper = d.wrapper_object() if hasattr(d, "wrapper_object") else d
-                            if not _validate_wrapper(wrapper) or not _elem_visible(wrapper):
-                                continue
-                            txt = wrapper.window_text() or ""
-                            sim = _text_similarity(name, txt)
-                            if sim < conf_min:
-                                continue
-                            spatial = _spatial_score(wrapper, t.bbox)
-                            score   = _composite_score(sim, spatial, self._get_stats(strategy).success_rate, boost)
-                            results.append(MatchResult(wrapper, score, f"{strategy}_desc",
-                                                        is_unique=False))
-                        except Exception:
-                            continue
-                except Exception:
-                    pass
+                            w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
+                            if not _validate_wrapper(w) or not _elem_visible(w): continue
+                            sim = _text_similarity(name, w.window_text() or "")
+                            if sim < conf_min: continue
+                            sp  = _spatial_score(w, t.bbox)
+                            rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                            tp  = _tp(t.control_type)
+                            sc_ = _composite_score(sim, sp,
+                                  self._get_stats(strategy).success_rate,
+                                  boost, sc, rb, tp)
+                            results.append(MatchResult(w, sc_, f"{strategy}_desc",
+                                is_unique=False, elem_hash=_elem_hash(w)))
+                        except Exception: continue
+                except Exception: pass
+            except Exception: continue
 
-            except Exception:
-                continue
+        return results[:10]
 
-        return results[:5]
-
-    def _by_classname(self, t: UITarget) -> Optional[MatchResult]:
-        for hwnd in find_windows(title_re=f".*{re.escape(t.window_title[:30])}.*"):
+    def _by_classname(self, t: UITarget, sc: float=0.5) -> list[MatchResult]:
+        """M3: accumulates all classname matches — no early return."""
+        results = []; boost = self._get_stats("classname").priority_boost
+        for hwnd in _find_window_handles(t.window_title or ""):
             try:
-                app  = Application(backend="uia").connect(handle=hwnd)
-                elem = app.window(handle=hwnd).child_window(class_name=t.class_name)
-                if elem.exists(timeout=0.5):
-                    w = elem.wrapper_object()
-                    spatial = _spatial_score(w, t.bbox)
-                    boost   = self._get_stats("classname").priority_boost
-                    return MatchResult(w, 65.0 + boost + spatial, "classname")
-            except Exception:
-                continue
-        return None
+                app = (self._app_cache.get(hwnd) or
+                       Application(backend="uia").connect(handle=hwnd))
+                self._app_cache[hwnd] = app
+                win = app.window(handle=hwnd)
+                try:
+                    elem = win.child_window(class_name=t.class_name)
+                    if elem.exists(timeout=0.4):
+                        w = elem.wrapper_object()
+                        if _validate_wrapper(w) and _elem_visible(w):
+                            sp = _spatial_score(w, t.bbox)
+                            rb = _role_boost(t.control_type, getattr(t,"element_role",None))
+                            results.append(MatchResult(w, 65+boost+sp+rb, "classname",
+                                                        elem_hash=_elem_hash(w)))
+                            # M3: no return
+                except Exception: pass
+                try:
+                    descs = win.descendants(class_name=t.class_name)
+                    for d in descs[:10]:
+                        w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
+                        if _validate_wrapper(w) and _elem_visible(w):
+                            sp = _spatial_score(w, t.bbox)
+                            rb = _role_boost(t.control_type, getattr(t,"element_role",None))
+                            results.append(MatchResult(w, 60+boost+sp+rb, "classname_desc",
+                                is_unique=len(descs)==1, elem_hash=_elem_hash(w)))
+                except Exception: pass
+            except Exception: continue
+        return results
 
-    def _by_ancestor(self, t: UITarget) -> list[MatchResult]:
-        """M-3: split with maxsplit=2 to handle colons in element text."""
-        if not t.ancestor_chain:
-            return []
-        first    = t.ancestor_chain[0]
-        parts    = first.split(":", 2)
+    def _by_ancestor(self, t: UITarget, sc: float=0.5) -> list[MatchResult]:
+        """M4: scans all desc candidates — no early return."""
+        if not t.ancestor_chain: return []
+        parts    = t.ancestor_chain[0].split(":", 2)
         anc_text = parts[1].strip() if len(parts) > 1 else ""
-        if not anc_text:
-            return []
-        results = []
-        boost   = self._get_stats("ancestor").priority_boost
+        if not anc_text: return []
+
+        results     = []; boost = self._get_stats("ancestor").priority_boost
+        anch_names  = [a.name for a in (getattr(t,"anchor_elements",None) or [])
+                       if getattr(a,"name",None)]
         try:
             for hwnd in find_windows(title_re=f".*{re.escape(anc_text[:20])}.*"):
                 try:
                     app = (self._app_cache.get(hwnd) or
                            Application(backend="uia").connect(handle=hwnd))
                     self._app_cache[hwnd] = app
-                    win    = app.window(handle=hwnd)
-                    kwargs = {}
-                    if t.control_type: kwargs["control_type"] = t.control_type
-                    if t.class_name:   kwargs["class_name"]   = t.class_name
-                    if kwargs:
-                        descs = win.descendants(**kwargs)
-                        for d in descs[:20]:
-                            wrapper = d.wrapper_object() if hasattr(d, "wrapper_object") else d
-                            if _validate_wrapper(wrapper) and _elem_visible(wrapper):
-                                spatial = _spatial_score(wrapper, t.bbox)
-                                results.append(MatchResult(wrapper, 55.0 + boost + spatial, "ancestor"))
-                                return results
+                    win = app.window(handle=hwnd)
+                    kw  = {}
+                    if t.control_type: kw["control_type"] = t.control_type
+                    if t.class_name:   kw["class_name"]   = t.class_name
+                    if not kw: continue
+                    descs = win.descendants(**kw)
+                    for d in descs[:20]:  # M4: all, no return on first
+                        w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
+                        if not _validate_wrapper(w) or not _elem_visible(w): continue
+                        sp   = _spatial_score(w, t.bbox)
+                        ab   = self._anchor_confirmation(w, anch_names)
+                        rb   = _role_boost(t.control_type, getattr(t,"element_role",None))
+                        results.append(MatchResult(w, 55+boost+sp+rb+ab, "ancestor",
+                                                    elem_hash=_elem_hash(w)))
+                except Exception: continue
+        except Exception: pass
+        return results
+    
+    def _anchor_confirmation(self, wrapper, anchor_names: list[str]) -> float:
+        if not anchor_names:
+            return 0.0
+        bonus = 0.0
+        try:
+            parent = wrapper.parent()
+            if not parent:
+                return 0.0
+            for sibling in parent.children():
+                try:
+                    sib_text = sibling.window_text() or ""
+                    for anchor_name in anchor_names:
+                        if anchor_name.lower() in sib_text.lower():
+                            bonus += 5.0
+                            break
                 except Exception:
                     continue
         except Exception:
             pass
-        return results
+        return min(bonus, 15.0)  # cap at 3 confirmed anchors
 
     def _by_bbox(self, t: UITarget) -> Optional[MatchResult]:
         try:
@@ -753,71 +988,61 @@ class ElementMatcher:
             return None
 
     def _by_screenshot_cropped(self, t: UITarget) -> Optional[tuple[int, int]]:
-   
         if not CV2_OK or not MSS_OK:
             return None
-
         ref_path = None
         if getattr(t, "screenshot_ref", None) and self._scr_dir:
             ref_path = self._scr_dir / t.screenshot_ref
-
         if ref_path is None or not ref_path.exists():
             return None
-
         template = cv2.imread(str(ref_path), cv2.IMREAD_COLOR)
         if template is None:
             return None
         th, tw = template.shape[:2]
-
         try:
             with mss.mss() as sct:
-                monitors = sct.monitors[1:] 
-
-                capture_mon = monitors[0]  
-                if t.bbox:
+                monitors = sct.monitors[1:]
+                capture_mon = monitors[0]
+                bbox = getattr(t, "raw_bbox", None) or t.bbox
+                if bbox:
                     scale = _primary_dpi() / (t.dpi_scale or 1.0)
-                    bcx   = int(((t.bbox.left + t.bbox.right)  / 2) * scale)
-                    bcy   = int(((t.bbox.top  + t.bbox.bottom) / 2) * scale)
+                    bcx   = int(((bbox.left + bbox.right)  / 2) * scale)
+                    bcy   = int(((bbox.top  + bbox.bottom) / 2) * scale)
                     for mon in monitors:
                         if (mon["left"] <= bcx < mon["left"] + mon["width"] and
                                 mon["top"] <= bcy < mon["top"] + mon["height"]):
                             capture_mon = mon
                             break
-
-                if t.bbox:
+                if bbox:
                     scale  = _primary_dpi() / (t.dpi_scale or 1.0)
                     margin = 200
                     region = {
-                        "left":   max(capture_mon["left"], int(t.bbox.left   * scale) - margin),
-                        "top":    max(capture_mon["top"],  int(t.bbox.top    * scale) - margin),
-                        "width":  tw + margin * 2 + int((t.bbox.right  - t.bbox.left)  * scale),
-                        "height": th + margin * 2 + int((t.bbox.bottom - t.bbox.top) * scale),
+                        "left":   max(capture_mon["left"], int(bbox.left  * scale) - margin),
+                        "top":    max(capture_mon["top"],  int(bbox.top   * scale) - margin),
+                        "width":  tw + margin * 2 + int((bbox.right - bbox.left) * scale),
+                        "height": th + margin * 2 + int((bbox.bottom - bbox.top) * scale),
                     }
-                    # Clamp to monitor bounds
                     region["width"]  = min(region["width"],
                                            capture_mon["left"] + capture_mon["width"]  - region["left"])
                     region["height"] = min(region["height"],
                                            capture_mon["top"]  + capture_mon["height"] - region["top"])
                 else:
                     region = capture_mon
-
                 if region["width"] <= tw or region["height"] <= th:
-                    region = capture_mon   
-
+                    region = capture_mon
                 shot = sct.grab(region)
                 bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_BGRA2BGR)
-
             res = cv2.matchTemplate(bgr, template, cv2.TM_CCOEFF_NORMED)
             _, max_val, _, max_loc = cv2.minMaxLoc(res)
             logger.debug("[MATCH] screenshot confidence={:.2%}", max_val)
             if max_val < 0.80:
                 return None
-            screen_x = region["left"] + max_loc[0] + tw // 2
-            screen_y = region["top"]  + max_loc[1] + th // 2
-            return (screen_x, screen_y)
+            return (region["left"] + max_loc[0] + tw // 2,
+                    region["top"]  + max_loc[1] + th // 2)
         except Exception as exc:
             logger.debug("[MATCH] screenshot error: {}", exc)
             return None
+
 
 
     def _cross_validate(self, match: MatchResult, target: UITarget) -> bool:
@@ -826,6 +1051,8 @@ class ElementMatcher:
             return True
         try:
             elem = match.element
+            if hasattr(elem, "raw"):
+                elem = elem.raw()
             if not _validate_wrapper(elem):
                 return False
             if target.name:
@@ -839,39 +1066,202 @@ class ElementMatcher:
                     found_ctrl = (elem.friendly_class_name()
                                   if callable(getattr(elem, "friendly_class_name", None))
                                   else str(getattr(elem, "friendly_class_name", "")))
-                    ok = target.control_type.lower() in found_ctrl.lower()
-                    return ok
+                    return target.control_type.lower() in found_ctrl.lower()
                 except Exception:
                     return True
         except Exception:
             pass
         return True
 
-    def _stability_check(self, element) -> bool:
-      
-        if isinstance(element, tuple):
-            return True  
+    def _stability_check_fast(self, element) -> bool:
+        """M12: non-blocking; skips sleep when element already stable."""
+        if not STABILITY_CHECK_ENABLED: return True
+        if isinstance(element, tuple): return True
+        raw = element.raw() if hasattr(element,"raw") else element
         try:
-            rect1 = element.rectangle()
-            time.sleep(STABILITY_WAIT_MS / 1000)
-            rect2 = element.rectangle()
-            # Allow 2px movement tolerance (sub-pixel rendering differences)
-            moved = (abs(rect1.left - rect2.left) > 2 or
-                     abs(rect1.top  - rect2.top)  > 2)
-            if moved:
-                logger.debug("[MATCH] stability check: element moved ({},{})→({},{})",
-                             rect1.left, rect1.top, rect2.left, rect2.top)
-                return False
-            return _elem_visible(element)
+            r1 = raw.rectangle()
+            # M12: only sleep if element might be animating (not enabled = loading)
+            try:
+                if raw.is_enabled():
+                    time.sleep(STABILITY_WAIT_MS/1000)
+            except Exception:
+                time.sleep(STABILITY_WAIT_MS/1000)
+            r2 = raw.rectangle()
+            if abs(r1.left-r2.left)>2 or abs(r1.top-r2.top)>2: return False
+            return _elem_visible(raw)
         except Exception:
             return False
 
+    # Alias so _find_uia can call either name (historical and fast variant)
+    _stability_check = _stability_check_fast
+        
+    # ── Context gate ──────────────────────────────────────────────────────────────────
+
+    def _context_gate(self, results: list[MatchResult], target: UITarget) -> list[MatchResult]:
+        """
+        Score-penalise candidates that are not in the expected window/process.
+        Candidates from the correct window get a +20 boost; wrong window get -25.
+        """
+        if not target.window_title and not target.process_name:
+            return results
+        out = []
+        for r in results:
+            if not r.is_wrapper:
+                out.append(r)
+                continue
+            bonus = 0.0
+            try:
+                raw = r.element.raw() if hasattr(r.element, "raw") else r.element
+                win_text = raw.top_level_parent().window_text() or ""
+                if target.window_title:
+                    if any(v.lower() in win_text.lower()
+                           for v in _title_variants(target.window_title)):
+                        bonus += 20.0
+                    else:
+                        bonus -= 25.0
+            except Exception:
+                pass
+            out.append(MatchResult(r.element, r.score + bonus,
+                                   r.strategy, r.is_unique, r.elem_hash))
+        return out
+
+    # ── Self-healing layer ─────────────────────────────────────────────────────────────
+
+    def _self_heal(self, target: UITarget, event_id: int,
+                   active_bonus: float = 0.0) -> Optional[object]:
+        """
+        Three-strategy self-healing layer, tried in order:
+          A) Ctrl-type-free name match (removes ctrl_type constraint)
+          B) Element-hash scan across all windows (identity-based match)
+          C) Anchor-spatial search (finds element near a stable sibling)
+        """
+        logger.info("[MATCH] Event #{} SELF-HEAL starting", event_id)
+        results: list[MatchResult] = []
+
+        # ─ A: ctrl-type-free relaxed name match ──────────────────────────
+        if target.name:
+            try:
+                t_loose = copy.copy(target)
+                t_loose.control_type = None
+                for r in self._by_name_type(t_loose, exact=False):
+                    results.append(MatchResult(
+                        r.element, r.score * 0.75 + active_bonus,
+                        "heal_relaxed", r.is_unique, r.elem_hash))
+            except Exception:
+                pass
+
+        # ─ B: element-hash scan ────────────────────────────────────────
+        target_hash = getattr(target, "element_hash", None)
+        if target_hash and UIA_OK:
+            try:
+                from .uia_enricher import _element_hash
+                for hwnd in find_windows(title_re=".*")[:MAX_WINDOW_SCAN]:
+                    try:
+                        app = (self._app_cache.get(hwnd) or
+                               Application(backend="uia").connect(handle=hwnd))
+                        self._app_cache[hwnd] = app
+                        win = app.window(handle=hwnd)
+                        kw = {"control_type": target.control_type} if target.control_type else {}
+                        descs = win.descendants(**kw) if kw else win.descendants()
+                        for d in descs[:MAX_DESC_SEARCH]:
+                            try:
+                                w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
+                                if not _validate_wrapper(w) or not _elem_visible(w):
+                                    continue
+                                aid, nm, ct, cn = None, None, None, None
+                                try: aid = w.automation_id()
+                                except: pass
+                                try: nm = w.window_text()
+                                except: pass
+                                try: ct = w.friendly_class_name()
+                                except: pass
+                                try: cn = w.class_name()
+                                except: pass
+                                if _element_hash(aid, nm, ct, cn) == target_hash:
+                                    sp = _spatial_score(w, target.bbox)
+                                    results.append(MatchResult(
+                                        w, 65 + sp + active_bonus,
+                                        "heal_hash", is_unique=True,
+                                        elem_hash=target_hash))
+                            except Exception:
+                                continue
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+        # ─ C: anchor-spatial search ───────────────────────────────────
+        anchors = getattr(target, "anchor_elements", None) or []
+        anchor_names = [a.name for a in anchors if getattr(a, "name", None)]
+        if anchor_names and target.window_title and UIA_OK:
+            try:
+                for hwnd in _find_window_handles(target.window_title):
+                    try:
+                        app = (self._app_cache.get(hwnd) or
+                               Application(backend="uia").connect(handle=hwnd))
+                        self._app_cache[hwnd] = app
+                        win = app.window(handle=hwnd)
+                        kw = {"control_type": target.control_type} if target.control_type else {}
+                        descs = win.descendants(**kw) if kw else win.descendants()
+                        for d in descs[:MAX_DESC_SEARCH]:
+                            try:
+                                w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
+                                if not _validate_wrapper(w) or not _elem_visible(w):
+                                    continue
+                                ab = self._anchor_confirmation(w, anchor_names)
+                                if ab > 0:
+                                    sp = _spatial_score(w, target.bbox)
+                                    results.append(MatchResult(
+                                        w, 45 + ab + sp + active_bonus,
+                                        "heal_anchor", is_unique=False,
+                                        elem_hash=_elem_hash(w)))
+                            except Exception:
+                                continue
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+        if not results:
+            return None
+
+        # Apply context gate and pick best
+        results = self._context_gate(results, target)
+        best = self._pick_best(results, 30.0)  # lower threshold for healed match
+        if best:
+            logger.info("[MATCH] Event #{} SELF-HEAL ✓ strategy={} score={:.0f}",
+                        event_id, best.strategy, best.score)
+            return self._wrap_safe(best.element, target)
+        return None
+
+    def _check_uniqueness(self, wrapper, target: UITarget, descs: list) -> bool:
+      
+        target_hash = getattr(target, "element_hash", None)
+        if not target_hash:
+            return len(descs) == 1
+        try:
+            from .uia_enricher import _element_hash
+            auto_id    = None
+            name       = None
+            ctrl_type  = None
+            class_name = None
+            try: auto_id    = wrapper.automation_id()
+            except Exception: pass
+            try: name       = wrapper.window_text()
+            except Exception: pass
+            try: ctrl_type  = wrapper.friendly_class_name()
+            except Exception: pass
+            try: class_name = wrapper.class_name()
+            except Exception: pass
+            found_hash = _element_hash(auto_id, name, ctrl_type, class_name)
+            if found_hash == target_hash:
+                return True 
+        except Exception:
+            pass
+        return len(descs) == 1
+
   
-    def _pick_best(
-        self,
-        results: list[MatchResult],
-        threshold: float,
-    ) -> Optional[MatchResult]:
+    def _pick_best(self, results: list[MatchResult], threshold: float) -> Optional[MatchResult]:
         viable = [r for r in results if r.score >= threshold]
         if not viable:
             return None
@@ -890,7 +1280,28 @@ class ElementMatcher:
                 if len(unique) == 1:
                     logger.info("[MATCH] Ambiguity resolved by uniqueness")
                     return unique[0]
-                
+
+         
+                if len(viable) >= 2:
+                    elem0 = viable[0].element
+                    elem1 = viable[1].element
+                    try:
+                        raw0 = elem0.raw() if hasattr(elem0, "raw") else elem0
+                        raw1 = elem1.raw() if hasattr(elem1, "raw") else elem1
+                        ct0  = (raw0.friendly_class_name() if callable(
+                                getattr(raw0, "friendly_class_name", None)) else "") or ""
+                        ct1  = (raw1.friendly_class_name() if callable(
+                                getattr(raw1, "friendly_class_name", None)) else "") or ""
+                        p0   = _ELEMENT_TYPE_PRIORITY.get(ct0, 50)
+                        p1   = _ELEMENT_TYPE_PRIORITY.get(ct1, 50)
+                        if abs(p0 - p1) >= 15:  # clear type priority difference
+                            chosen = viable[0] if p0 > p1 else viable[1]
+                            logger.info("[MATCH] Ambiguity resolved by type priority ({} vs {})",
+                                        ct0, ct1)
+                            return chosen
+                    except Exception:
+                        pass
+
                 if self.REJECT_ON_AMBIGUOUS and not unique:
                     logger.error("[MATCH] Ambiguity unresolved — REJECT_ON_AMBIGUOUS set")
                     return None
@@ -908,17 +1319,48 @@ class ElementMatcher:
         return viable[0]
 
     def _coord_fallback(self, t: UITarget, event_id: int):
-        
-        if t.bbox:
-            scale = _primary_dpi() / (t.dpi_scale or 1.0)
-            cx    = int(((t.bbox.left + t.bbox.right)  / 2) * scale)
-            cy    = int(((t.bbox.top  + t.bbox.bottom) / 2) * scale)
-            # Adjust for per-monitor DPI
-            actual = _dpi_for_point(cx, cy)
-            if abs(actual - _primary_dpi()) > 0.05:
-                cx = int(cx * actual / _primary_dpi())
-                cy = int(cy * actual / _primary_dpi())
+        rel = getattr(t, "relative_to_window", None)
+        if rel and t.window_title:
+            try:
+                handles = _find_window_handles(t.window_title)
+                if handles:
+                    app = Application(backend="uia").connect(handle=handles[0])
+                    win = app.window(handle=handles[0])
+                    wr  = win.rectangle()
+                    cx  = wr.left + rel["x"] + rel["w"] // 2
+                    cy  = wr.top  + rel["y"] + rel["h"] // 2
+                    logger.debug("[MATCH] Event #{} relative coord fallback ({},{})",
+                                 event_id, cx, cy)
+                    return (cx, cy)
+            except Exception:
+                pass
+
+       
+        raw = getattr(t, "raw_bbox", None)
+        if raw:
+            cx = (raw.left + raw.right)  // 2
+            cy = (raw.top  + raw.bottom) // 2
+            # raw_bbox is already in exact screen pixels at recording time.
+            # Only scale if the primary DPI fundamentally changed between sessions.
+            recorded_dpi = t.dpi_scale or 1.0
+            current_dpi  = _primary_dpi()
+            if abs(current_dpi - recorded_dpi) > 0.05:
+                cx = int(cx * current_dpi / recorded_dpi)
+                cy = int(cy * current_dpi / recorded_dpi)
             return (cx, cy)
+
+        if t.bbox:
+            # t.bbox is a normalized (unscaled) bbox in logical pixels.
+            # Scale it strictly using the current monitor's local DPI.
+            cx_logical = (t.bbox.left + t.bbox.right) / 2
+            cy_logical = (t.bbox.top + t.bbox.bottom) / 2
+            current_dpi = _dpi_for_point(int(cx_logical), int(cy_logical))
+            cx = int(cx_logical * current_dpi)
+            cy = int(cy_logical * current_dpi)
+            return (cx, cy)
+
         if t.screen_x is not None:
             return (t.screen_x, t.screen_y)
+
         raise ElementNotFoundError(f"Event #{event_id}: no fallback coordinates", event_id)
+
