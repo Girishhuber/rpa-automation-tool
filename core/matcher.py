@@ -58,7 +58,7 @@ _DPI_LOCK = threading.Lock()
 
 
 def _primary_dpi() -> float:
-    """Cached primary-monitor DPI."""
+    
     global _DPI_PRIMARY_CACHE
     with _DPI_LOCK:
         if _DPI_PRIMARY_CACHE is None:
@@ -75,7 +75,6 @@ def _primary_dpi() -> float:
 def _dpi_for_point(x: int, y: int) -> float:
   
     try:
-        # MonitorFromPoint + GetDpiForMonitor (Windows 8.1+)
         MonitorFromPoint = ctypes.windll.user32.MonitorFromPoint
         GetDpiForMonitor = ctypes.windll.shcore.GetDpiForMonitor
 
@@ -275,7 +274,6 @@ def _find_window_handles(window_title: str, process_name: Optional[str] = None,
    
     handles = []
 
-    # Try each title variant (CRIT-6)
     for variant in _title_variants(window_title):
         try:
             found = find_windows(title_re=f".*{re.escape(variant[:40])}.*")
@@ -551,7 +549,6 @@ class ElementMatcher:
         boost = self._get_stats("automation_id").priority_boost
         found: list[MatchResult] = []
 
-        # Window-scoped first (PERF-1, CRIT-6)
         handles = _find_window_handles(t.window_title or "", t.process_name)
         for hwnd in handles:
             try:
@@ -563,7 +560,7 @@ class ElementMatcher:
                     wrapper = elem.wrapper_object()
                     if not _validate_wrapper(wrapper):
                         continue
-                    if not _elem_visible(wrapper):   # CRIT-7
+                    if not _elem_visible(wrapper):  
                         logger.debug("[MATCH] auto_id found but not visible — skipping")
                         continue
                     spatial = _spatial_score(wrapper, t.bbox)
@@ -774,10 +771,9 @@ class ElementMatcher:
 
         try:
             with mss.mss() as sct:
-                monitors = sct.monitors[1:]  # skip [0] which is virtual all-monitors
+                monitors = sct.monitors[1:] 
 
-                # BUG-4: find the monitor containing the recorded bbox
-                capture_mon = monitors[0]  # default to primary
+                capture_mon = monitors[0]  
                 if t.bbox:
                     scale = _primary_dpi() / (t.dpi_scale or 1.0)
                     bcx   = int(((t.bbox.left + t.bbox.right)  / 2) * scale)
@@ -806,7 +802,7 @@ class ElementMatcher:
                     region = capture_mon
 
                 if region["width"] <= tw or region["height"] <= th:
-                    region = capture_mon   # fallback to full monitor
+                    region = capture_mon   
 
                 shot = sct.grab(region)
                 bgr  = cv2.cvtColor(np.array(shot), cv2.COLOR_BGRA2BGR)
@@ -816,7 +812,6 @@ class ElementMatcher:
             logger.debug("[MATCH] screenshot confidence={:.2%}", max_val)
             if max_val < 0.80:
                 return None
-            # Convert back to screen coordinates
             screen_x = region["left"] + max_loc[0] + tw // 2
             screen_y = region["top"]  + max_loc[1] + th // 2
             return (screen_x, screen_y)
@@ -826,7 +821,7 @@ class ElementMatcher:
 
 
     def _cross_validate(self, match: MatchResult, target: UITarget) -> bool:
-        """M-4: compare name (primary) or ctrl_type (fallback)."""
+        
         if not match.is_wrapper:
             return True
         try:
@@ -855,7 +850,7 @@ class ElementMatcher:
     def _stability_check(self, element) -> bool:
       
         if isinstance(element, tuple):
-            return True  # coords don't go stale
+            return True  
         try:
             rect1 = element.rectangle()
             time.sleep(STABILITY_WAIT_MS / 1000)
@@ -891,12 +886,11 @@ class ElementMatcher:
                     viable[0].score, viable[1].score, gap,
                     viable[0].strategy, viable[1].strategy,
                 )
-                # Attempt resolution: prefer unique
                 unique = [r for r in viable if r.is_unique]
                 if len(unique) == 1:
                     logger.info("[MATCH] Ambiguity resolved by uniqueness")
                     return unique[0]
-                # If REJECT_ON_AMBIGUOUS set and still unresolved — caller handles
+                
                 if self.REJECT_ON_AMBIGUOUS and not unique:
                     logger.error("[MATCH] Ambiguity unresolved — REJECT_ON_AMBIGUOUS set")
                     return None

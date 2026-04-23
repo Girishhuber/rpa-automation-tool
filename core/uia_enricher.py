@@ -533,20 +533,14 @@ class UIAEnricher:
         except Exception:
             return True   # assume visible on error
 
-    # ──────────────────────────────────────────────────────────────────
-    # Desktop cache
-    # ──────────────────────────────────────────────────────────────────
-
+ 
     def _get_desktop(self):
         with self._desktop_lock:
             if self._desktop_cache is None:
                 self._desktop_cache = Desktop(backend="uia")
             return self._desktop_cache
 
-    # ──────────────────────────────────────────────────────────────────
-    # Low-level helpers
-    # ──────────────────────────────────────────────────────────────────
-
+  
     def _get_window_title(self, wrapper) -> Optional[str]:
         try:
             return wrapper.top_level_parent().window_text() or None
@@ -571,10 +565,6 @@ class UIAEnricher:
         except Exception:
             return None
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Module-level helpers used by recorder / selector
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _is_unstable(value: str) -> bool:
     """Shared unstable-ID detector (same logic as selector.py)."""

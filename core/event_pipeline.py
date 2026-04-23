@@ -92,9 +92,6 @@ class EventPipeline:
         self._flush_pending_scroll()
         logger.info("[PIPELINE] Stopped — {} events emitted", self._event_id)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Emit helpers
-    # ──────────────────────────────────────────────────────────────────
 
     def emit_click(self, x: int, y: int, button: str = "left",
                    target: Optional[UITarget] = None) -> None:

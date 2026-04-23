@@ -156,10 +156,8 @@ class AnchorElement:
         )
 
 
-# SEL-2: Current schema version — bump when Selector fields change
 SELECTOR_SCHEMA_VERSION = "2.1"
 
-# SEL-1: How many seconds before confidence starts decaying
 _DECAY_HALF_LIFE_DAYS = 30.0
 _DECAY_HALF_LIFE_S    = _DECAY_HALF_LIFE_DAYS * 86400
 
