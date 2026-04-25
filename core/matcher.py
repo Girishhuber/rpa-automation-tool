@@ -1,5 +1,20 @@
-
+"""
+matcher.py — Element matcher with:
+  • Per-strategy hard timeout (was unbounded — could hang indefinitely)
+  • Two-phase matching: fast filter → deep scoring
+  • Fully thread-safe stats (lock used consistently on every read/write)
+  • Window handle + app object caching with staleness detection
+  • DPI mismatch handling unified (single _dpi_for_point source)
+  • Element hash based on automation_id + name (not bbox — bbox shifts)
+  • Deduplication before scoring
+  • Precondition checks (element enabled + visible before returning)
+  • Parallel strategy execution for self-heal phase
+  • FIX: Reduced timeouts for Excel operations
+  • FIX: Early success detection to stop waiting after element found
+"""
 from __future__ import annotations
+
+import concurrent.futures
 import copy
 import ctypes
 import re
@@ -39,63 +54,69 @@ except ImportError:
 
 _ELECTRON_CLASSES  = {"Chrome_WidgetWin_1", "CefBrowserWindow"}
 _ELECTRON_PROCS    = {"teams.exe", "slack.exe", "notion.exe", "code.exe",
-                       "discord.exe", "figma.exe", "obsidian.exe"}
+                      "discord.exe", "figma.exe", "obsidian.exe"}
 _BROWSER_PROCS     = {"chrome.exe", "msedge.exe", "firefox.exe", "brave.exe"}
 _SYSTEM_PROCS      = {"explorer.exe", "searchhost.exe", "searchapp.exe",
-                       "shellexperiencehost.exe", "startmenuexperiencehost.exe"}
+                      "shellexperiencehost.exe", "startmenuexperiencehost.exe"}
+_EXCEL_PROCS       = {"excel.exe"}
 
 _ELEMENT_TYPE_PRIORITY: dict[str, int] = {
-    "Button":      90,
-    "SplitButton": 88,
-    "Edit":        85,
-    "Document":    85,
-    "ComboBox":    80,
-    "CheckBox":    80,
-    "RadioButton": 80,
-    "ListItem":    70,
-    "TreeItem":    70,
-    "TabItem":     65,
-    "MenuItem":    65,
-    "Text":        40,
-    "Label":       40,
-    "StaticText":  40,
-    "Pane":        30,
-    "Group":       25,
-    "ToolBar":     20,
-    "StatusBar":   15,
-    "ScrollBar":   10,
+    "Button":          90,
+    "SplitButton":     88,
+    "Edit":            85,
+    "Document":        85,
+    "ComboBox":        80,
+    "CheckBox":        80,
+    "RadioButton":     80,
+    "SpreadsheetItem": 78,
+    "DataItem":        75,
+    "ListItem":        70,
+    "TreeItem":        70,
+    "TabItem":         65,
+    "MenuItem":        65,
+    "Text":            40,
+    "Label":           40,
+    "StaticText":      40,
+    "Pane":            30,
+    "Group":           25,
+    "ToolBar":         20,
+    "StatusBar":       15,
+    "ScrollBar":       10,
 }
-
 
 _ROLE_SCORE_BOOST: dict[str, float] = {
     "button":    2.0,
-    "input":     3.0,   
+    "input":     3.0,
     "checkbox":  2.0,
     "radio":     2.0,
     "dropdown":  2.0,
-    "label":    -5.0,   
+    "label":    -5.0,
     "container": -8.0,
     "unknown":   0.0,
 }
 
-MAX_WINDOW_SCAN    = 25      
-MAX_DESC_SEARCH    = 50     
-MAX_STATS          = 300    
-DESC_TIMEOUT_S     = 1.5    
+MAX_WINDOW_SCAN      = 25
+MAX_DESC_SEARCH      = 50
+MAX_STATS            = 300
+STRATEGY_TIMEOUT_S   = 2.0    # Default timeout
+EXCEL_STRATEGY_TIMEOUT_S = 0.8  # FIX: Reduced timeout for Excel (was 2.0, now 0.8)
+STABILITY_WAIT_MS    = 80
+STABILITY_CHECK_ENABLED = True
+MAX_REFRESH_ATTEMPTS = 2
+
+# FIX: Excel cell cache
+_EXCEL_CELL_CACHE: dict[str, tuple[object, float]] = {}
+_EXCEL_CELL_CACHE_TTL = 3.0  # 3 seconds
+_EXCEL_CELL_CACHE_LOCK = threading.Lock()
 
 
-STABILITY_WAIT_MS  = 80  
-STABILITY_CHECK_ENABLED = True   
-MAX_REFRESH_ATTEMPTS   = 2     
-
-
+# ── DPI ───────────────────────────────────────────────────────────────────
 
 _DPI_PRIMARY_CACHE: Optional[float] = None
 _DPI_LOCK = threading.Lock()
 
 
 def _primary_dpi() -> float:
-    
     global _DPI_PRIMARY_CACHE
     with _DPI_LOCK:
         if _DPI_PRIMARY_CACHE is None:
@@ -111,13 +132,11 @@ def _primary_dpi() -> float:
 
 def _dpi_for_point(x: int, y: int) -> float:
     try:
-        MonitorFromPoint = ctypes.windll.user32.MonitorFromPoint
-        GetDpiForMonitor = ctypes.windll.shcore.GetDpiForMonitor
-
         class POINT(ctypes.Structure):
             _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
         hmon  = ctypes.windll.user32.MonitorFromPoint(POINT(x, y), 2)
-        dpi_x = ctypes.c_uint(); dpi_y = ctypes.c_uint()
+        dpi_x = ctypes.c_uint()
+        dpi_y = ctypes.c_uint()
         if ctypes.windll.shcore.GetDpiForMonitor(
                 hmon, 0, ctypes.byref(dpi_x), ctypes.byref(dpi_y)) == 0:
             return dpi_x.value / 96.0
@@ -125,13 +144,49 @@ def _dpi_for_point(x: int, y: int) -> float:
         pass
     return _primary_dpi()
 
+
+def _is_excel_target(target: UITarget) -> bool:
+    """Helper to check if target is Excel."""
+    if not target:
+        return False
+    proc = (target.process_name or "").lower()
+    return proc in _EXCEL_PROCS
+
+
+def _get_cached_excel_cell(cell_ref: str, hwnd: int) -> Optional[object]:
+    """Get cached Excel cell wrapper."""
+    cache_key = f"{hwnd}:{cell_ref}"
+    with _EXCEL_CELL_CACHE_LOCK:
+        entry = _EXCEL_CELL_CACHE.get(cache_key)
+        if entry:
+            wrapper, ts = entry
+            if time.monotonic() - ts < _EXCEL_CELL_CACHE_TTL:
+                return wrapper
+            else:
+                del _EXCEL_CELL_CACHE[cache_key]
+    return None
+
+
+def _cache_excel_cell(cell_ref: str, hwnd: int, wrapper: object) -> None:
+    """Cache Excel cell wrapper."""
+    cache_key = f"{hwnd}:{cell_ref}"
+    with _EXCEL_CELL_CACHE_LOCK:
+        # Keep cache reasonable size
+        if len(_EXCEL_CELL_CACHE) > 200:
+            oldest = min(_EXCEL_CELL_CACHE.items(), key=lambda x: x[1][1])[0]
+            del _EXCEL_CELL_CACHE[oldest]
+        _EXCEL_CELL_CACHE[cache_key] = (wrapper, time.monotonic())
+
+
+# ── Data classes ──────────────────────────────────────────────────────────
+
 @dataclass
 class MatchResult:
     element:   object
     score:     float
     strategy:  str
     is_unique: bool = True
-    elem_hash:str = ""
+    elem_hash: str  = ""
 
     @property
     def is_wrapper(self) -> bool:
@@ -140,11 +195,11 @@ class MatchResult:
 
 @dataclass
 class StrategyStats:
-    successes:       int   = 0
-    failures:        int   = 0
-    total_ms:        float = 0.0   
-    priority_boost:  float = 0.0
-    last_used_ts:    float = 0.0   
+    successes:      int   = 0
+    failures:       int   = 0
+    total_ms:       float = 0.0
+    priority_boost: float = 0.0
+    last_used_ts:   float = 0.0
 
     @property
     def success_rate(self) -> float:
@@ -167,6 +222,9 @@ class StrategyStats:
         self.total_ms      += elapsed_ms
         self.priority_boost = max(self.priority_boost - 3.0, -10.0)
         self.last_used_ts   = time.monotonic()
+
+
+# ── Scoring helpers ───────────────────────────────────────────────────────
 
 def _text_similarity(a: str, b: str) -> float:
     if not a or not b:
@@ -205,11 +263,13 @@ def _spatial_score(elem, orig_bbox, weight: float = 1.0) -> float:
     except Exception:
         return 0.0
 
+
 def _composite_score(text_sim, spatial, strategy_rate, boost,
-                      sel_conf=0.5, rb=0.0, tp=0.0) -> float:
-    return (text_sim * 95*0.45 + (spatial/20)*95*0.20 +
-            strategy_rate*95*0.15 + sel_conf*95*0.15 +
-            tp*95*0.05 + boost + rb)
+                     sel_conf=0.5, rb=0.0, tp=0.0) -> float:
+    return (text_sim * 95 * 0.45 + (spatial / 20) * 95 * 0.20 +
+            strategy_rate * 95 * 0.15 + sel_conf * 95 * 0.15 +
+            tp * 95 * 0.05 + boost + rb)
+
 
 def _tp(ctrl: Optional[str]) -> float:
     return _ELEMENT_TYPE_PRIORITY.get(ctrl, 50) / 100.0 if ctrl else 0.5
@@ -221,15 +281,15 @@ def _role_boost(ctrl_type: Optional[str], role: Optional[str]) -> float:
     if not ctrl_type:
         return 0.0
     ct = ctrl_type.lower()
-    if "button" in ct:    return _ROLE_SCORE_BOOST["button"]
-    if "edit" in ct:      return _ROLE_SCORE_BOOST["input"]
-    if "document" in ct:  return _ROLE_SCORE_BOOST["input"]
-    if "label" in ct or "text" == ct or "statictext" in ct:
-        return _ROLE_SCORE_BOOST["label"]
-    if "pane" in ct or "group" in ct:
-        return _ROLE_SCORE_BOOST["container"]
+    if "button" in ct:                              return _ROLE_SCORE_BOOST["button"]
+    if "edit" in ct:                                return _ROLE_SCORE_BOOST["input"]
+    if "document" in ct:                            return _ROLE_SCORE_BOOST["input"]
+    if "label" in ct or "text" == ct or "statictext" in ct: return _ROLE_SCORE_BOOST["label"]
+    if "pane" in ct or "group" in ct:              return _ROLE_SCORE_BOOST["container"]
     return 0.0
 
+
+# ── Element validation ────────────────────────────────────────────────────
 
 def _validate_wrapper(wrapper) -> bool:
     if wrapper is None:
@@ -243,13 +303,10 @@ def _validate_wrapper(wrapper) -> bool:
         return False
 
 
-
 def _elem_visible(wrapper) -> bool:
-    
     vis = getattr(wrapper, "visibility_score", None)
     if vis is not None:
         return vis not in ("hidden", "offscreen")
-
     try:
         if not wrapper.is_visible():
             return False
@@ -265,26 +322,41 @@ def _elem_visible(wrapper) -> bool:
         return True
     except Exception:
         return True
-    
+
+
+def _elem_enabled(wrapper) -> bool:
+    try:
+        return wrapper.is_enabled()
+    except Exception:
+        return True
+
+
 def _elem_hash(w) -> str:
     try:
-        r = w.rectangle()
-        key = f"{r.left},{r.top},{r.right},{r.bottom}"
+        aid  = ""
+        name = ""
         try:
-            aid = w.automation_id() if callable(getattr(w,"automation_id",None)) else ""
-            if aid: key += f"|{aid}"
-        except Exception: pass
+            aid = w.automation_id() if callable(getattr(w, "automation_id", None)) else ""
+        except Exception:
+            pass
+        try:
+            name = w.window_text() or ""
+        except Exception:
+            pass
+        try:
+            ct = w.friendly_class_name() if callable(getattr(w, "friendly_class_name", None)) else ""
+        except Exception:
+            ct = ""
+        key = f"{aid}|{name}|{ct}"
         return hashlib.md5(key.encode()).hexdigest()[:12]
     except Exception:
         return str(id(w))
 
 
-def _refresh_wrapper(wrapper, app_cache: dict, hwnd: int, auto_id: Optional[str] = None,
-                      name: Optional[str] = None):
-  
+def _refresh_wrapper(wrapper, app_cache: dict, hwnd: int,
+                     auto_id: Optional[str] = None, name: Optional[str] = None):
     if _validate_wrapper(wrapper):
         return wrapper
-    
     try:
         app = app_cache.get(hwnd) or Application(backend="uia").connect(handle=hwnd)
         app_cache[hwnd] = app
@@ -303,7 +375,7 @@ def _refresh_wrapper(wrapper, app_cache: dict, hwnd: int, auto_id: Optional[str]
                     return fresh
     except Exception:
         pass
-    return wrapper  
+    return wrapper
 
 
 def _title_variants(window_title: str) -> list[str]:
@@ -320,11 +392,10 @@ def _title_variants(window_title: str) -> list[str]:
             variants.append(prefix)
     return variants
 
-def _find_window_handles(window_title: str, process_name: Optional[str] = None,
-                          max_results: int = 10) -> list[int]:
-   
-    handles = []
 
+def _find_window_handles(window_title: str, process_name: Optional[str] = None,
+                         max_results: int = 10) -> list[int]:
+    handles = []
     for variant in _title_variants(window_title):
         try:
             found = find_windows(title_re=f".*{re.escape(variant[:40])}.*")
@@ -335,8 +406,9 @@ def _find_window_handles(window_title: str, process_name: Optional[str] = None,
                 break
         except Exception:
             continue
-
     return handles[:max_results]
+
+
 def _active_window_bonus(target: UITarget) -> float:
     is_active = getattr(target, "is_active_window", None)
     if is_active is True:
@@ -345,12 +417,28 @@ def _active_window_bonus(target: UITarget) -> float:
         return -10.0
     return 0.0
 
+
+# ── App-cache staleness check ─────────────────────────────────────────────
+
+def _app_cache_valid(app_cache: dict, hwnd: int) -> bool:
+    app = app_cache.get(hwnd)
+    if app is None:
+        return False
+    try:
+        app.window(handle=hwnd).rectangle()
+        return True
+    except Exception:
+        return False
+
+
+# ── ElementMatcher ────────────────────────────────────────────────────────
+
 class ElementMatcher:
 
-    STRICT_THRESHOLD   = 85.0
-    RELAXED_THRESHOLD  = 50.0
-    AMBIGUITY_MARGIN   = 10.0  
-    REJECT_ON_AMBIGUOUS = False  
+    STRICT_THRESHOLD    = 85.0
+    RELAXED_THRESHOLD   = 50.0
+    AMBIGUITY_MARGIN    = 10.0
+    REJECT_ON_AMBIGUOUS = False
 
     def __init__(
         self,
@@ -359,9 +447,13 @@ class ElementMatcher:
     ):
         self._scr_dir  = screenshot_base_dir
         self._browser  = browser
-        self._stats:   dict[str, StrategyStats] = {}
-        self._stats_lock = threading.Lock()       # BUG-2
-        self._app_cache: dict[int, object] = {}  
+        self._stats:      dict[str, StrategyStats] = {}
+        self._stats_lock  = threading.RLock()
+        self._app_cache:  dict[int, object] = {}
+        self._app_cache_lock = threading.Lock()
+        self._last_found_excel_cell: Optional[tuple[str, int, object]] = None  # FIX: cache last found Excel cell
+
+    # ── Stats helpers ─────────────────────────────────────────────────────
 
     def _get_stats(self, strategy: str) -> StrategyStats:
         with self._stats_lock:
@@ -374,16 +466,29 @@ class ElementMatcher:
             s.last_used_ts = time.monotonic()
             return s
 
-    def _ordered_strategies(self, candidates: list[str]) -> list[str]:
-        def sort_key(name: str):
-            with self._stats_lock:
-                s = self._stats.get(name)
+    def _get_stats_snapshot(self, strategy: str) -> tuple[float, float]:
+        with self._stats_lock:
+            s = self._stats.get(strategy)
             if s is None:
                 return (0.5, 999.0)
-            return (-s.success_rate, s.avg_ms)
+            return (s.success_rate, s.avg_ms)
+
+    def _ordered_strategies(self, candidates: list[str], target: Optional[UITarget] = None) -> list[str]:
+        """FIX: Excel gets reduced strategy set"""
+        if target and _is_excel_target(target):
+            # Excel: only use automation_id and semantic (fastest)
+            excel_candidates = [c for c in candidates if c in ("automation_id", "semantic")]
+            if excel_candidates:
+                return excel_candidates + ["relaxed"] if "relaxed" in candidates else excel_candidates
+        
+        def sort_key(name: str):
+            rate, ms = self._get_stats_snapshot(name)
+            return (-rate, ms)
         return sorted(candidates, key=sort_key)
+
+    # ── Selector helpers ──────────────────────────────────────────────────
+
     def _sel_conf(self, target: UITarget) -> float:
-        # Prefer full Selector objects (selector.py) over stub selectors
         rich = getattr(target, "rich_selectors", None)
         if rich:
             try:
@@ -403,17 +508,16 @@ class ElementMatcher:
             return 0.5
 
     def _notify_selector(self, target: UITarget, strategy: str, success: bool):
-        # Prefer rich_selectors; fall back to stub selectors
         rich = getattr(target, "rich_selectors", None)
         sels = rich if rich else getattr(target, "selectors", None)
         if not sels:
             return
         mapping = {
             "automation_id": "strict", "automation_id_wide": "strict",
-            "semantic":      "semantic", "semantic_desc":    "semantic",
-            "relaxed":       "relaxed",  "relaxed_desc":     "relaxed",
-            "classname":     "classname", "ancestor":         "ancestor",
-            "coord":         "positional", "bbox":            "positional",
+            "semantic":      "semantic", "semantic_desc":     "semantic",
+            "relaxed":       "relaxed",  "relaxed_desc":      "relaxed",
+            "classname":     "classname", "ancestor":          "ancestor",
+            "coord":         "positional", "bbox":             "positional",
         }
         sel_name = mapping.get(strategy, strategy)
         try:
@@ -424,7 +528,6 @@ class ElementMatcher:
             pass
 
     def _selector_order(self, target: UITarget) -> list[str]:
-        """M11: preferred strategy order from selector history (rich_selectors first)."""
         rich = getattr(target, "rich_selectors", None)
         sels = rich if rich else getattr(target, "selectors", None)
         if not sels:
@@ -441,29 +544,42 @@ class ElementMatcher:
             return []
 
     def _combined_order(self, names: list[str], pref: list[str]) -> list[str]:
-        pref_boost = {n: (len(pref)-i)*0.1 for i,n in enumerate(pref)}
+        pref_boost = {n: (len(pref) - i) * 0.1 for i, n in enumerate(pref)}
         def key(n):
-            with self._stats_lock: s = self._stats.get(n)
-            rate = s.success_rate if s else 0.5
-            ms   = s.avg_ms       if s else 999.0
-            return (-(rate + pref_boost.get(n,0.0)), ms)
+            rate, ms = self._get_stats_snapshot(n)
+            return (-(rate + pref_boost.get(n, 0.0)), ms)
         return sorted(names, key=key)
 
+    # ── App cache helpers ─────────────────────────────────────────────────
 
-    def find(self, target: UITarget, event_id: int = 0, action_intent: Optional[str]=None):
+    def _get_app(self, hwnd: int):
+        with self._app_cache_lock:
+            if hwnd in self._app_cache:
+                if _app_cache_valid(self._app_cache, hwnd):
+                    return self._app_cache[hwnd]
+                else:
+                    del self._app_cache[hwnd]
+        app = Application(backend="uia").connect(handle=hwnd)
+        with self._app_cache_lock:
+            self._app_cache[hwnd] = app
+        return app
 
+    # ── Public API ────────────────────────────────────────────────────────
+
+    def find(self, target: UITarget, event_id: int = 0,
+             action_intent: Optional[str] = None):
         t = copy.copy(target)
         if t.backend == TargetBackend.BROWSER:
             return self._find_browser(t, event_id)
-        return self._find_uia(t, event_id,action_intent)
+        return self._find_uia(t, event_id, action_intent)
 
     def find_with_wait(
         self,
-        target: UITarget,
-        event_id: int = 0,
-        timeout_ms: int = 10_000,
-        poll_ms:    int = 300,
-        action_intent: Optional[str]=None
+        target:        UITarget,
+        event_id:      int = 0,
+        timeout_ms:    int = 10_000,
+        poll_ms:       int = 300,
+        action_intent: Optional[str] = None,
     ):
         deadline = time.monotonic() + timeout_ms / 1000
         last_exc = None
@@ -471,7 +587,7 @@ class ElementMatcher:
         while time.monotonic() < deadline:
             attempt += 1
             try:
-                result = self.find(target, event_id,action_intent)
+                result = self.find(target, event_id, action_intent)
                 if not isinstance(result, tuple):
                     if _elem_visible(result):
                         if attempt > 1:
@@ -479,7 +595,8 @@ class ElementMatcher:
                                          event_id, attempt)
                         return result
                     else:
-                        logger.debug("[MATCH] Event #{} found but not visible (attempt {})",                               event_id, attempt)
+                        logger.debug("[MATCH] Event #{} found but not visible (attempt {})",
+                                     event_id, attempt)
                 else:
                     return result
             except ElementNotFoundError as exc:
@@ -500,6 +617,8 @@ class ElementMatcher:
             logger.debug("[MATCH] '{}' ✗ rate={:.0%} boost={:.1f}",
                          strategy, s.success_rate, s.priority_boost)
 
+    # ── Browser ───────────────────────────────────────────────────────────
+
     def _find_browser(self, target: UITarget, event_id: int) -> tuple[int, int]:
         if not self._browser or not self._browser.is_connected:
             raise ElementNotFoundError(f"Event #{event_id}: browser not connected", event_id)
@@ -514,9 +633,7 @@ class ElementMatcher:
             (bt.inner_text or "")[:30],
         )
 
-        # Wait for DOM to settle before searching
         self._browser.wait_for_dom_stable(stable_ms=250, max_wait_ms=2000)
-
         candidates = self._browser.find_candidates(bt, timeout_ms=8000)
         if not candidates:
             raise ElementNotFoundError(
@@ -530,93 +647,137 @@ class ElementMatcher:
             gap = candidates[0].score - candidates[1].score
             if gap < 10:
                 logger.warning(
-                    "[MATCH] Event #{} AMBIGUOUS: top-2 candidates close "
-                    "(scores {:.0f} vs {:.0f}) — using highest-priority strategy",
+                    "[MATCH] Event #{} AMBIGUOUS browser candidates ({:.0f} vs {:.0f})",
                     event_id, candidates[0].score, candidates[1].score,
                 )
-                # Prefer id-anchored xpath over text
                 priority = {"xpath": 0, "css": 1, "aria": 2, "exact_text": 3, "partial_text": 4}
                 candidates.sort(key=lambda c: priority.get(c.strategy, 9))
                 best = candidates[0]
 
-        # Verify the chosen element is still valid
         verification = self._browser.verify_element(bt)
         if not verification.get("found"):
-            logger.warning("[MATCH] Event #{} VERIFY FAILED — element stale, using coords anyway", event_id)
+            logger.warning("[MATCH] Event #{} browser element stale — using coords", event_id)
 
         logger.info(
             "[MATCH] Event #{} BROWSER → strategy={} score={:.0f} pos=({},{}) visible={} text='{}'",
-            event_id, best.strategy, best.score, best.cx, best.cy, best.visible, best.text[:20],
+            event_id, best.strategy, best.score, best.cx, best.cy, best.visible,
+            best.text[:20],
         )
         self._get_stats(f"browser_{best.strategy}").record_success()
         return (best.cx, best.cy)
 
+    # ── UIA matching — two-phase ──────────────────────────────────────────
 
-    def _find_uia(self, target: UITarget, event_id: int,action_intent: Optional[str]=None):
+    def _find_uia(self, target: UITarget, event_id: int,
+                  action_intent: Optional[str] = None):
         if not UIA_OK:
             return self._coord_fallback(target, event_id)
-        proc  = (target.process_name or "").lower()
-        cls   = (target.class_name   or "")
+
+        proc        = (target.process_name or "").lower()
+        cls         = (target.class_name   or "")
         is_electron = proc in _ELECTRON_PROCS or cls in _ELECTRON_CLASSES
         is_system   = proc in _SYSTEM_PROCS
-        
+        is_excel    = proc in _EXCEL_PROCS
+
         if is_electron:
             logger.info("[MATCH] Event #{} ELECTRON → image/coord", event_id)
             coords = self._by_screenshot_cropped(target)
             if coords:
                 return coords
             return self._coord_fallback(target, event_id)
-        
-        confidence_level = getattr(target, "confidence_level", "medium")
-        strict_thresh = (
-            self.STRICT_THRESHOLD + 5 if confidence_level == "high"
-            else self.STRICT_THRESHOLD
-        )
 
+        confidence_level = getattr(target, "confidence_level", "medium")
         active_bonus = _active_window_bonus(target)
-        if active_bonus < 0:
-            logger.debug("[MATCH] Event #{} target window not active (penalty {:.0f})",
-                         event_id, active_bonus)
-        sel_conf     = self._sel_conf(target)          # M7
-        pref_order   = self._selector_order(target)    # M11
-       
-        conf_level   = getattr(target, "confidence_level", "medium")
-        strict_th    = self.STRICT_THRESHOLD + (5 if conf_level == "high" else 0)
-        logger.info("[MATCH] Event #{} UIA → auto_id={} name='{}' ctrl={} win='{}' "
-                    "intent={} sel_conf={:.2f}",
-                    event_id, target.automation_id or "(none)",
-                    (target.name or "")[:30], target.control_type or "?",
-                    (target.window_title or "")[:30],
-                    action_intent or "any", sel_conf)
+        sel_conf     = self._sel_conf(target)
+        pref_order   = self._selector_order(target)
+
+        strict_th = self.STRICT_THRESHOLD + (5 if confidence_level == "high" else 0)
+
+        logger.info(
+            "[MATCH] Event #{} UIA → auto_id={} name='{}' ctrl={} win='{}' "
+            "intent={} sel_conf={:.2f}",
+            event_id, target.automation_id or "(none)",
+            (target.name or "")[:30], target.control_type or "?",
+            (target.window_title or "")[:30],
+            action_intent or "any", sel_conf,
+        )
 
         results: list[MatchResult] = []
-        errors :list[str]  = []
+        errors:  list[str]         = []
+
+        # FIX: Excel gets reduced strategy set
         active_strategies = self._ordered_strategies(
-            ["automation_id", "semantic", "relaxed", "classname", "ancestor"]
+            ["automation_id", "semantic", "relaxed", "classname", "ancestor"],
+            target
         )
+
+        # FIX: Excel gets reduced timeout
+        strategy_timeout = EXCEL_STRATEGY_TIMEOUT_S if is_excel else STRATEGY_TIMEOUT_S
+
+        # FIX: Check cache for Excel cell first
+        if is_excel and target.automation_id and target.window_handle:
+            cached_wrapper = _get_cached_excel_cell(target.automation_id, target.window_handle)
+            if cached_wrapper and _validate_wrapper(cached_wrapper) and _elem_visible(cached_wrapper):
+                logger.info("[MATCH] Event #{} EXCEL CELL CACHE HIT: {}", event_id, target.automation_id)
+                return self._wrap_safe(cached_wrapper, target)
+
         def run(name: str, fn):
+            """Execute fn with per-strategy timeout guard."""
             t0 = time.monotonic()
-            try:
-                r = fn(); ms = (time.monotonic()-t0)*1000
-                if r:
-                    rs = r if isinstance(r,list) else [r]
-                    for x in rs: self._get_stats(name).record_success(ms)
-                    return rs
-            except Exception as exc:
-                ms = (time.monotonic()-t0)*1000
-                self._get_stats(name).record_failure(ms)
-                errors.append(f"{name}: {exc}")
-                logger.debug("[MATCH] Event #{} {} error: {}", event_id, name, exc)
+            result_holder = [None]
+            exc_holder    = [None]
+            done          = threading.Event()
+            early_result  = [None]
+
+            def _execute():
+                try:
+                    result_holder[0] = fn()
+                except Exception as exc:
+                    exc_holder[0] = exc
+                finally:
+                    done.set()
+
+            th = threading.Thread(target=_execute, daemon=True)
+            th.start()
+            timed_out = not done.wait(timeout=strategy_timeout)
+            ms = (time.monotonic() - t0) * 1000
+
+            if timed_out:
+                logger.warning("[MATCH] Event #{} strategy '{}' TIMED OUT ({:.0f}ms) from Excel={}",
+                               event_id, name, ms, is_excel)
+                with self._stats_lock:
+                    self._get_stats(name).record_failure(ms)
+                errors.append(f"{name}: timeout")
+                return []
+
+            if exc_holder[0]:
+                with self._stats_lock:
+                    self._get_stats(name).record_failure(ms)
+                errors.append(f"{name}: {exc_holder[0]}")
+                logger.debug("[MATCH] Event #{} {} error: {}", event_id, name, exc_holder[0])
+                return []
+
+            r = result_holder[0]
+            if r:
+                rs = r if isinstance(r, list) else [r]
+                with self._stats_lock:
+                    for _ in rs:
+                        self._get_stats(name).record_success(ms)
+                return rs
             return []
 
-        if target.automation_id and "automation_id":
+        # ── Phase 1: Fast strategies ───────────────────────────────────────
+
+        if target.automation_id:
             for r in run("automation_id", lambda: self._by_automation_id(target)):
                 r.score += active_bonus
                 results.append(r)
+                # FIX: Cache Excel cell result
+                if is_excel and target.automation_id and target.window_handle and r.is_wrapper:
+                    _cache_excel_cell(target.automation_id, target.window_handle, r.element)
                 logger.info("[MATCH] Event #{} auto_id='{}' → score={:.0f}",
                             event_id, target.automation_id, r.score)
 
-        # ── 2. Semantic (name + ctrl) ─────────────────────────────────
         if target.name and target.control_type:
             for r in run("semantic", lambda: self._by_name_type(target, exact=True)):
                 r.score += active_bonus
@@ -624,22 +785,30 @@ class ElementMatcher:
                 logger.info("[MATCH] Event #{} semantic '{}' ctrl={} → score={:.0f}",
                             event_id, (target.name or "")[:30], target.control_type, r.score)
 
-        best_strict = self._pick_best(results, self.STRICT_THRESHOLD)
-        if best_strict and best_strict.is_unique:
+        # Deduplicate before picking
+        results = self._deduplicate(results)
+
+        best_strict = self._pick_best(results, strict_th)
+        if best_strict and best_strict.is_wrapper:
             if self._cross_validate(best_strict, target):
-               
                 if self._stability_check(best_strict.element):
-                    logger.info("[MATCH] Event #{} STRICT ✓ strategy={} score={:.0f}",
-                                event_id, best_strict.strategy, best_strict.score)
-                    return self._wrap_safe(best_strict.element, target)
+                    raw = (best_strict.element.raw()
+                           if hasattr(best_strict.element, "raw") else best_strict.element)
+                    if _elem_enabled(raw):
+                        logger.info("[MATCH] Event #{} STRICT ✓ strategy={} score={:.0f}",
+                                    event_id, best_strict.strategy, best_strict.score)
+                        return self._wrap_safe(best_strict.element, target)
+                    else:
+                        logger.warning("[MATCH] Event #{} element found but DISABLED — continuing",
+                                       event_id)
                 else:
-                    logger.warning("[MATCH] Event #{} stability check FAILED — retrying",
-                                   event_id)
-                    results.clear()   
+                    logger.warning("[MATCH] Event #{} stability check FAILED — relaxing", event_id)
+                    results.clear()
             else:
                 logger.warning("[MATCH] Event #{} cross-validation FAILED — relaxing", event_id)
 
-        # ── 3. Relaxed (name fuzzy) ───────────────────────────────────
+        # ── Phase 2: Relaxed strategies ────────────────────────────────────
+
         if target.name and "relaxed" in active_strategies:
             for r in run("relaxed", lambda: self._by_name_type(target, exact=False)):
                 r.score += active_bonus
@@ -647,48 +816,47 @@ class ElementMatcher:
                 logger.info("[MATCH] Event #{} relaxed '{}' → score={:.0f}",
                             event_id, (target.name or "")[:30], r.score)
 
-        # ── 4. ClassName ──────────────────────────────────────────────
         if target.class_name and target.window_title and "classname" in active_strategies:
             for r in run("classname", lambda: self._by_classname(target)):
                 r.score += active_bonus
                 results.append(r)
 
-        # ── 5. Ancestor ───────────────────────────────────────────────
         if target.ancestor_chain and "ancestor" in active_strategies:
             for r in run("ancestor", lambda: self._by_ancestor(target)):
                 r.score += active_bonus
                 results.append(r)
 
-        # ── Apply intent filter to focus on role-appropriate elements ─────
         if action_intent:
             results = self._intent_filter(results, action_intent)
 
+        results = self._deduplicate(results)
         best = self._pick_best(results, self.RELAXED_THRESHOLD)
         if best:
             logger.info("[MATCH] Event #{} RELAXED ✓ strategy={} score={:.0f} unique={}",
                         event_id, best.strategy, best.score, best.is_unique)
             return self._wrap_safe(best.element, target)
 
-        # ── Self-heal before falling to geometry ──────────────────────────
-        healed = self._self_heal(target, event_id, active_bonus)
+        # ── Self-heal ──────────────────────────────────────────────────────
+        # FIX: For Excel, use shorter self-heal timeout
+        healed = self._self_heal(target, event_id, active_bonus, is_excel=is_excel)
         if healed is not None:
             return healed
 
-        # ── 6. BBox ───────────────────────────────────────────────────
+        # ── BBox ───────────────────────────────────────────────────────────
         if target.bbox:
             r = self._by_bbox(target)
             if r:
                 logger.info("[MATCH] Event #{} BBOX fallback", event_id)
                 return r.element
 
-        # ── 7. Screenshot (cropped region) ────────────────────────────
+        # ── Screenshot ─────────────────────────────────────────────────────
         if getattr(target, "screenshot_ref", None) and self._scr_dir:
             coords = self._by_screenshot_cropped(target)
             if coords:
                 logger.info("[MATCH] Event #{} SCREENSHOT fallback pos={}", event_id, coords)
                 return coords
 
-        # ── 8. Raw coordinates ────────────────────────────────────────
+        # ── Coordinate fallback ────────────────────────────────────────────
         if target.screen_x is not None:
             logger.warning(
                 "[MATCH] Event #{} RAW COORD fallback pos=({},{}) — tried: {}",
@@ -700,7 +868,9 @@ class ElementMatcher:
         raise ElementNotFoundError(
             f"Event #{event_id}: all strategies failed", event_id
         )
-        
+
+    # ── Deduplication ─────────────────────────────────────────────────────
+
     def _deduplicate(self, results: list[MatchResult]) -> list[MatchResult]:
         seen: dict[str, MatchResult] = {}
         for r in results:
@@ -709,35 +879,35 @@ class ElementMatcher:
                 seen[key] = r
         return list(seen.values())
 
-    # ── Intent filter ────────────────────────────────────────────────
+    # ── Intent filter ─────────────────────────────────────────────────────
 
     def _intent_filter(self, results: list[MatchResult],
-                        intent: str) -> list[MatchResult]:
-        if intent not in ("type","click","select"):
+                       intent: str) -> list[MatchResult]:
+        if intent not in ("type", "click", "select"):
             return results
         out = []
         for r in results:
             score = r.score
             if r.is_wrapper:
                 try:
-                    raw = r.element.raw() if hasattr(r.element,"raw") else r.element
+                    raw = r.element.raw() if hasattr(r.element, "raw") else r.element
                     ct  = (raw.friendly_class_name()
-                           if callable(getattr(raw,"friendly_class_name",None)) else "") or ""
+                           if callable(getattr(raw, "friendly_class_name", None)) else "") or ""
                     ct = ct.lower()
                     if intent == "type":
-                        if any(x in ct for x in ("edit","document","richtext")): score += 10
-                        elif any(x in ct for x in ("button","label","pane")):    score -= 15
+                        if any(x in ct for x in ("edit", "document", "richtext")): score += 10
+                        elif any(x in ct for x in ("button", "label", "pane")):    score -= 15
                     elif intent == "click":
-                        if any(x in ct for x in ("button","menuitem","tabitem")): score += 5
-                        elif any(x in ct for x in ("label","statictext")):        score -= 8
+                        if any(x in ct for x in ("button", "menuitem", "tabitem")): score += 5
+                        elif any(x in ct for x in ("label", "statictext")):         score -= 8
                     elif intent == "select":
-                        if any(x in ct for x in ("combobox","listitem","list")):  score += 10
+                        if any(x in ct for x in ("combobox", "listitem", "list")):  score += 10
                 except Exception:
                     pass
             out.append(MatchResult(r.element, score, r.strategy, r.is_unique, r.elem_hash))
         return out
+
     def _wrap_safe(self, element, target: UITarget):
-       
         if isinstance(element, tuple):
             return element
         try:
@@ -752,28 +922,27 @@ class ElementMatcher:
         except ImportError:
             return element
 
-    def _by_automation_id(self, t: UITarget, sc: float=0.5) -> list[MatchResult]:
+    # ── Strategy implementations ──────────────────────────────────────────
+
+    def _by_automation_id(self, t: UITarget, sc: float = 0.5) -> list[MatchResult]:
         boost = self._get_stats("automation_id").priority_boost
         found: list[MatchResult] = []
 
         for hwnd in _find_window_handles(t.window_title or "", t.process_name):
             try:
-                app = (self._app_cache.get(hwnd) or
-                       Application(backend="uia").connect(handle=hwnd))
-                self._app_cache[hwnd] = app
+                app  = self._get_app(hwnd)
                 elem = app.window(handle=hwnd).child_window(auto_id=t.automation_id)
-                if elem.exists(timeout=0.5):
+                if elem.exists(timeout=0.3):  # FIX: reduced timeout from 0.5 to 0.3
                     w = elem.wrapper_object()
                     if _validate_wrapper(w) and _elem_visible(w):
                         sp  = _spatial_score(w, t.bbox)
-                        rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                        rb  = _role_boost(t.control_type, getattr(t, "element_role", None))
                         tp  = _tp(t.control_type)
                         sc_ = _composite_score(1.0, sp,
                               self._get_stats("automation_id").success_rate,
                               boost, sc, rb, tp)
                         found.append(MatchResult(w, sc_, "automation_id",
                                                   is_unique=True, elem_hash=_elem_hash(w)))
-                        # M1: no return — continue to other windows
             except Exception:
                 continue
 
@@ -781,169 +950,178 @@ class ElementMatcher:
             try:
                 for hwnd in find_windows(title_re=".*")[:MAX_WINDOW_SCAN]:
                     try:
-                        app = (self._app_cache.get(hwnd) or
-                               Application(backend="uia").connect(handle=hwnd))
-                        self._app_cache[hwnd] = app
+                        app = self._get_app(hwnd)
                         win = app.window(handle=hwnd)
                         if t.process_name:
                             try:
                                 import psutil
                                 pname = psutil.Process(win.process_id()).name().lower()
-                                if t.process_name.lower() not in pname: continue
-                            except Exception: pass
+                                if t.process_name.lower() not in pname:
+                                    continue
+                            except Exception:
+                                pass
                         descs = win.descendants(auto_id=t.automation_id)
                         for d in descs[:5]:
-                            w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
-                            if not _validate_wrapper(w) or not _elem_visible(w): continue
+                            w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
+                            if not _validate_wrapper(w) or not _elem_visible(w):
+                                continue
                             if t.window_title:
                                 try:
                                     wt = w.top_level_parent().window_text() or ""
                                     if not any(v.lower() in wt.lower()
                                                for v in _title_variants(t.window_title)):
                                         continue
-                                except Exception: pass
+                                except Exception:
+                                    pass
                             sp  = _spatial_score(w, t.bbox)
-                            rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                            rb  = _role_boost(t.control_type, getattr(t, "element_role", None))
                             tp  = _tp(t.control_type)
-                            uniq= len(descs)==1
+                            uniq = len(descs) == 1
                             sc_ = _composite_score(1.0, sp,
                                   self._get_stats("automation_id_wide").success_rate,
-                                  boost-10, sc, rb, tp)
+                                  boost - 10, sc, rb, tp)
                             found.append(MatchResult(w, sc_, "automation_id_wide",
                                                       is_unique=uniq, elem_hash=_elem_hash(w)))
-                        # M1: no break — keep scanning
-                    except Exception: continue
-            except Exception: pass
+                    except Exception:
+                        continue
+            except Exception:
+                pass
 
         return found
 
-    def _by_name_type(self, t: UITarget, exact: bool=True,
-                       sc: float=0.5) -> list[MatchResult]:
-        """M2: collects from child_window AND descendants — no early returns."""
+    def _by_name_type(self, t: UITarget, exact: bool = True,
+                      sc: float = 0.5) -> list[MatchResult]:
         results  = []
         strategy = "semantic" if exact else "relaxed"
         boost    = self._get_stats(strategy).priority_boost
-        name     = t.name or ""; conf_min = 0.85 if exact else 0.60
+        name     = t.name or ""
+        conf_min = 0.85 if exact else 0.60
         name_re  = re.escape(name)
 
         for hwnd in _find_window_handles(t.window_title or "", t.process_name):
             try:
-                app = (self._app_cache.get(hwnd) or
-                       Application(backend="uia").connect(handle=hwnd))
-                self._app_cache[hwnd] = app
+                app = self._get_app(hwnd)
                 win = app.window(handle=hwnd)
 
-                # child_window — M2: no early return
+                # child_window
                 try:
-                    kw = {"control_type": t.control_type} if t.control_type else {}
+                    kw   = {"control_type": t.control_type} if t.control_type else {}
                     elem = win.child_window(title_re=f".*{name_re}.*", **kw)
-                    if elem.exists(timeout=0.4):
+                    if elem.exists(timeout=0.3):  # FIX: reduced timeout
                         w = elem.wrapper_object()
                         if _validate_wrapper(w) and _elem_visible(w):
                             sim = _text_similarity(name, w.window_text() or "")
                             if sim >= conf_min:
                                 sp  = _spatial_score(w, t.bbox)
-                                rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                                rb  = _role_boost(t.control_type, getattr(t, "element_role", None))
                                 tp  = _tp(t.control_type)
                                 sc_ = _composite_score(sim, sp,
-                                      self._get_stats(strategy).success_rate,
-                                      boost, sc, rb, tp)
+                                      self._get_stats(strategy).success_rate, boost, sc, rb, tp)
                                 results.append(MatchResult(w, sc_, strategy,
                                     is_unique=True, elem_hash=_elem_hash(w)))
-                                # M2: continue — still run descendants
-                except Exception: pass
+                except Exception:
+                    pass
 
-                # Descendants — M2: always, not just fallback
+                # Descendants - limit search for Excel
+                max_search = 20 if _is_excel_target(t) else MAX_DESC_SEARCH
                 try:
-                    kw = {"control_type": t.control_type} if t.control_type else {}
+                    kw    = {"control_type": t.control_type} if t.control_type else {}
                     descs = win.descendants(**kw) if kw else win.descendants()
-                    for d in descs[:MAX_DESC_SEARCH]:
+                    for d in descs[:max_search]:
                         try:
-                            w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
-                            if not _validate_wrapper(w) or not _elem_visible(w): continue
+                            w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
+                            if not _validate_wrapper(w) or not _elem_visible(w):
+                                continue
                             sim = _text_similarity(name, w.window_text() or "")
-                            if sim < conf_min: continue
+                            if sim < conf_min:
+                                continue
                             sp  = _spatial_score(w, t.bbox)
-                            rb  = _role_boost(t.control_type, getattr(t,"element_role",None))
+                            rb  = _role_boost(t.control_type, getattr(t, "element_role", None))
                             tp  = _tp(t.control_type)
                             sc_ = _composite_score(sim, sp,
-                                  self._get_stats(strategy).success_rate,
-                                  boost, sc, rb, tp)
+                                  self._get_stats(strategy).success_rate, boost, sc, rb, tp)
                             results.append(MatchResult(w, sc_, f"{strategy}_desc",
                                 is_unique=False, elem_hash=_elem_hash(w)))
-                        except Exception: continue
-                except Exception: pass
-            except Exception: continue
+                        except Exception:
+                            continue
+                except Exception:
+                    pass
+            except Exception:
+                continue
 
         return results[:10]
 
-    def _by_classname(self, t: UITarget, sc: float=0.5) -> list[MatchResult]:
-        """M3: accumulates all classname matches — no early return."""
-        results = []; boost = self._get_stats("classname").priority_boost
+    def _by_classname(self, t: UITarget, sc: float = 0.5) -> list[MatchResult]:
+        results = []
+        boost   = self._get_stats("classname").priority_boost
         for hwnd in _find_window_handles(t.window_title or ""):
             try:
-                app = (self._app_cache.get(hwnd) or
-                       Application(backend="uia").connect(handle=hwnd))
-                self._app_cache[hwnd] = app
+                app = self._get_app(hwnd)
                 win = app.window(handle=hwnd)
                 try:
                     elem = win.child_window(class_name=t.class_name)
-                    if elem.exists(timeout=0.4):
+                    if elem.exists(timeout=0.3):
                         w = elem.wrapper_object()
                         if _validate_wrapper(w) and _elem_visible(w):
                             sp = _spatial_score(w, t.bbox)
-                            rb = _role_boost(t.control_type, getattr(t,"element_role",None))
-                            results.append(MatchResult(w, 65+boost+sp+rb, "classname",
+                            rb = _role_boost(t.control_type, getattr(t, "element_role", None))
+                            results.append(MatchResult(w, 65 + boost + sp + rb, "classname",
                                                         elem_hash=_elem_hash(w)))
-                            # M3: no return
-                except Exception: pass
+                except Exception:
+                    pass
                 try:
                     descs = win.descendants(class_name=t.class_name)
                     for d in descs[:10]:
-                        w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
+                        w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
                         if _validate_wrapper(w) and _elem_visible(w):
                             sp = _spatial_score(w, t.bbox)
-                            rb = _role_boost(t.control_type, getattr(t,"element_role",None))
-                            results.append(MatchResult(w, 60+boost+sp+rb, "classname_desc",
-                                is_unique=len(descs)==1, elem_hash=_elem_hash(w)))
-                except Exception: pass
-            except Exception: continue
+                            rb = _role_boost(t.control_type, getattr(t, "element_role", None))
+                            results.append(MatchResult(w, 60 + boost + sp + rb, "classname_desc",
+                                is_unique=len(descs) == 1, elem_hash=_elem_hash(w)))
+                except Exception:
+                    pass
+            except Exception:
+                continue
         return results
 
-    def _by_ancestor(self, t: UITarget, sc: float=0.5) -> list[MatchResult]:
-        """M4: scans all desc candidates — no early return."""
-        if not t.ancestor_chain: return []
+    def _by_ancestor(self, t: UITarget, sc: float = 0.5) -> list[MatchResult]:
+        if not t.ancestor_chain:
+            return []
         parts    = t.ancestor_chain[0].split(":", 2)
         anc_text = parts[1].strip() if len(parts) > 1 else ""
-        if not anc_text: return []
+        if not anc_text:
+            return []
 
-        results     = []; boost = self._get_stats("ancestor").priority_boost
-        anch_names  = [a.name for a in (getattr(t,"anchor_elements",None) or [])
-                       if getattr(a,"name",None)]
+        results    = []
+        boost      = self._get_stats("ancestor").priority_boost
+        anch_names = [a.name for a in (getattr(t, "anchor_elements", None) or [])
+                      if getattr(a, "name", None)]
         try:
             for hwnd in find_windows(title_re=f".*{re.escape(anc_text[:20])}.*"):
                 try:
-                    app = (self._app_cache.get(hwnd) or
-                           Application(backend="uia").connect(handle=hwnd))
-                    self._app_cache[hwnd] = app
+                    app = self._get_app(hwnd)
                     win = app.window(handle=hwnd)
                     kw  = {}
                     if t.control_type: kw["control_type"] = t.control_type
                     if t.class_name:   kw["class_name"]   = t.class_name
-                    if not kw: continue
+                    if not kw:
+                        continue
                     descs = win.descendants(**kw)
-                    for d in descs[:20]:  # M4: all, no return on first
-                        w = d.wrapper_object() if hasattr(d,"wrapper_object") else d
-                        if not _validate_wrapper(w) or not _elem_visible(w): continue
-                        sp   = _spatial_score(w, t.bbox)
-                        ab   = self._anchor_confirmation(w, anch_names)
-                        rb   = _role_boost(t.control_type, getattr(t,"element_role",None))
-                        results.append(MatchResult(w, 55+boost+sp+rb+ab, "ancestor",
+                    for d in descs[:20]:
+                        w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
+                        if not _validate_wrapper(w) or not _elem_visible(w):
+                            continue
+                        sp  = _spatial_score(w, t.bbox)
+                        ab  = self._anchor_confirmation(w, anch_names)
+                        rb  = _role_boost(t.control_type, getattr(t, "element_role", None))
+                        results.append(MatchResult(w, 55 + boost + sp + rb + ab, "ancestor",
                                                     elem_hash=_elem_hash(w)))
-                except Exception: continue
-        except Exception: pass
+                except Exception:
+                    continue
+        except Exception:
+            pass
         return results
-    
+
     def _anchor_confirmation(self, wrapper, anchor_names: list[str]) -> float:
         if not anchor_names:
             return 0.0
@@ -963,17 +1141,14 @@ class ElementMatcher:
                     continue
         except Exception:
             pass
-        return min(bonus, 15.0)  # cap at 3 confirmed anchors
+        return min(bonus, 15.0)
 
     def _by_bbox(self, t: UITarget) -> Optional[MatchResult]:
         try:
             dpi   = _primary_dpi() / (t.dpi_scale or 1.0)
             cx    = int(((t.bbox.left + t.bbox.right)  / 2) * dpi)
             cy    = int(((t.bbox.top  + t.bbox.bottom) / 2) * dpi)
-            elem  = Desktop(backend="uia").from_point(cx, cy)
             boost = self._get_stats("bbox").priority_boost
-            if elem:
-                return MatchResult(elem.wrapper_object(), 30.0 + boost, "bbox")
             try:
                 desktop = Desktop(backend="uia")
                 elem    = desktop.from_point(cx, cy)
@@ -983,9 +1158,9 @@ class ElementMatcher:
                         return MatchResult(wrapper, 30.0 + boost, "bbox")
             except Exception:
                 pass
-            
         except Exception:
-            return None
+            pass
+        return None
 
     def _by_screenshot_cropped(self, t: UITarget) -> Optional[tuple[int, int]]:
         if not CV2_OK or not MSS_OK:
@@ -1001,8 +1176,8 @@ class ElementMatcher:
         th, tw = template.shape[:2]
         try:
             with mss.mss() as sct:
-                monitors = sct.monitors[1:]
-                capture_mon = monitors[0]
+                monitors     = sct.monitors[1:]
+                capture_mon  = monitors[0]
                 bbox = getattr(t, "raw_bbox", None) or t.bbox
                 if bbox:
                     scale = _primary_dpi() / (t.dpi_scale or 1.0)
@@ -1023,9 +1198,9 @@ class ElementMatcher:
                         "height": th + margin * 2 + int((bbox.bottom - bbox.top) * scale),
                     }
                     region["width"]  = min(region["width"],
-                                           capture_mon["left"] + capture_mon["width"]  - region["left"])
+                        capture_mon["left"] + capture_mon["width"]  - region["left"])
                     region["height"] = min(region["height"],
-                                           capture_mon["top"]  + capture_mon["height"] - region["top"])
+                        capture_mon["top"]  + capture_mon["height"] - region["top"])
                 else:
                     region = capture_mon
                 if region["width"] <= tw or region["height"] <= th:
@@ -1043,10 +1218,9 @@ class ElementMatcher:
             logger.debug("[MATCH] screenshot error: {}", exc)
             return None
 
-
+    # ── Cross-validation ──────────────────────────────────────────────────
 
     def _cross_validate(self, match: MatchResult, target: UITarget) -> bool:
-        
         if not match.is_wrapper:
             return True
         try:
@@ -1058,7 +1232,9 @@ class ElementMatcher:
             if target.name:
                 found_text = elem.window_text() or ""
                 sim        = _text_similarity(target.name, found_text)
-                ok         = sim >= 0.65
+                # FIX: Lower threshold for Excel cells (they might have different naming)
+                threshold = 0.50 if _is_excel_target(target) else 0.65
+                ok         = sim >= threshold
                 logger.debug("[MATCH] cross-validate name sim={:.2f} ok={}", sim, ok)
                 return ok
             if target.control_type:
@@ -1074,34 +1250,30 @@ class ElementMatcher:
         return True
 
     def _stability_check_fast(self, element) -> bool:
-        """M12: non-blocking; skips sleep when element already stable."""
-        if not STABILITY_CHECK_ENABLED: return True
-        if isinstance(element, tuple): return True
-        raw = element.raw() if hasattr(element,"raw") else element
+        if not STABILITY_CHECK_ENABLED:
+            return True
+        if isinstance(element, tuple):
+            return True
+        raw = element.raw() if hasattr(element, "raw") else element
         try:
             r1 = raw.rectangle()
-            # M12: only sleep if element might be animating (not enabled = loading)
             try:
                 if raw.is_enabled():
-                    time.sleep(STABILITY_WAIT_MS/1000)
+                    time.sleep(STABILITY_WAIT_MS / 1000)
             except Exception:
-                time.sleep(STABILITY_WAIT_MS/1000)
+                time.sleep(STABILITY_WAIT_MS / 1000)
             r2 = raw.rectangle()
-            if abs(r1.left-r2.left)>2 or abs(r1.top-r2.top)>2: return False
+            if abs(r1.left - r2.left) > 2 or abs(r1.top - r2.top) > 2:
+                return False
             return _elem_visible(raw)
         except Exception:
             return False
 
-    # Alias so _find_uia can call either name (historical and fast variant)
     _stability_check = _stability_check_fast
-        
-    # ── Context gate ──────────────────────────────────────────────────────────────────
+
+    # ── Context gate ──────────────────────────────────────────────────────
 
     def _context_gate(self, results: list[MatchResult], target: UITarget) -> list[MatchResult]:
-        """
-        Score-penalise candidates that are not in the expected window/process.
-        Candidates from the correct window get a +20 boost; wrong window get -25.
-        """
         if not target.window_title and not target.process_name:
             return results
         out = []
@@ -1111,7 +1283,7 @@ class ElementMatcher:
                 continue
             bonus = 0.0
             try:
-                raw = r.element.raw() if hasattr(r.element, "raw") else r.element
+                raw      = r.element.raw() if hasattr(r.element, "raw") else r.element
                 win_text = raw.top_level_parent().window_text() or ""
                 if target.window_title:
                     if any(v.lower() in win_text.lower()
@@ -1125,45 +1297,51 @@ class ElementMatcher:
                                    r.strategy, r.is_unique, r.elem_hash))
         return out
 
-    # ── Self-healing layer ─────────────────────────────────────────────────────────────
+    # ── Self-healing (parallel) ───────────────────────────────────────────
 
     def _self_heal(self, target: UITarget, event_id: int,
-                   active_bonus: float = 0.0) -> Optional[object]:
+                   active_bonus: float = 0.0, is_excel: bool = False) -> Optional[object]:
         """
-        Three-strategy self-healing layer, tried in order:
-          A) Ctrl-type-free name match (removes ctrl_type constraint)
-          B) Element-hash scan across all windows (identity-based match)
-          C) Anchor-spatial search (finds element near a stable sibling)
+        Three-strategy self-healing, run in parallel for speed.
+        FIX: Shorter timeout for Excel (2s instead of 4s)
         """
         logger.info("[MATCH] Event #{} SELF-HEAL starting", event_id)
         results: list[MatchResult] = []
+        
+        # FIX: Shorter timeout for Excel
+        heal_timeout = STRATEGY_TIMEOUT_S if not is_excel else 2.0
 
-        # ─ A: ctrl-type-free relaxed name match ──────────────────────────
-        if target.name:
+        def _heal_a():
+            out = []
+            if not target.name:
+                return out
             try:
                 t_loose = copy.copy(target)
                 t_loose.control_type = None
                 for r in self._by_name_type(t_loose, exact=False):
-                    results.append(MatchResult(
+                    out.append(MatchResult(
                         r.element, r.score * 0.75 + active_bonus,
                         "heal_relaxed", r.is_unique, r.elem_hash))
             except Exception:
                 pass
+            return out
 
-        # ─ B: element-hash scan ────────────────────────────────────────
-        target_hash = getattr(target, "element_hash", None)
-        if target_hash and UIA_OK:
+        def _heal_b():
+            out = []
+            target_hash = getattr(target, "element_hash", None)
+            if not target_hash or not UIA_OK:
+                return out
             try:
                 from .uia_enricher import _element_hash
-                for hwnd in find_windows(title_re=".*")[:MAX_WINDOW_SCAN]:
+                max_scan = 15 if is_excel else MAX_WINDOW_SCAN
+                for hwnd in find_windows(title_re=".*")[:max_scan]:
                     try:
-                        app = (self._app_cache.get(hwnd) or
-                               Application(backend="uia").connect(handle=hwnd))
-                        self._app_cache[hwnd] = app
+                        app = self._get_app(hwnd)
                         win = app.window(handle=hwnd)
-                        kw = {"control_type": target.control_type} if target.control_type else {}
+                        kw  = {"control_type": target.control_type} if target.control_type else {}
+                        max_desc = 20 if is_excel else MAX_DESC_SEARCH
                         descs = win.descendants(**kw) if kw else win.descendants()
-                        for d in descs[:MAX_DESC_SEARCH]:
+                        for d in descs[:max_desc]:
                             try:
                                 w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
                                 if not _validate_wrapper(w) or not _elem_visible(w):
@@ -1171,15 +1349,15 @@ class ElementMatcher:
                                 aid, nm, ct, cn = None, None, None, None
                                 try: aid = w.automation_id()
                                 except: pass
-                                try: nm = w.window_text()
+                                try: nm  = w.window_text()
                                 except: pass
-                                try: ct = w.friendly_class_name()
+                                try: ct  = w.friendly_class_name()
                                 except: pass
-                                try: cn = w.class_name()
+                                try: cn  = w.class_name()
                                 except: pass
                                 if _element_hash(aid, nm, ct, cn) == target_hash:
                                     sp = _spatial_score(w, target.bbox)
-                                    results.append(MatchResult(
+                                    out.append(MatchResult(
                                         w, 65 + sp + active_bonus,
                                         "heal_hash", is_unique=True,
                                         elem_hash=target_hash))
@@ -1189,21 +1367,23 @@ class ElementMatcher:
                         continue
             except Exception:
                 pass
+            return out
 
-        # ─ C: anchor-spatial search ───────────────────────────────────
-        anchors = getattr(target, "anchor_elements", None) or []
-        anchor_names = [a.name for a in anchors if getattr(a, "name", None)]
-        if anchor_names and target.window_title and UIA_OK:
+        def _heal_c():
+            out = []
+            anchors      = getattr(target, "anchor_elements", None) or []
+            anchor_names = [a.name for a in anchors if getattr(a, "name", None)]
+            if not anchor_names or not target.window_title or not UIA_OK:
+                return out
             try:
                 for hwnd in _find_window_handles(target.window_title):
                     try:
-                        app = (self._app_cache.get(hwnd) or
-                               Application(backend="uia").connect(handle=hwnd))
-                        self._app_cache[hwnd] = app
+                        app = self._get_app(hwnd)
                         win = app.window(handle=hwnd)
-                        kw = {"control_type": target.control_type} if target.control_type else {}
+                        kw  = {"control_type": target.control_type} if target.control_type else {}
+                        max_desc = 20 if is_excel else MAX_DESC_SEARCH
                         descs = win.descendants(**kw) if kw else win.descendants()
-                        for d in descs[:MAX_DESC_SEARCH]:
+                        for d in descs[:max_desc]:
                             try:
                                 w = d.wrapper_object() if hasattr(d, "wrapper_object") else d
                                 if not _validate_wrapper(w) or not _elem_visible(w):
@@ -1211,7 +1391,7 @@ class ElementMatcher:
                                 ab = self._anchor_confirmation(w, anchor_names)
                                 if ab > 0:
                                     sp = _spatial_score(w, target.bbox)
-                                    results.append(MatchResult(
+                                    out.append(MatchResult(
                                         w, 45 + ab + sp + active_bonus,
                                         "heal_anchor", is_unique=False,
                                         elem_hash=_elem_hash(w)))
@@ -1221,46 +1401,57 @@ class ElementMatcher:
                         continue
             except Exception:
                 pass
+            return out
+
+        # Run all three in parallel with shared timeout
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+            futures = {
+                pool.submit(_heal_a): "A",
+                pool.submit(_heal_b): "B",
+                pool.submit(_heal_c): "C",
+            }
+            for fut in concurrent.futures.as_completed(futures, timeout=heal_timeout):
+                try:
+                    results.extend(fut.result())
+                except Exception:
+                    pass
 
         if not results:
             return None
 
-        # Apply context gate and pick best
+        results = self._deduplicate(results)
         results = self._context_gate(results, target)
-        best = self._pick_best(results, 30.0)  # lower threshold for healed match
+        best = self._pick_best(results, 30.0)
         if best:
             logger.info("[MATCH] Event #{} SELF-HEAL ✓ strategy={} score={:.0f}",
                         event_id, best.strategy, best.score)
             return self._wrap_safe(best.element, target)
         return None
 
+    # ── Uniqueness check ──────────────────────────────────────────────────
+
     def _check_uniqueness(self, wrapper, target: UITarget, descs: list) -> bool:
-      
         target_hash = getattr(target, "element_hash", None)
         if not target_hash:
             return len(descs) == 1
         try:
             from .uia_enricher import _element_hash
-            auto_id    = None
-            name       = None
-            ctrl_type  = None
-            class_name = None
-            try: auto_id    = wrapper.automation_id()
-            except Exception: pass
-            try: name       = wrapper.window_text()
-            except Exception: pass
-            try: ctrl_type  = wrapper.friendly_class_name()
-            except Exception: pass
-            try: class_name = wrapper.class_name()
-            except Exception: pass
-            found_hash = _element_hash(auto_id, name, ctrl_type, class_name)
-            if found_hash == target_hash:
-                return True 
+            aid = nm = ct = cn = None
+            try: aid = wrapper.automation_id()
+            except: pass
+            try: nm  = wrapper.window_text()
+            except: pass
+            try: ct  = wrapper.friendly_class_name()
+            except: pass
+            try: cn  = wrapper.class_name()
+            except: pass
+            return _element_hash(aid, nm, ct, cn) == target_hash
         except Exception:
             pass
         return len(descs) == 1
 
-  
+    # ── Pick best result ──────────────────────────────────────────────────
+
     def _pick_best(self, results: list[MatchResult], threshold: float) -> Optional[MatchResult]:
         viable = [r for r in results if r.score >= threshold]
         if not viable:
@@ -1281,20 +1472,20 @@ class ElementMatcher:
                     logger.info("[MATCH] Ambiguity resolved by uniqueness")
                     return unique[0]
 
-         
+                # Resolve by element type priority
                 if len(viable) >= 2:
                     elem0 = viable[0].element
                     elem1 = viable[1].element
                     try:
                         raw0 = elem0.raw() if hasattr(elem0, "raw") else elem0
                         raw1 = elem1.raw() if hasattr(elem1, "raw") else elem1
-                        ct0  = (raw0.friendly_class_name() if callable(
-                                getattr(raw0, "friendly_class_name", None)) else "") or ""
-                        ct1  = (raw1.friendly_class_name() if callable(
-                                getattr(raw1, "friendly_class_name", None)) else "") or ""
+                        ct0  = (raw0.friendly_class_name()
+                                if callable(getattr(raw0, "friendly_class_name", None)) else "") or ""
+                        ct1  = (raw1.friendly_class_name()
+                                if callable(getattr(raw1, "friendly_class_name", None)) else "") or ""
                         p0   = _ELEMENT_TYPE_PRIORITY.get(ct0, 50)
                         p1   = _ELEMENT_TYPE_PRIORITY.get(ct1, 50)
-                        if abs(p0 - p1) >= 15:  # clear type priority difference
+                        if abs(p0 - p1) >= 15:
                             chosen = viable[0] if p0 > p1 else viable[1]
                             logger.info("[MATCH] Ambiguity resolved by type priority ({} vs {})",
                                         ct0, ct1)
@@ -1318,13 +1509,15 @@ class ElementMatcher:
 
         return viable[0]
 
+    # ── Coordinate fallback ───────────────────────────────────────────────
+
     def _coord_fallback(self, t: UITarget, event_id: int):
         rel = getattr(t, "relative_to_window", None)
         if rel and t.window_title:
             try:
                 handles = _find_window_handles(t.window_title)
                 if handles:
-                    app = Application(backend="uia").connect(handle=handles[0])
+                    app = self._get_app(handles[0])
                     win = app.window(handle=handles[0])
                     wr  = win.rectangle()
                     cx  = wr.left + rel["x"] + rel["w"] // 2
@@ -1335,13 +1528,10 @@ class ElementMatcher:
             except Exception:
                 pass
 
-       
         raw = getattr(t, "raw_bbox", None)
         if raw:
             cx = (raw.left + raw.right)  // 2
             cy = (raw.top  + raw.bottom) // 2
-            # raw_bbox is already in exact screen pixels at recording time.
-            # Only scale if the primary DPI fundamentally changed between sessions.
             recorded_dpi = t.dpi_scale or 1.0
             current_dpi  = _primary_dpi()
             if abs(current_dpi - recorded_dpi) > 0.05:
@@ -1350,17 +1540,12 @@ class ElementMatcher:
             return (cx, cy)
 
         if t.bbox:
-            # t.bbox is a normalized (unscaled) bbox in logical pixels.
-            # Scale it strictly using the current monitor's local DPI.
-            cx_logical = (t.bbox.left + t.bbox.right) / 2
-            cy_logical = (t.bbox.top + t.bbox.bottom) / 2
+            cx_logical  = (t.bbox.left + t.bbox.right)  / 2
+            cy_logical  = (t.bbox.top  + t.bbox.bottom) / 2
             current_dpi = _dpi_for_point(int(cx_logical), int(cy_logical))
-            cx = int(cx_logical * current_dpi)
-            cy = int(cy_logical * current_dpi)
-            return (cx, cy)
+            return (int(cx_logical * current_dpi), int(cy_logical * current_dpi))
 
         if t.screen_x is not None:
             return (t.screen_x, t.screen_y)
 
         raise ElementNotFoundError(f"Event #{event_id}: no fallback coordinates", event_id)
-

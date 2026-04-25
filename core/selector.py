@@ -1,10 +1,22 @@
-
+"""
+selector.py — Element selector model with:
+  • Fixed _is_unstable (was too aggressive; now pattern-only, not length-based)
+  • Dynamic scoring based on replay success (per-strategy adaptive weights)
+  • Context-aware confidence (environment + window stability)
+  • Selector versioning migration (from_dict handles old schemas gracefully)
+  • Selector compression (removes redundant low-signal attributes)
+  • Time-decay for stale selectors
+"""
 from __future__ import annotations
+
 import time
 from dataclasses import dataclass, field
 from typing import Optional, Any
 import re
 
+
+# ── Attribute score table ──────────────────────────────────────────────────
+# Higher = more stable / unique identifier.
 
 ATTR_SCORES: dict[str, int] = {
     "automation_id":  100,
@@ -25,33 +37,47 @@ ATTR_SCORES: dict[str, int] = {
     "window_title":    50,
 }
 
+# ── Unstable-ID detection ──────────────────────────────────────────────────
+# FIX: was incorrectly treating any 3-char alphanum as stable;
+#      now checks *only* known-stable whitelist + known-bad patterns.
 
 _UNSTABLE_PATTERNS = [
-    re.compile(r"^[0-9]{6,}$"),               
-    re.compile(r"\b[a-f0-9]{8,}\b"),         
-    re.compile(r"^_\w+\d{4,}$"),              
-    re.compile(r"-[a-f0-9]{6,}$"),         
-    re.compile(r"_[a-f0-9]{6,}$"),           
+    re.compile(r"^[0-9]{5,}$"),               # pure numeric ≥ 5 digits
+    re.compile(r"\b[a-f0-9]{8,}\b"),           # hex UUID fragment
+    re.compile(r"^_\w+\d{4,}$"),              # _identifier1234
+    re.compile(r"-[a-f0-9]{6,}$"),            # suffix -deadbeef
+    re.compile(r"_[a-f0-9]{6,}$"),            # suffix _deadbeef
+    re.compile(r"^\d{1,4}-\d{4,}$"),          # e.g. 1-10293847
+    re.compile(r"^[A-Z]{2,4}\d{6,}$"),        # e.g. WIN32009384
 ]
 
-
-_KNOWN_STABLE_IDS = {
+# IDs that look numeric/short but are stable in well-known apps.
+_KNOWN_STABLE_IDS: frozenset[str] = frozenset({
     "1148", "1001", "1000", "100", "101", "1", "2", "3", "4",
     "200", "201", "300", "1003", "1004", "1005",
-}
+    # Excel Name Box, Formula Bar
+    "Box", "FormulaBar",
+    # Common Office automation IDs
+    "TabStrip", "SheetTab",
+})
 
 
 def _is_unstable(value: str) -> bool:
     """
     Return True if value looks like a dynamic/generated identifier that will
-    not survive across sessions or UI reloads.
+    NOT survive across sessions or UI reloads.
+
+    Fixed:
+    - No longer marks short 3-char alphanum as unconditionally stable (e.g. "abc"
+      could be a generated suffix). Whitelist covers known-stable short IDs.
+    - Only triggers on concrete bad-pattern matches, not on length alone.
     """
     if not value:
         return True
     if value in _KNOWN_STABLE_IDS:
         return False
-    # Very short values are stable (single-char button names, etc.)
-    if len(value) <= 3 and value.isalnum():
+    # Single-character values (keyboard shortcut labels etc.) are stable
+    if len(value) == 1:
         return False
     for pat in _UNSTABLE_PATTERNS:
         if pat.search(value):
@@ -59,6 +85,7 @@ def _is_unstable(value: str) -> bool:
     return False
 
 
+# ── Data classes ───────────────────────────────────────────────────────────
 
 @dataclass
 class SelectorAttribute:
@@ -78,9 +105,11 @@ class SelectorStrategy:
     total_score: int = 0
     backend:     str = "uia"
 
-    # SEL-2: per-strategy success tracking
+    # Per-strategy success tracking
     successes:  int = 0
     failures:   int = 0
+    # Adaptive score boost — updated by record_success/record_failure
+    _score_boost: float = field(default=0.0, repr=False)
 
     def __post_init__(self):
         self.total_score = sum(a.score for a in self.attributes)
@@ -90,21 +119,43 @@ class SelectorStrategy:
         total = self.successes + self.failures
         return self.successes / total if total > 0 else 0.5
 
+    @property
+    def effective_total_score(self) -> float:
+        """total_score adjusted by replay-based adaptive boost."""
+        return self.total_score + self._score_boost
+
     def record_success(self) -> None:
-        self.successes += 1
+        self.successes   += 1
+        # Boost up to +20 for consistently succeeding strategies
+        self._score_boost = min(self._score_boost + 4.0, 20.0)
 
     def record_failure(self) -> None:
-        self.failures += 1
+        self.failures    += 1
+        # Penalise down to -15 for consistently failing strategies
+        self._score_boost = max(self._score_boost - 6.0, -15.0)
+
+    # Selector compression: drop attributes below minimum signal
+    def compress(self, min_score: int = 15) -> "SelectorStrategy":
+        """Return a copy with low-signal attributes removed."""
+        kept = [a for a in self.attributes if a.score >= min_score]
+        if not kept:
+            kept = self.attributes[:1]  # always keep at least one
+        s = SelectorStrategy(name=self.name, attributes=kept, backend=self.backend)
+        s.successes    = self.successes
+        s.failures     = self.failures
+        s._score_boost = self._score_boost
+        return s
 
     def to_dict(self) -> dict:
         return {
-            "name":        self.name,
-            "backend":     self.backend,
-            "total_score": self.total_score,
-            "attributes":  [{"name": a.name, "value": a.value, "score": a.score}
-                            for a in self.attributes],
-            "successes":   self.successes,
-            "failures":    self.failures,
+            "name":         self.name,
+            "backend":      self.backend,
+            "total_score":  self.total_score,
+            "attributes":   [{"name": a.name, "value": a.value, "score": a.score}
+                              for a in self.attributes],
+            "successes":    self.successes,
+            "failures":     self.failures,
+            "score_boost":  self._score_boost,
         }
 
     @classmethod
@@ -112,23 +163,24 @@ class SelectorStrategy:
         attrs = [SelectorAttribute(a["name"], a["value"], a.get("score", 0))
                  for a in d.get("attributes", [])]
         s = cls(name=d["name"], attributes=attrs, backend=d.get("backend", "uia"))
-        s.total_score = d.get("total_score", s.total_score)
-        s.successes   = d.get("successes", 0)
-        s.failures    = d.get("failures",  0)
+        s.total_score  = d.get("total_score", s.total_score)
+        s.successes    = d.get("successes", 0)
+        s.failures     = d.get("failures", 0)
+        s._score_boost = d.get("score_boost", 0.0)
         return s
 
 
 @dataclass
 class AnchorElement:
     """
-    SEL-3: A nearby stable element that can help disambiguate the primary target.
+    A nearby stable element that helps disambiguate the primary target.
     Example: label "Username:" to the left of an input field.
     """
     direction:     str            # "left", "right", "above", "below", "parent"
     name:          Optional[str]  = None
     control_type:  Optional[str]  = None
     automation_id: Optional[str]  = None
-    offset_x:      int = 0        # pixel offset from primary element
+    offset_x:      int = 0
     offset_y:      int = 0
 
     def to_dict(self) -> dict:
@@ -153,8 +205,9 @@ class AnchorElement:
         )
 
 
-# SEL-2: Current schema version — bump when Selector fields change
-SELECTOR_SCHEMA_VERSION = "2.2"   # bumped: added element_hash, role, visibility, relative pos
+# ── Selector schema versioning ─────────────────────────────────────────────
+
+SELECTOR_SCHEMA_VERSION = "2.3"   # bumped: adaptive boost, compression, migration
 
 _DECAY_HALF_LIFE_DAYS = 30.0
 _DECAY_HALF_LIFE_S    = _DECAY_HALF_LIFE_DAYS * 86400
@@ -162,7 +215,10 @@ _DECAY_HALF_LIFE_S    = _DECAY_HALF_LIFE_DAYS * 86400
 
 @dataclass
 class Selector:
-  
+    """
+    Full selector for one recorded UI element.
+    Supports multiple strategies tried in priority order during replay.
+    """
     strategies:       list[SelectorStrategy]
     process_name:     Optional[str] = None
     window_title:     Optional[str] = None
@@ -171,78 +227,85 @@ class Selector:
     is_clickable:     bool  = True
     confidence:       float = 0.0
 
-    # Positioning
+    # Absolute screen position at record time
     screen_x:         Optional[int] = None
     screen_y:         Optional[int] = None
 
-    # SEL-2: versioning + replay history
-    selector_version: str = SELECTOR_SCHEMA_VERSION
-    recorded_at:      float = field(default_factory=time.time)  # SEL-1: epoch seconds
+    # Versioning + replay history
+    selector_version: str   = SELECTOR_SCHEMA_VERSION
+    recorded_at:      float = field(default_factory=time.time)
     last_used_at:     Optional[float] = None
     replay_successes: int = 0
     replay_failures:  int = 0
     last_strategy_used: Optional[str] = None
 
-    # SEL-3: anchor elements for disambiguation
+    # Anchor elements for disambiguation
     anchor_elements:  list[AnchorElement] = field(default_factory=list)
 
-   
-    element_hash:     Optional[str]  = None
-  
-    element_role:     Optional[str]  = None
-    
-    confidence_level: Optional[str]  = None
-   
-    visibility_score: Optional[str]  = None
-    # IMP-9: window handle for active-window matching
-    window_handle:    int = 0
-    # IMP-8: raw absolute bbox (pixel-exact, no DPI normalisation)
-    raw_bbox:         Optional[dict] = None   # {"left":…,"top":…,"right":…,"bottom":…}
-   
-    relative_to_window: Optional[dict] = None 
-    relative_to_parent: Optional[dict] = None  
+    # Extended context (v2.2+)
+    element_hash:       Optional[str]  = None
+    element_role:       Optional[str]  = None
+    confidence_level:   Optional[str]  = None
+    visibility_score:   Optional[str]  = None
+    window_handle:      int = 0
+    raw_bbox:           Optional[dict] = None
+    relative_to_window: Optional[dict] = None
+    relative_to_parent: Optional[dict] = None
 
+    # ── Computed properties ────────────────────────────────────────────────
 
     @property
     def success_rate(self) -> float:
-        """SEL-2: lifetime replay success rate."""
         total = self.replay_successes + self.replay_failures
         return self.replay_successes / total if total > 0 else 1.0
 
     def time_decay_score(self) -> float:
-        
+        """Exponential decay: 1.0 when fresh, 0.5 at 30 days, ~0.0 at 120 days."""
         age_s = time.time() - self.recorded_at
         if age_s <= 0:
             return 1.0
         return 0.5 ** (age_s / _DECAY_HALF_LIFE_S)
 
     def effective_confidence(self) -> float:
-        """Base confidence × time decay × success rate."""
-        return self.confidence * self.time_decay_score() * max(self.success_rate, 0.1)
+        """
+        Base confidence × time decay × success rate × environment stability.
+
+        Environment stability: window_handle present = small bonus (stable session).
+        """
+        env_factor = 1.05 if self.window_handle else 1.0
+        return min(
+            self.confidence * self.time_decay_score() * max(self.success_rate, 0.1) * env_factor,
+            1.0,
+        )
 
     def best_strategy(self) -> Optional[SelectorStrategy]:
-        """ADV-1 compatible: return strategy with highest success_rate, else first."""
+        """Return strategy with highest success_rate, else first."""
         if not self.strategies:
             return None
-        by_rate = sorted(self.strategies, key=lambda s: s.success_rate, reverse=True)
-        return by_rate[0]
+        return max(self.strategies, key=lambda s: (s.success_rate, s.effective_total_score))
 
     def strategy_names(self) -> list[str]:
         return [s.name for s in self.strategies]
 
     def ordered_strategies(self) -> list[SelectorStrategy]:
-        """Return strategies sorted by success_rate DESC (for adaptive ordering)."""
-        return sorted(self.strategies, key=lambda s: s.success_rate, reverse=True)
+        """
+        Return strategies sorted by (success_rate DESC, effective_total_score DESC).
+        Used by matcher for adaptive ordering.
+        """
+        return sorted(
+            self.strategies,
+            key=lambda s: (s.success_rate, s.effective_total_score),
+            reverse=True,
+        )
 
     def record_replay(self, strategy_used: str, success: bool) -> None:
-        """SEL-2: Update per-selector and per-strategy stats."""
+        """Update per-selector and per-strategy stats."""
         if success:
             self.replay_successes += 1
         else:
             self.replay_failures += 1
         self.last_strategy_used = strategy_used
         self.last_used_at = time.time()
-        # Update per-strategy stats
         for s in self.strategies:
             if s.name == strategy_used:
                 if success:
@@ -251,40 +314,75 @@ class Selector:
                     s.record_failure()
                 break
 
+    def compress(self) -> "Selector":
+        """Return a copy with low-signal attributes stripped from all strategies."""
+        compressed = [s.compress() for s in self.strategies]
+        import copy
+        c = copy.copy(self)
+        c.strategies = compressed
+        return c
+
+    def is_stale(self, threshold_days: float = 90.0) -> bool:
+        age_days = (time.time() - self.recorded_at) / 86400
+        return age_days > threshold_days
+
+    def needs_refresh(self) -> bool:
+        """True if success_rate is low enough to warrant re-recording."""
+        if self.replay_successes + self.replay_failures < 5:
+            return False
+        return self.success_rate < 0.5
+
+    # ── Serialisation ──────────────────────────────────────────────────────
+
     def to_dict(self) -> dict:
         return {
-            "selector_version":  self.selector_version,
-            "strategies":        [s.to_dict() for s in self.strategies],
-            "process_name":      self.process_name,
-            "window_title":      self.window_title,
-            "semantic_role":     self.semantic_role,
-            "is_editable":       self.is_editable,
-            "is_clickable":      self.is_clickable,
-            "confidence":        self.confidence,
-            "screen_x":          self.screen_x,
-            "screen_y":          self.screen_y,
-            "recorded_at":       self.recorded_at,
-            "last_used_at":      self.last_used_at,
-            "replay_successes":  self.replay_successes,
-            "replay_failures":   self.replay_failures,
+            "selector_version":   self.selector_version,
+            "strategies":         [s.to_dict() for s in self.strategies],
+            "process_name":       self.process_name,
+            "window_title":       self.window_title,
+            "semantic_role":      self.semantic_role,
+            "is_editable":        self.is_editable,
+            "is_clickable":       self.is_clickable,
+            "confidence":         self.confidence,
+            "screen_x":           self.screen_x,
+            "screen_y":           self.screen_y,
+            "recorded_at":        self.recorded_at,
+            "last_used_at":       self.last_used_at,
+            "replay_successes":   self.replay_successes,
+            "replay_failures":    self.replay_failures,
             "last_strategy_used": self.last_strategy_used,
-            "anchor_elements":   [a.to_dict() for a in self.anchor_elements],
-            # New in 2.2
-            "element_hash":      self.element_hash,
-            "element_role":      self.element_role,
-            "confidence_level":  self.confidence_level,
-            "visibility_score":  self.visibility_score,
-            "window_handle":     self.window_handle,
-            "raw_bbox":          self.raw_bbox,
+            "anchor_elements":    [a.to_dict() for a in self.anchor_elements],
+            "element_hash":       self.element_hash,
+            "element_role":       self.element_role,
+            "confidence_level":   self.confidence_level,
+            "visibility_score":   self.visibility_score,
+            "window_handle":      self.window_handle,
+            "raw_bbox":           self.raw_bbox,
             "relative_to_window": self.relative_to_window,
             "relative_to_parent": self.relative_to_parent,
         }
 
     @classmethod
     def from_dict(cls, d: dict) -> "Selector":
+        """
+        Schema-migration aware deserialiser.
+        Handles v1.x, v2.0, v2.1, v2.2, v2.3 transparently.
+        """
+        ver = d.get("selector_version", "1.0")
+
+        # v1.x migration: strategies may be stored as plain dicts without successes/failures
+        strategies_raw = d.get("strategies", [])
+        strategies = []
+        for s in strategies_raw:
+            strat = SelectorStrategy.from_dict(s)
+            # v2.2 → v2.3: inject score_boost from successes if missing
+            if "score_boost" not in s and strat.successes > 0:
+                strat._score_boost = min(strat.successes * 2.0, 20.0)
+            strategies.append(strat)
+
         return cls(
-            selector_version    = d.get("selector_version", "1.0"),
-            strategies          = [SelectorStrategy.from_dict(s) for s in d.get("strategies", [])],
+            selector_version    = SELECTOR_SCHEMA_VERSION,   # always upgrade
+            strategies          = strategies,
             process_name        = d.get("process_name"),
             window_title        = d.get("window_title"),
             semantic_role       = d.get("semantic_role"),
@@ -298,8 +396,8 @@ class Selector:
             replay_successes    = d.get("replay_successes", 0),
             replay_failures     = d.get("replay_failures",  0),
             last_strategy_used  = d.get("last_strategy_used"),
-            anchor_elements     = [AnchorElement.from_dict(a) for a in d.get("anchor_elements", [])],
-            # New in 2.2
+            anchor_elements     = [AnchorElement.from_dict(a)
+                                   for a in d.get("anchor_elements", [])],
             element_hash        = d.get("element_hash"),
             element_role        = d.get("element_role"),
             confidence_level    = d.get("confidence_level"),
@@ -310,17 +408,8 @@ class Selector:
             relative_to_parent  = d.get("relative_to_parent"),
         )
 
-    def is_stale(self, threshold_days: float = 90.0) -> bool:
-        """SEL-1: True if selector is older than threshold_days."""
-        age_days = (time.time() - self.recorded_at) / 86400
-        return age_days > threshold_days
 
-    def needs_refresh(self) -> bool:
-        """SEL-2: True if success_rate is low enough to warrant re-recording."""
-        if self.replay_successes + self.replay_failures < 5:
-            return False   # not enough data
-        return self.success_rate < 0.5
-
+# ── Builder ────────────────────────────────────────────────────────────────
 
 class SelectorBuilder:
 
@@ -340,7 +429,6 @@ class SelectorBuilder:
         dpi_scale:          float = 1.0,
         capabilities:       Optional[dict] = None,
         anchor_elements:    Optional[list[AnchorElement]] = None,
-        # New in 2.2 (from uia_enricher)
         element_hash:       Optional[str] = None,
         element_role:       Optional[str] = None,
         confidence_level:   Optional[str] = None,
@@ -386,24 +474,25 @@ class SelectorBuilder:
 
         strategies: list[SelectorStrategy] = []
 
+        # 1: STRICT — automation_id + window context
         if aid_stable:
             strict_attrs = [a for a in raw if a.name == "automation_id"]
             if window_title:
                 strict_attrs = strict_attrs + [SelectorAttribute("window_title", window_title, score=50)]
             elif process_name:
-                # S-3: process_name when window_title absent
                 strict_attrs = strict_attrs + [SelectorAttribute("process_name", process_name, score=45)]
             strategies.append(SelectorStrategy(name="strict", attributes=strict_attrs, backend="uia"))
 
         # 2: SEMANTIC — name + ctrl_type + window
         sem_attrs = [a for a in raw if a.name in ("name", "control_type")]
         if len(sem_attrs) >= 2:
-            ctx = ([SelectorAttribute("window_title", window_title, score=50)] if window_title else
-                   [SelectorAttribute("process_name", process_name, score=45)] if process_name else [])
-            strategies.append(SelectorStrategy(name="semantic",
-                                               attributes=sem_attrs + ctx, backend="uia"))
+            ctx = (
+                [SelectorAttribute("window_title", window_title, score=50)] if window_title else
+                [SelectorAttribute("process_name", process_name, score=45)] if process_name else []
+            )
+            strategies.append(SelectorStrategy(name="semantic", attributes=sem_attrs + ctx, backend="uia"))
 
-        # 3: RELAXED — name only
+        # 3: RELAXED — name only (fuzzy)
         name_attrs = [a for a in raw if a.name == "name"]
         if name_attrs:
             strategies.append(SelectorStrategy(name="relaxed", attributes=name_attrs, backend="uia"))
@@ -413,7 +502,7 @@ class SelectorBuilder:
         if anc_attrs and ancestor_chain:
             strategies.append(SelectorStrategy(name="ancestor", attributes=anc_attrs, backend="uia"))
 
-        # 5: POSITIONAL
+        # 5: POSITIONAL (last resort)
         pos_attrs = [a for a in raw if a.name in ("bbox", "screen_coord")]
         if pos_attrs:
             strategies.append(SelectorStrategy(name="positional", attributes=pos_attrs, backend="uia"))
@@ -434,7 +523,6 @@ class SelectorBuilder:
             screen_y            = screen_y,
             recorded_at         = time.time(),
             anchor_elements     = anchor_elements or [],
-            # New in 2.2
             element_hash        = element_hash,
             element_role        = element_role,
             confidence_level    = confidence_level,
@@ -466,7 +554,6 @@ class SelectorBuilder:
     ) -> Selector:
         raw: list[SelectorAttribute] = []
 
-        # S-2: xpath_id detection — handles @id= with both quote styles
         def _xpath_has_id(xp: str, eid: str) -> bool:
             if not xp or not eid:
                 return False
@@ -505,23 +592,23 @@ class SelectorBuilder:
 
         id_attrs = [a for a in raw if a.name in ("xpath_id", "css_id")]
         if id_attrs:
-            strategies.append(SelectorStrategy(name="strict",   attributes=id_attrs, backend="browser"))
+            strategies.append(SelectorStrategy(name="strict",     attributes=id_attrs,    backend="browser"))
 
         aria_attrs = [a for a in raw if a.name == "aria_label"]
         if aria_attrs:
-            strategies.append(SelectorStrategy(name="aria",     attributes=aria_attrs, backend="browser"))
+            strategies.append(SelectorStrategy(name="aria",       attributes=aria_attrs,  backend="browser"))
 
         sem_attrs = [a for a in raw if a.name in ("name", "placeholder", "tag_name")]
         if sem_attrs:
-            strategies.append(SelectorStrategy(name="semantic", attributes=sem_attrs[:3], backend="browser"))
+            strategies.append(SelectorStrategy(name="semantic",   attributes=sem_attrs[:3], backend="browser"))
 
         xpath_attrs = [a for a in raw if a.name == "xpath_text"]
         if xpath_attrs:
-            strategies.append(SelectorStrategy(name="xpath",    attributes=xpath_attrs, backend="browser"))
+            strategies.append(SelectorStrategy(name="xpath",      attributes=xpath_attrs, backend="browser"))
 
         pos_attrs = [a for a in raw if a.name == "screen_coord"]
         if pos_attrs:
-            strategies.append(SelectorStrategy(name="positional", attributes=pos_attrs, backend="browser"))
+            strategies.append(SelectorStrategy(name="positional", attributes=pos_attrs,   backend="browser"))
 
         max_possible = 75 + 70
         actual       = sum(a.score for a in raw[:2])
@@ -541,6 +628,7 @@ class SelectorBuilder:
         )
 
 
+# ── Role helpers ───────────────────────────────────────────────────────────
 
 def _detect_semantic_role_uia(
     control_type: Optional[str],
@@ -550,17 +638,18 @@ def _detect_semantic_role_uia(
     if not control_type:
         return None
     ct = control_type.lower()
-    if "button"   in ct:             return "button"
-    if ct in ("edit", "document"):   return "input"
-    if "checkbox" in ct:             return "checkbox"
-    if "radio"    in ct:             return "radio"
-    if "combobox" in ct:             return "dropdown"
-    if ct in ("dataitem", "cell"):   return "cell"
-    if "tab"      in ct:             return "tab"
-    if "menu"     in ct:             return "menu"
-    if "list"     in ct:             return "list"
-    if "tree"     in ct:             return "tree"
-    if "pane"     in ct:             return "pane"
+    if "button"   in ct:                        return "button"
+    if ct in ("edit", "document", "richtext"):  return "input"
+    if "checkbox" in ct:                        return "checkbox"
+    if "radio"    in ct:                        return "radio"
+    if "combobox" in ct:                        return "dropdown"
+    if ct in ("dataitem", "cell", "spreadsheetitem"): return "cell"
+    if "tab"      in ct:                        return "tab"
+    if "menu"     in ct:                        return "menu"
+    if "list"     in ct:                        return "list"
+    if "tree"     in ct:                        return "tree"
+    if "pane"     in ct:                        return "pane"
+    if caps.get("is_editable"):                 return "input"
     return "generic"
 
 

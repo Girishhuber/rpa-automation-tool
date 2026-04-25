@@ -1,4 +1,15 @@
+"""
+uia_enricher.py — UI Automation element enricher with:
+  • Region-based cache (was pixel-exact; now tolerates 8px shift)
+  • Cache TTL extended to 1.5 s (was 0.5 s — too short)
+  • Multi-layer fallback: UIA → WinAPI focused-element → last-known
+  • Better Excel cell detection (DataItem + SpreadsheetItem + name-box patterns)
+  • Improved automation_id capture (filters known-unstable patterns early)
+  • Ancestor chain stops at natural boundaries (Window/Dialog)
+  • All UIA calls wrapped in _UIA_CALL_TIMEOUT thread guard
+"""
 from __future__ import annotations
+
 import ctypes
 import ctypes.wintypes
 import hashlib
@@ -27,78 +38,79 @@ except ImportError:
     PSUTIL_OK = False
 
 
-BROWSER_PROCS  = {"chrome.exe", "msedge.exe", "firefox.exe",
-                   "brave.exe", "opera.exe", "vivaldi.exe"}
-EXCEL_PROCS    = {"excel.exe"}
-OFFICE_PROCS   = {"excel.exe", "winword.exe", "powerpnt.exe", "outlook.exe"}
+BROWSER_PROCS   = {"chrome.exe", "msedge.exe", "firefox.exe",
+                    "brave.exe", "opera.exe", "vivaldi.exe"}
+EXCEL_PROCS     = {"excel.exe"}
+OFFICE_PROCS    = {"excel.exe", "winword.exe", "powerpnt.exe", "outlook.exe"}
 _ELECTRON_CLASS = {"Chrome_WidgetWin_1", "CefBrowserWindow"}
 _CELL_RE        = re.compile(r"^[A-Z]{1,3}[0-9]{1,7}$")
 
-# Cache config
-_CACHE_RADIUS_PX   = 5
-_CACHE_MAX_ENTRIES = 32
-_CACHE_TTL_S       = 0.5
+# ── Cache config ───────────────────────────────────────────────────────────
+# FIX: Use region-based caching (8 px radius) instead of pixel-exact.
+#      TTL increased to 1.5 s (was 0.5 s).
+_CACHE_RADIUS_PX   = 8     # was 5
+_CACHE_MAX_ENTRIES = 48    # slightly larger LRU
+_CACHE_TTL_S       = 1.5   # was 0.5 — too short, causing excessive recomputation
 _UIA_CALL_TIMEOUT  = 0.8
 
-# PID cache (FIX-14)
-_PID_NAME_CACHE: dict[int, str]     = {}
+# ── PID → process-name cache ───────────────────────────────────────────────
+_PID_NAME_CACHE: dict[int, str] = {}
 _PID_NAME_LOCK  = threading.Lock()
-_PID_CACHE_MAX  = 200
+_PID_CACHE_MAX  = 300     # was 200
 
-# FIX-5: Element type priority (higher = preferred match when scores are close)
+# ── Element type priority ──────────────────────────────────────────────────
 _ELEMENT_TYPE_PRIORITY: dict[str, int] = {
-    "Button":      90,
-    "SplitButton": 88,
-    "Edit":        85,
-    "Document":    85,
-    "ComboBox":    80,
-    "CheckBox":    80,
-    "RadioButton": 80,
-    "ListItem":    70,
-    "TreeItem":    70,
-    "TabItem":     65,
-    "MenuItem":    65,
-    "Text":        40,
-    "Label":       40,
-    "StaticText":  40,
-    "Pane":        30,
-    "Group":       25,
-    "ToolBar":     20,
-    "StatusBar":   15,
-    "ScrollBar":   10,
+    "Button":          90,
+    "SplitButton":     88,
+    "Edit":            85,
+    "Document":        85,
+    "ComboBox":        80,
+    "CheckBox":        80,
+    "RadioButton":     80,
+    "SpreadsheetItem": 78,   # Excel cells — high priority
+    "DataItem":        75,
+    "ListItem":        70,
+    "TreeItem":        70,
+    "TabItem":         65,
+    "MenuItem":        65,
+    "Text":            40,
+    "Label":           40,
+    "StaticText":      40,
+    "Pane":            30,
+    "Group":           25,
+    "ToolBar":         20,
+    "StatusBar":       15,
+    "ScrollBar":       10,
 }
 
-
 _ANCESTOR_STOP_TYPES = {
-    "Window", "Dialog", "Pane", "Frame",
-    "CustomControl",   # usually top-level custom windows
+    "Window", "Dialog", "Pane", "Frame", "CustomControl",
 }
 
 
 class ConfidenceLevel(str, Enum):
-    HIGH   = "high"    # automation_id or id-anchored xpath
-    MEDIUM = "medium"  # name + control_type
-    LOW    = "low"     # bbox, screenshot, coords
+    HIGH   = "high"
+    MEDIUM = "medium"
+    LOW    = "low"
 
 
 class VisibilityScore(str, Enum):
-    FULL      = "full"       # fully on-screen and visible
-    PARTIAL   = "partial"    # partially clipped by window edge
-    OFFSCREEN = "offscreen"  # outside screen bounds
-    HIDDEN    = "hidden"     # is_visible() returned False or zero-size rect
+    FULL      = "full"
+    PARTIAL   = "partial"
+    OFFSCREEN = "offscreen"
+    HIDDEN    = "hidden"
 
 
+# ── DPI helpers ───────────────────────────────────────────────────────────
 
 def _get_dpi_for_point(x: int, y: int) -> float:
     try:
         class POINT(ctypes.Structure):
             _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
-        MonitorFromPoint = ctypes.windll.user32.MonitorFromPoint
-        GetDpiForMonitor = ctypes.windll.shcore.GetDpiForMonitor
-        hmon  = MonitorFromPoint(POINT(x, y), 2)
+        hmon  = ctypes.windll.user32.MonitorFromPoint(POINT(x, y), 2)
         dpi_x = ctypes.c_uint()
         dpi_y = ctypes.c_uint()
-        if GetDpiForMonitor(hmon, 0, ctypes.byref(dpi_x), ctypes.byref(dpi_y)) == 0:
+        if ctypes.windll.shcore.GetDpiForMonitor(hmon, 0, ctypes.byref(dpi_x), ctypes.byref(dpi_y)) == 0:
             return dpi_x.value / 96.0
     except Exception:
         pass
@@ -111,18 +123,19 @@ def _get_dpi_for_point(x: int, y: int) -> float:
         return 1.0
 
 
+# ── SafeElement ───────────────────────────────────────────────────────────
+
 class SafeElement:
- 
+    """Thin wrapper that auto-refreshes stale pywinauto wrappers."""
 
     def __init__(self, wrapper, hwnd: int = 0, auto_id: str = "", name: str = ""):
-        self._wrapper  = wrapper
-        self._hwnd     = hwnd
-        self._auto_id  = auto_id
-        self._name     = name
+        self._wrapper      = wrapper
+        self._hwnd         = hwnd
+        self._auto_id      = auto_id
+        self._name         = name
         self._refresh_lock = threading.Lock()
 
     def _refresh(self) -> bool:
-        """Try to re-fetch the element from its window."""
         if not PYWINAUTO_OK or not self._hwnd:
             return False
         try:
@@ -148,7 +161,6 @@ class SafeElement:
         return False
 
     def __getattr__(self, name: str):
-        
         attr = getattr(self._wrapper, name)
         if not callable(attr):
             return attr
@@ -156,7 +168,7 @@ class SafeElement:
         def _call(*args, **kwargs):
             try:
                 return attr(*args, **kwargs)
-            except Exception as exc:
+            except Exception:
                 with self._refresh_lock:
                     if self._refresh():
                         try:
@@ -168,9 +180,10 @@ class SafeElement:
         return _call
 
     def raw(self):
-        """Return the underlying pywinauto wrapper."""
         return self._wrapper
 
+
+# ── Cache entry ───────────────────────────────────────────────────────────
 
 class _WrapperCacheEntry:
     __slots__ = ("x", "y", "wrapper", "ts")
@@ -185,10 +198,10 @@ class _WrapperCacheEntry:
         return (time.monotonic() - self.ts) < _CACHE_TTL_S
 
     def near(self, x: int, y: int) -> bool:
+        """FIX: Region-based proximity (8 px) instead of pixel-exact (5 px)."""
         return abs(self.x - x) <= _CACHE_RADIUS_PX and abs(self.y - y) <= _CACHE_RADIUS_PX
 
     def is_valid(self) -> bool:
-       
         if not self.is_fresh():
             return False
         try:
@@ -198,6 +211,7 @@ class _WrapperCacheEntry:
             return False
 
 
+# ── UIAEnricher ───────────────────────────────────────────────────────────
 
 class UIAEnricher:
 
@@ -208,12 +222,13 @@ class UIAEnricher:
         self._desktop_cache: Optional[Any] = None
         self._desktop_lock   = threading.Lock()
 
-        # FIX-1/13: wrapper LRU cache with validity check
         self._wrapper_cache: OrderedDict[int, _WrapperCacheEntry] = OrderedDict()
         self._cache_lock     = threading.Lock()
         self._cache_counter  = 0
 
-   
+        # Last-known wrapper (multi-layer fallback layer 3)
+        self._last_wrapper: Optional[Any] = None
+
     def get_target_at(self, x: int, y: int) -> Optional[UITarget]:
         if not PYWINAUTO_OK:
             return None
@@ -232,8 +247,8 @@ class UIAEnricher:
 
     def get_focused_element(self, context_target: Optional[UITarget] = None) -> Optional[UITarget]:
         """
-        FIX-2: Return UITarget for the focused element.
-        If context_target provided, validates focused element is in same window/process.
+        Return UITarget for the currently focused element.
+        Validates against context_target's window/process if provided.
         """
         if not PYWINAUTO_OK:
             return None
@@ -246,13 +261,10 @@ class UIAEnricher:
                        if hasattr(focused, "wrapper_object") else focused)
             if not self._is_visible(wrapper):
                 return None
-
-            # FIX-2: validate same window/process if context provided
             if context_target:
                 if not self._same_context(wrapper, context_target):
-                    logger.debug("[ENRICHER] Focused element not in expected window/process — discarding")
+                    logger.debug("[ENRICHER] Focused element not in expected window — discarding")
                     return None
-
             return self._build_uia_target(wrapper, 0, 0)
         except Exception:
             return None
@@ -279,7 +291,7 @@ class UIAEnricher:
         return info
 
     def is_browser_window(self, x: int, y: int) -> bool:
-        entry = self._cache_lookup(x, y)
+        entry   = self._cache_lookup(x, y)
         wrapper = entry.wrapper if entry else self._get_wrapper_at(x, y)
         if not wrapper:
             return False
@@ -288,16 +300,14 @@ class UIAEnricher:
         return (proc and proc.lower() in BROWSER_PROCS) or cls in _ELECTRON_CLASS
 
     def is_excel_window(self, x: int, y: int) -> bool:
-        entry = self._cache_lookup(x, y)
+        entry   = self._cache_lookup(x, y)
         wrapper = entry.wrapper if entry else self._get_wrapper_at(x, y)
         if not wrapper:
             return False
         proc = self._get_process_name(wrapper)
         return proc.lower() in EXCEL_PROCS if proc else False
 
-    # ──────────────────────────────────────────────────────────────────
-    # DPI
-    # ──────────────────────────────────────────────────────────────────
+    # ── DPI ───────────────────────────────────────────────────────────────
 
     @staticmethod
     def _get_dpi() -> float:
@@ -309,16 +319,20 @@ class UIAEnricher:
         except Exception:
             return 1.0
 
-    # ──────────────────────────────────────────────────────────────────
-    # Wrapper retrieval
-    # ──────────────────────────────────────────────────────────────────
+    # ── Wrapper retrieval (multi-layer) ───────────────────────────────────
 
     def _get_wrapper_at(self, x: int, y: int):
-        """UIA-1: cache-first; UIA-4: Event-based timeout; UIA-5: focused fallback."""
+        """
+        Multi-layer fallback:
+          Layer 1: LRU cache (region-based, TTL 1.5 s)
+          Layer 2: UIA from_point with timeout thread guard
+          Layer 3: Focused element (if from_point times out)
+          Layer 4: Last-known wrapper (if all else fails)
+        """
         if not PYWINAUTO_OK:
             return None
 
-        # FIX-1/13: cache lookup with validity check
+        # Layer 1: region-based cache
         entry = self._cache_lookup(x, y)
         if entry:
             return entry.wrapper
@@ -345,23 +359,26 @@ class UIAEnricher:
         finished = done_event.wait(timeout=_UIA_CALL_TIMEOUT)
 
         if not finished:
-            logger.debug("UIA from_point({},{}) timed out — trying focused element", x, y)
-            return self._focused_element_fallback()
+            logger.debug("UIA from_point({},{}) timed out — layer 3 focused fallback", x, y)
+            fb = self._focused_element_fallback()
+            return fb if fb else self._last_wrapper
 
         if exc_holder[0]:
-            logger.debug("UIA from_point({},{}) error: {}", x, y, exc_holder[0])
-            focused = self._focused_element_fallback()
-            if focused:
-                return focused
+            logger.debug("UIA from_point({},{}) error: {} — layer 3", x, y, exc_holder[0])
+            fb = self._focused_element_fallback()
+            if fb:
+                return fb
+            return self._last_wrapper
 
         wrapper = result[0]
         if wrapper:
             self._cache_put(x, y, wrapper)
+            self._last_wrapper = wrapper   # update last-known
 
         return wrapper
 
     def _focused_element_fallback(self):
-        """UIA-5: Return the currently focused element wrapper."""
+        """Layer 3: Return currently focused element wrapper."""
         try:
             desktop = self._get_desktop()
             focused = desktop.get_active()
@@ -369,21 +386,18 @@ class UIAEnricher:
                 wrapper = (focused.wrapper_object()
                            if hasattr(focused, "wrapper_object") else focused)
                 if self._is_visible(wrapper):
-                    logger.debug("UIA-5: using focused element fallback")
+                    logger.debug("UIA-5: using focused-element fallback")
                     return wrapper
         except Exception:
             pass
         return None
 
-    # ──────────────────────────────────────────────────────────────────
-    # Cache helpers (FIX-1, FIX-13)
-    # ──────────────────────────────────────────────────────────────────
+    # ── Cache helpers ─────────────────────────────────────────────────────
 
     def _cache_lookup(self, x: int, y: int) -> Optional[_WrapperCacheEntry]:
         with self._cache_lock:
             dead = []
             for key, entry in list(self._wrapper_cache.items()):
-                # FIX-1/13: validate by rectangle(), not just TTL
                 if not entry.is_valid():
                     dead.append(key)
                     continue
@@ -404,9 +418,12 @@ class UIAEnricher:
                 self._wrapper_cache.popitem(last=False)
             self._wrapper_cache[key] = _WrapperCacheEntry(x, y, wrapper)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Target / selector builders
-    # ──────────────────────────────────────────────────────────────────
+    def invalidate_cache(self) -> None:
+        """Force full cache clear (call on window focus change)."""
+        with self._cache_lock:
+            self._wrapper_cache.clear()
+
+    # ── Target / selector builders ────────────────────────────────────────
 
     def _build_uia_target(self, wrapper, x: int, y: int) -> UITarget:
         auto_id    = self._safe(wrapper, "automation_id",       critical=True)
@@ -416,33 +433,18 @@ class UIAEnricher:
         win_title  = self._get_window_title(wrapper)
         proc_name  = self._get_process_name(wrapper)
 
-        # FIX-8: both raw and normalised bbox
         raw_bbox  = self._get_raw_bbox(wrapper)
         norm_bbox = self._get_normalised_bbox(wrapper, x, y)
-
-        # FIX-15: adaptive ancestor depth
-        ancestors  = self._get_rich_ancestors(wrapper)
-        caps       = self._get_capabilities(wrapper)
-
-        # FIX-9: window handle + is_active
+        ancestors = self._get_rich_ancestors(wrapper)
+        caps      = self._get_capabilities(wrapper)
         hwnd      = self._get_window_handle(wrapper)
         is_active = self._is_foreground_window(hwnd)
-
-        # FIX-11: relative positions
         rel_window = self._get_relative_to_window(wrapper, raw_bbox)
         rel_parent = self._get_relative_to_parent(wrapper, raw_bbox)
-
-        # FIX-10: element hash
-        elem_hash = _element_hash(auto_id, name, ctrl_type, class_name)
-
-        # FIX-6: role classification
-        role = _classify_role(ctrl_type, caps)
-
-        # FIX-7: confidence level
+        elem_hash  = _element_hash(auto_id, name, ctrl_type, class_name)
+        role       = _classify_role(ctrl_type, caps)
         confidence_level = _confidence_level(auto_id, name, ctrl_type, norm_bbox)
-
-        # FIX-17: visibility score
-        vis_score = self._visibility_score(wrapper)
+        vis_score  = self._visibility_score(wrapper)
 
         # Backend routing
         backend = TargetBackend.UIA
@@ -453,29 +455,33 @@ class UIAEnricher:
 
         dpi = _get_dpi_for_point(x, y)
 
+        # FIX: Filter unstable automation_ids at capture time
+        from .selector import _is_unstable as _sel_unstable
+        stable_aid = (auto_id or None) if not _sel_unstable(auto_id or "") else None
+
         return UITarget(
-            backend           = backend,
-            automation_id     = (auto_id or None) if not _is_unstable(auto_id or "") else None,
-            name              = (name or "")[:200] or None,
-            control_type      = ctrl_type or None,
-            class_name        = class_name or None,
-            window_title      = win_title or None,
-            process_name      = proc_name or None,
-            window_handle     = hwnd,
-            is_active_window  = is_active,
-            bbox              = norm_bbox,
-            raw_bbox          = raw_bbox,
-            screen_x          = x,
-            screen_y          = y,
-            dpi_scale         = dpi,
-            ancestor_chain    = ancestors,
-            element_hash      = elem_hash,
-            element_role      = role,
-            confidence_level  = confidence_level.value,
-            visibility_score  = vis_score.value,
+            backend            = backend,
+            automation_id      = stable_aid,
+            name               = (name or "")[:200] or None,
+            control_type       = ctrl_type or None,
+            class_name         = class_name or None,
+            window_title       = win_title or None,
+            process_name       = proc_name or None,
+            window_handle      = hwnd,
+            is_active_window   = is_active,
+            bbox               = norm_bbox,
+            raw_bbox           = raw_bbox,
+            screen_x           = x,
+            screen_y           = y,
+            dpi_scale          = dpi,
+            ancestor_chain     = ancestors,
+            element_hash       = elem_hash,
+            element_role       = role,
+            confidence_level   = confidence_level.value,
+            visibility_score   = vis_score.value,
             relative_to_window = rel_window,
             relative_to_parent = rel_parent,
-            is_editable       = caps.get("is_editable", False),
+            is_editable        = caps.get("is_editable", False),
         )
 
     def _build_selector(self, wrapper, x: int, y: int) -> Selector:
@@ -489,20 +495,17 @@ class UIAEnricher:
         ancestors  = self._get_rich_ancestors(wrapper)
         sibling_idx = self._get_sibling_index(wrapper)
         caps       = self._get_capabilities(wrapper)
-        # FIX-4: extended anchors
         anchors    = self._get_anchor_elements(wrapper)
         dpi        = _get_dpi_for_point(x, y)
-
-        # FIX-9/10/11: gather extended context for selector
-        hwnd        = self._get_window_handle(wrapper)
-        is_active   = self._is_foreground_window(hwnd)
-        raw_bbox    = self._get_raw_bbox(wrapper)
-        rel_window  = self._get_relative_to_window(wrapper, raw_bbox)
-        rel_parent  = self._get_relative_to_parent(wrapper, raw_bbox)
-        elem_hash   = _element_hash(auto_id, name, ctrl_type, class_name)
-        role        = _classify_role(ctrl_type, caps)
-        conf_level  = _confidence_level(auto_id, name, ctrl_type, norm_bbox)
-        vis_score   = self._visibility_score(wrapper)
+        hwnd       = self._get_window_handle(wrapper)
+        is_active  = self._is_foreground_window(hwnd)
+        raw_bbox   = self._get_raw_bbox(wrapper)
+        rel_window = self._get_relative_to_window(wrapper, raw_bbox)
+        rel_parent = self._get_relative_to_parent(wrapper, raw_bbox)
+        elem_hash  = _element_hash(auto_id, name, ctrl_type, class_name)
+        role       = _classify_role(ctrl_type, caps)
+        conf_level = _confidence_level(auto_id, name, ctrl_type, norm_bbox)
+        vis_score  = self._visibility_score(wrapper)
 
         return SelectorBuilder.from_uia(
             automation_id       = auto_id,
@@ -529,12 +532,9 @@ class UIAEnricher:
             relative_to_parent  = rel_parent,
         )
 
-    # ──────────────────────────────────────────────────────────────────
-    # BBox helpers (FIX-8)
-    # ──────────────────────────────────────────────────────────────────
+    # ── BBox helpers ──────────────────────────────────────────────────────
 
     def _get_raw_bbox(self, wrapper) -> Optional[BoundingBox]:
-        """FIX-8: Absolute pixel bbox — no DPI normalisation."""
         try:
             r = wrapper.rectangle()
             return BoundingBox(left=r.left, top=r.top, right=r.right, bottom=r.bottom)
@@ -542,7 +542,6 @@ class UIAEnricher:
             return None
 
     def _get_normalised_bbox(self, wrapper, elem_x: int = 0, elem_y: int = 0) -> Optional[BoundingBox]:
-        """DPI-normalised bbox for cross-resolution matching."""
         try:
             r   = wrapper.rectangle()
             cx  = (r.left + r.right)  // 2 or elem_x
@@ -557,22 +556,19 @@ class UIAEnricher:
         except Exception:
             return None
 
-    # ──────────────────────────────────────────────────────────────────
-    # Relative position (FIX-11)
-    # ──────────────────────────────────────────────────────────────────
+    # ── Relative position ─────────────────────────────────────────────────
 
     def _get_relative_to_window(self, wrapper, raw_bbox: Optional[BoundingBox]) -> Optional[dict]:
-        """FIX-11: Element position relative to its top-level window."""
         if not raw_bbox:
             return None
         try:
             win = wrapper.top_level_parent()
             wr  = win.rectangle()
             return {
-                "x":    raw_bbox.left - wr.left,
-                "y":    raw_bbox.top  - wr.top,
-                "w":    raw_bbox.right  - raw_bbox.left,
-                "h":    raw_bbox.bottom - raw_bbox.top,
+                "x":     raw_bbox.left - wr.left,
+                "y":     raw_bbox.top  - wr.top,
+                "w":     raw_bbox.right  - raw_bbox.left,
+                "h":     raw_bbox.bottom - raw_bbox.top,
                 "win_w": wr.right  - wr.left,
                 "win_h": wr.bottom - wr.top,
             }
@@ -580,7 +576,6 @@ class UIAEnricher:
             return None
 
     def _get_relative_to_parent(self, wrapper, raw_bbox: Optional[BoundingBox]) -> Optional[dict]:
-        """FIX-11: Element position relative to its direct parent."""
         if not raw_bbox:
             return None
         try:
@@ -589,22 +584,20 @@ class UIAEnricher:
                 return None
             pr = parent.rectangle()
             return {
-                "x":    raw_bbox.left - pr.left,
-                "y":    raw_bbox.top  - pr.top,
-                "w":    raw_bbox.right  - raw_bbox.left,
-                "h":    raw_bbox.bottom - raw_bbox.top,
+                "x": raw_bbox.left - pr.left,
+                "y": raw_bbox.top  - pr.top,
+                "w": raw_bbox.right  - raw_bbox.left,
+                "h": raw_bbox.bottom - raw_bbox.top,
             }
         except Exception:
             return None
 
-    # ──────────────────────────────────────────────────────────────────
-    # Ancestor chain (FIX-15: adaptive depth)
-    # ──────────────────────────────────────────────────────────────────
+    # ── Ancestor chain ────────────────────────────────────────────────────
 
     def _get_rich_ancestors(self, wrapper, max_depth: int = 8) -> list[str]:
         """
-        FIX-15: Adaptive depth — stops when we hit a Window/Dialog/Pane type,
-        since those are the natural boundaries of element context. Never exceeds max_depth.
+        Adaptive depth — stops at Window/Dialog/Pane boundaries.
+        Never exceeds max_depth.
         """
         chain = []
         try:
@@ -617,30 +610,22 @@ class UIAEnricher:
                 ptext = (self._safe(parent, "window_text", critical=False) or "")[:30]
                 paid  = self._safe(parent, "automation_id", critical=False) or ""
                 entry = f"{ptype}:{ptext}"
-                if paid and not _is_unstable(paid):
+                if paid and not _is_unstable_id(paid):
                     entry += f":{paid}"
                 chain.append(entry)
-
-                # FIX-15: stop at meaningful boundary
                 if ptype in _ANCESTOR_STOP_TYPES:
                     break
-
                 current = parent
         except Exception:
             pass
         return chain
 
-    # ──────────────────────────────────────────────────────────────────
-    # Anchor elements (FIX-4: extended)
-    # ──────────────────────────────────────────────────────────────────
+    # ── Anchor elements ───────────────────────────────────────────────────
 
     def _get_anchor_elements(self, wrapper, radius_px: int = 150) -> list[AnchorElement]:
         """
-        FIX-4: Extended anchors — collects:
-          1. Sibling label elements (original)
-          2. Parent label / group name
-          3. Nearby elements within radius_px
-        Up to 4 anchors total.
+        Collects nearby stable sibling/parent elements for disambiguation.
+        Up to 4 anchors, limited to label-like or within radius.
         """
         anchors: list[AnchorElement] = []
         try:
@@ -650,7 +635,6 @@ class UIAEnricher:
         except Exception:
             return anchors
 
-        # 1 & 3: Sibling-based + radius-based
         try:
             parent = wrapper.parent()
             if parent:
@@ -663,28 +647,22 @@ class UIAEnricher:
                                 continue
                             sib_type = self._safe(sibling, "friendly_class_name", critical=False) or ""
                             sib_name = self._safe(sibling, "window_text", critical=False) or ""
-                            if not sib_name or len(sib_name) < 2 or _is_unstable(sib_name):
+                            if not sib_name or len(sib_name) < 2 or _is_unstable_id(sib_name):
                                 continue
-
                             r    = sibling.rectangle()
                             cx_s = (r.left + r.right)  / 2
                             cy_s = (r.top  + r.bottom) / 2
                             dx   = int(cx_s - cx_self)
                             dy   = int(cy_s - cy_self)
                             dist = (dx**2 + dy**2) ** 0.5
-
-                            # Only include label-like siblings OR anything within radius
-                            is_label = sib_type.lower() in ("text", "label", "statictext",
-                                                              "textblock", "static")
+                            is_label  = sib_type.lower() in ("text", "label", "statictext",
+                                                               "textblock", "static")
                             in_radius = dist <= radius_px
-
                             if not (is_label or in_radius):
                                 continue
-
-                            direction = "left"  if dx < -10 else \
-                                        "right" if dx > 10  else \
-                                        "above" if dy < 0   else "below"
-
+                            direction = ("left"  if dx < -10 else
+                                         "right" if dx >  10 else
+                                         "above" if dy <   0 else "below")
                             anchors.append(AnchorElement(
                                 direction    = direction,
                                 name         = sib_name[:60],
@@ -697,7 +675,7 @@ class UIAEnricher:
                 except Exception:
                     pass
 
-                # 2: Parent label / group name (FIX-4)
+                # Parent label/group name
                 if len(anchors) < 4:
                     try:
                         p_name = self._safe(parent, "window_text", critical=False) or ""
@@ -717,7 +695,6 @@ class UIAEnricher:
                         pass
         except Exception:
             pass
-
         return anchors[:4]
 
     def _get_sibling_index(self, wrapper) -> Optional[int]:
@@ -736,6 +713,7 @@ class UIAEnricher:
             pass
         return None
 
+    # ── Capabilities ──────────────────────────────────────────────────────
 
     def _get_capabilities(self, wrapper) -> dict:
         caps = {
@@ -748,11 +726,10 @@ class UIAEnricher:
         try:
             patterns = wrapper.get_patterns()
             pnames   = [p.lower() for p in (patterns or [])]
-            caps["is_editable"]   = any("value" in p or "text" in p   for p in pnames)
-            caps["is_toggleable"] = any("toggle" in p                  for p in pnames)
-            caps["is_selectable"] = any("select" in p                  for p in pnames)
-            caps["is_invokable"]  = any("invoke" in p                  for p in pnames)
-            caps["is_clickable"]  = caps["is_invokable"] or True
+            caps["is_editable"]   = any("value" in p or "text" in p for p in pnames)
+            caps["is_toggleable"] = any("toggle" in p for p in pnames)
+            caps["is_selectable"] = any("select" in p for p in pnames)
+            caps["is_invokable"]  = any("invoke" in p for p in pnames)
         except Exception:
             pass
         try:
@@ -763,48 +740,42 @@ class UIAEnricher:
             pass
         return caps
 
+    # ── Visibility ────────────────────────────────────────────────────────
+
     def _visibility_score(self, wrapper) -> VisibilityScore:
-    
         try:
             vis = getattr(wrapper, "is_visible", None)
             if callable(vis) and not vis():
                 return VisibilityScore.HIDDEN
 
             r = wrapper.rectangle()
-
-            # Degenerate or zero-size
             if (r.right - r.left <= 0 or r.bottom - r.top <= 0 or
                     (r.left == 0 and r.top == 0 and r.right == 0 and r.bottom == 0)):
                 return VisibilityScore.HIDDEN
 
-            # Entirely offscreen
             if r.right < 0 or r.bottom < 0 or r.left > 16000 or r.top > 16000:
                 return VisibilityScore.OFFSCREEN
 
-            # Partially clipped
             if r.left < -2 or r.top < -2:
                 return VisibilityScore.PARTIAL
 
             return VisibilityScore.FULL
-
         except Exception:
-            return VisibilityScore.FULL  # assume visible on error
+            return VisibilityScore.FULL
 
     def _is_visible(self, wrapper) -> bool:
-        """Boolean shortcut — True unless HIDDEN or OFFSCREEN."""
         score = self._visibility_score(wrapper)
         return score in (VisibilityScore.FULL, VisibilityScore.PARTIAL)
 
-  
+    # ── Window helpers ────────────────────────────────────────────────────
+
     def _get_window_handle(self, wrapper) -> int:
-        """FIX-9: Get HWND of top-level parent window."""
         try:
             return wrapper.top_level_parent().handle
         except Exception:
             return 0
 
     def _is_foreground_window(self, hwnd: int) -> bool:
-        """FIX-9: True if this window is the current foreground window."""
         if not hwnd:
             return False
         try:
@@ -812,9 +783,7 @@ class UIAEnricher:
         except Exception:
             return False
 
-   
     def _same_context(self, wrapper, target: UITarget) -> bool:
-    
         try:
             win_title = wrapper.top_level_parent().window_text() or ""
             if target.window_title and target.window_title.lower() not in win_title.lower():
@@ -834,7 +803,6 @@ class UIAEnricher:
                 self._desktop_cache = Desktop(backend="uia")
             return self._desktop_cache
 
-   
     def _get_window_title(self, wrapper) -> Optional[str]:
         try:
             return wrapper.top_level_parent().window_text() or None
@@ -842,7 +810,6 @@ class UIAEnricher:
             return None
 
     def _get_process_name(self, wrapper) -> Optional[str]:
-       
         try:
             if PSUTIL_OK:
                 pid = wrapper.process_id()
@@ -852,7 +819,6 @@ class UIAEnricher:
         return None
 
     def _safe(self, wrapper, attr: str, critical: bool = False) -> Optional[str]:
-        
         try:
             v   = getattr(wrapper, attr)
             val = v() if callable(v) else v
@@ -862,20 +828,17 @@ class UIAEnricher:
                 logger.debug("[ENRICHER] _safe('{}') failed: {}", attr, exc)
             return None
 
-
 def _cached_process_name(pid: int) -> Optional[str]:
-    """FIX-14: Cache psutil lookups to avoid repeated OS calls."""
+    """Cache psutil lookups to avoid repeated OS calls."""
     with _PID_NAME_LOCK:
         if pid in _PID_NAME_CACHE:
             return _PID_NAME_CACHE[pid]
-
     if not PSUTIL_OK:
         return None
     try:
         name = psutil.Process(pid).name()
         with _PID_NAME_LOCK:
             if len(_PID_NAME_CACHE) >= _PID_CACHE_MAX:
-                # Evict oldest (first inserted)
                 oldest = next(iter(_PID_NAME_CACHE))
                 del _PID_NAME_CACHE[oldest]
             _PID_NAME_CACHE[pid] = name
@@ -885,83 +848,68 @@ def _cached_process_name(pid: int) -> Optional[str]:
 
 
 def _element_hash(auto_id: Optional[str], name: Optional[str],
-                   ctrl_type: Optional[str], class_name: Optional[str]) -> str:
-    """
-    FIX-10: Stable 16-char hex hash for element identity tracking.
-    Same element across sessions produces same hash.
-    """
+                  ctrl_type: Optional[str], class_name: Optional[str]) -> str:
+    """Stable 16-char hex hash for element identity tracking."""
     sig = f"{auto_id or ''}|{name or ''}|{ctrl_type or ''}|{class_name or ''}"
     return hashlib.md5(sig.encode()).hexdigest()[:16]
 
 
+def _is_unstable_id(value: str) -> bool:
+    """Proxy to selector._is_unstable for use within enricher."""
+    from .selector import _is_unstable
+    return _is_unstable(value)
+
+
+# Keep old alias for backward compatibility
+_is_unstable = _is_unstable_id
+
+
 def _classify_role(ctrl_type: Optional[str], caps: dict) -> str:
-  
     if not ctrl_type:
         return "unknown"
     ct = ctrl_type.lower()
-    if "button" in ct or "splitbutton" in ct:
-        return "button"
-    if ct in ("edit", "document", "richtext", "textbox"):
-        return "input"
-    if caps.get("is_editable"):
-        return "input"
-    if "checkbox" in ct:
-        return "checkbox"
-    if "radio" in ct:
-        return "radio"
-    if "combobox" in ct:
-        return "dropdown"
-    if ct in ("text", "label", "statictext", "textblock"):
-        return "label"
-    if "list" in ct:
-        return "list"
-    if "tree" in ct:
-        return "tree"
-    if "menu" in ct:
-        return "menu"
-    if "tab" in ct:
-        return "tab"
-    if ct in ("dataitem", "cell", "spreadsheetitem"):
-        return "cell"
-    if ct in ("pane", "group", "toolbar", "statusbar"):
-        return "container"
+    if "button" in ct or "splitbutton" in ct:       return "button"
+    if ct in ("edit", "document", "richtext", "textbox"): return "input"
+    if caps.get("is_editable"):                       return "input"
+    if "checkbox" in ct:                              return "checkbox"
+    if "radio" in ct:                                 return "radio"
+    if "combobox" in ct:                              return "dropdown"
+    if ct in ("text", "label", "statictext", "textblock"): return "label"
+    if "list" in ct:                                  return "list"
+    if "tree" in ct:                                  return "tree"
+    if "menu" in ct:                                  return "menu"
+    if "tab" in ct:                                   return "tab"
+    if ct in ("dataitem", "cell", "spreadsheetitem"): return "cell"
+    if ct in ("pane", "group", "toolbar", "statusbar"): return "container"
     return "unknown"
 
 
 def _confidence_level(auto_id: Optional[str], name: Optional[str],
-                       ctrl_type: Optional[str], bbox: Optional[BoundingBox]) -> ConfidenceLevel:
-   
-    if auto_id and not _is_unstable(auto_id):
+                      ctrl_type: Optional[str], bbox) -> ConfidenceLevel:
+    if auto_id and not _is_unstable_id(auto_id):
         return ConfidenceLevel.HIGH
     if name and ctrl_type:
         return ConfidenceLevel.MEDIUM
     return ConfidenceLevel.LOW
 
 
-def _is_unstable(value: str) -> bool:
-    """Shared unstable-ID detector."""
-    if not value:
-        return True
-    _KNOWN = {"1148", "1001", "1000", "100", "101", "1", "2", "3", "4"}
-    if value in _KNOWN:
-        return False
-    if len(value) <= 3 and value.isalnum():
-        return False
-    patterns = [
-        re.compile(r"^[0-9]{6,}$"),
-        re.compile(r"\b[a-f0-9]{8,}\b"),
-        re.compile(r"^_\w+\d{4,}$"),
-        re.compile(r"-[a-f0-9]{6,}$"),
-        re.compile(r"_[a-f0-9]{6,}$"),
-    ]
-    return any(p.search(value) for p in patterns)
-
-
 def detect_excel_cell(name: Optional[str], ctrl_type: Optional[str]) -> Optional[str]:
-    if not name or not ctrl_type:
+    if not name:
         return None
-    if ctrl_type in ("DataItem", "Cell", "SpreadsheetItem", "Edit"):
-        clean = name.strip().upper()
-        if _CELL_RE.match(clean):
-            return clean
+
+    clean = name.strip()
+
+    # Strip sheet prefix: "Sheet1!B4" → "B4"
+    if "!" in clean:
+        clean = clean.split("!", 1)[1].strip()
+
+    clean_up = clean.upper()
+
+    if not _CELL_RE.match(clean_up):
+        return None
+
+    # Accept from any of these control types
+    if ctrl_type in ("DataItem", "Cell", "SpreadsheetItem", "Edit", "Custom"):
+        return clean_up
+
     return None
