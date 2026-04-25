@@ -34,18 +34,18 @@ OFFICE_PROCS   = {"excel.exe", "winword.exe", "powerpnt.exe", "outlook.exe"}
 _ELECTRON_CLASS = {"Chrome_WidgetWin_1", "CefBrowserWindow"}
 _CELL_RE        = re.compile(r"^[A-Z]{1,3}[0-9]{1,7}$")
 
-# Cache config
+
 _CACHE_RADIUS_PX   = 5
 _CACHE_MAX_ENTRIES = 32
 _CACHE_TTL_S       = 0.5
 _UIA_CALL_TIMEOUT  = 0.8
 
-# PID cache (FIX-14)
+
 _PID_NAME_CACHE: dict[int, str]     = {}
 _PID_NAME_LOCK  = threading.Lock()
 _PID_CACHE_MAX  = 200
 
-# FIX-5: Element type priority (higher = preferred match when scores are close)
+
 _ELEMENT_TYPE_PRIORITY: dict[str, int] = {
     "Button":      90,
     "SplitButton": 88,
@@ -71,14 +71,14 @@ _ELEMENT_TYPE_PRIORITY: dict[str, int] = {
 
 _ANCESTOR_STOP_TYPES = {
     "Window", "Dialog", "Pane", "Frame",
-    "CustomControl",   # usually top-level custom windows
+    "CustomControl",  
 }
 
 
 class ConfidenceLevel(str, Enum):
-    HIGH   = "high"    # automation_id or id-anchored xpath
-    MEDIUM = "medium"  # name + control_type
-    LOW    = "low"     # bbox, screenshot, coords
+    HIGH   = "high"   
+    MEDIUM = "medium"  
+    LOW    = "low"     
 
 
 class VisibilityScore(str, Enum):
@@ -122,7 +122,6 @@ class SafeElement:
         self._refresh_lock = threading.Lock()
 
     def _refresh(self) -> bool:
-        """Try to re-fetch the element from its window."""
         if not PYWINAUTO_OK or not self._hwnd:
             return False
         try:
@@ -208,7 +207,7 @@ class UIAEnricher:
         self._desktop_cache: Optional[Any] = None
         self._desktop_lock   = threading.Lock()
 
-        # FIX-1/13: wrapper LRU cache with validity check
+    
         self._wrapper_cache: OrderedDict[int, _WrapperCacheEntry] = OrderedDict()
         self._cache_lock     = threading.Lock()
         self._cache_counter  = 0
@@ -314,7 +313,6 @@ class UIAEnricher:
     # ──────────────────────────────────────────────────────────────────
 
     def _get_wrapper_at(self, x: int, y: int):
-        """UIA-1: cache-first; UIA-4: Event-based timeout; UIA-5: focused fallback."""
         if not PYWINAUTO_OK:
             return None
 
@@ -361,7 +359,6 @@ class UIAEnricher:
         return wrapper
 
     def _focused_element_fallback(self):
-        """UIA-5: Return the currently focused element wrapper."""
         try:
             desktop = self._get_desktop()
             focused = desktop.get_active()
@@ -375,15 +372,11 @@ class UIAEnricher:
             pass
         return None
 
-    # ──────────────────────────────────────────────────────────────────
-    # Cache helpers (FIX-1, FIX-13)
-    # ──────────────────────────────────────────────────────────────────
 
     def _cache_lookup(self, x: int, y: int) -> Optional[_WrapperCacheEntry]:
         with self._cache_lock:
             dead = []
             for key, entry in list(self._wrapper_cache.items()):
-                # FIX-1/13: validate by rectangle(), not just TTL
                 if not entry.is_valid():
                     dead.append(key)
                     continue
@@ -404,9 +397,6 @@ class UIAEnricher:
                 self._wrapper_cache.popitem(last=False)
             self._wrapper_cache[key] = _WrapperCacheEntry(x, y, wrapper)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Target / selector builders
-    # ──────────────────────────────────────────────────────────────────
 
     def _build_uia_target(self, wrapper, x: int, y: int) -> UITarget:
         auto_id    = self._safe(wrapper, "automation_id",       critical=True)
