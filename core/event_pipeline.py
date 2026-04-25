@@ -1,4 +1,8 @@
+
 from __future__ import annotations
+
+import queue
+import threading
 import time
 from datetime import datetime, timezone
 from typing import Callable, Optional
@@ -13,9 +17,12 @@ from models.event import (
 from models.target import UITarget
 from utils.logger import logger
 
-def _classify_intent(payload) -> str:
+def classify_intent(payload) -> str:
+    """Canonical intent classifier — import this everywhere instead of duplicating."""
     ptype = str(getattr(payload, "type", ""))
     if "navigate" in ptype or "browser_back" in ptype or "browser_forward" in ptype:
+        return "navigation"
+    if "process_launch" in ptype:
         return "navigation"
     if "clipboard" in ptype or "copy" in ptype or "paste" in ptype:
         return "clipboard"
@@ -24,12 +31,17 @@ def _classify_intent(payload) -> str:
     if "click" in ptype or "drag" in ptype:
         return "selection"
     if "scroll" in ptype:
-        return "navigation"
+        return "scroll"        # was "navigation" — corrected
     if "window_focus" in ptype:
         return "system"
     if "excel" in ptype:
         return "input"
+    if "screenshot" in ptype or "wait" in ptype:
+        return "checkpoint"
     return "system"
+
+
+_classify_intent = classify_intent
 
 
 def _target_summary(target: Optional[UITarget]) -> str:
@@ -39,7 +51,7 @@ def _target_summary(target: Optional[UITarget]) -> str:
     parts = []
     backend = getattr(target, "backend", None)
     if backend:
-        parts.append(f"backend={backend.value if hasattr(backend,'value') else backend}")
+        parts.append(f"backend={backend.value if hasattr(backend, 'value') else backend}")
     if target.process_name:
         parts.append(f"app={target.process_name}")
     if target.window_title:
@@ -61,127 +73,235 @@ def _target_summary(target: Optional[UITarget]) -> str:
     return " | ".join(parts) if parts else "(unknown)"
 
 
+# ── Pipeline ───────────────────────────────────────────────────────────────
+
+_SENTINEL = object()   # signals worker to stop
+
+
 class EventPipeline:
-    """
-    Thread-safe pipeline. Compresses noisy events and tags with intent.
-    """
+    
+    QUEUE_MAX = 2_000
+  
+    _WORKER_POLL_S = 0.005   # 5 ms
 
     def __init__(
         self,
         consumer: Callable[[Event], None],
         debounce_scroll_ms: int = 80,
     ):
-        self._consumer          = consumer
-        self._debounce_scroll   = debounce_scroll_ms
-        self._event_id          = 0
+        self._consumer        = consumer
+        self._debounce_scroll = debounce_scroll_ms
+        self._event_id        = 0
         self._session_start_ms: Optional[int] = None
-        self._last_event_ts:    dict[str, int] = {}
 
-        # Scroll compression state
-        self._pending_scroll:   Optional[dict] = None
-        self._last_scroll_ms:   int = 0
+        # Bounded queue — drops oldest on overflow (back-pressure)
+        self._q: queue.Queue = queue.Queue(maxsize=self.QUEUE_MAX)
 
-        # Text compression state (handled by recorder's text buffer — pipeline just passes through)
+        # Worker thread state
+        self._worker_thread: Optional[threading.Thread] = None
+        self._running = False
+
+        # Scroll accumulation (worker-thread only — no lock needed)
+        self._pending_scroll: Optional[dict] = None
+        self._last_scroll_ms: int = 0
+
+    # ── Lifecycle ──────────────────────────────────────────────────────────
 
     def start(self) -> None:
+        if self._running:
+            return
         self._session_start_ms = self._now_ms()
         self._event_id = 0
+        self._running = True
+        self._worker_thread = threading.Thread(
+            target=self._worker, daemon=True, name="EventPipelineWorker"
+        )
+        self._worker_thread.start()
         logger.info("[PIPELINE] Started — session clock reset")
 
     def stop(self) -> None:
-        self._flush_pending_scroll()
+        """Flush pending scroll, drain queue, stop worker, wait for join."""
+        self._running = False
+        # Send sentinel so worker exits its blocking get()
+        try:
+            self._q.put_nowait(_SENTINEL)
+        except queue.Full:
+            pass
+        if self._worker_thread:
+            self._worker_thread.join(timeout=5.0)
         logger.info("[PIPELINE] Stopped — {} events emitted", self._event_id)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Emit helpers
-    # ──────────────────────────────────────────────────────────────────
+    # ── Public emit API (called from hook threads) ─────────────────────────
 
     def emit_click(self, x: int, y: int, button: str = "left",
                    target: Optional[UITarget] = None) -> None:
-        self._flush_pending_scroll()
-        self._emit(MouseClickEvent(x=x, y=y, button=button, target=target))
+        self._enqueue(("flush_scroll", None))
+        self._enqueue(("emit", MouseClickEvent(x=x, y=y, button=button, target=target)))
 
     def emit_double_click(self, x: int, y: int,
                           target: Optional[UITarget] = None) -> None:
-        self._flush_pending_scroll()
-        self._emit(MouseDoubleClickEvent(x=x, y=y, target=target))
+        self._enqueue(("flush_scroll", None))
+        self._enqueue(("emit", MouseDoubleClickEvent(x=x, y=y, target=target)))
 
     def emit_right_click(self, x: int, y: int,
                          target: Optional[UITarget] = None) -> None:
-        self._flush_pending_scroll()
-        self._emit(MouseRightClickEvent(x=x, y=y, target=target))
+        self._enqueue(("flush_scroll", None))
+        self._enqueue(("emit", MouseRightClickEvent(x=x, y=y, target=target)))
 
     def emit_scroll(self, x: int, y: int, dx: int, dy: int,
                     target: Optional[UITarget] = None) -> None:
-        """
-        Compress consecutive scroll events in the same direction.
-        Emits the accumulated scroll when direction changes or flush is called.
-        """
-        now = self._now_ms()
-        if (now - self._last_scroll_ms) < self._debounce_scroll:
-            # Debounce — merge into pending
-            if self._pending_scroll:
-                self._pending_scroll["dx"] += dx
-                self._pending_scroll["dy"] += dy
-                self._last_scroll_ms = now
-                return
-
-        # Check direction change
-        if self._pending_scroll:
-            same_dir = (
-                (dy > 0) == (self._pending_scroll["dy"] > 0) or
-                (dx > 0) == (self._pending_scroll["dx"] > 0)
-            )
-            if not same_dir:
-                self._flush_pending_scroll()
-
-        if self._pending_scroll:
-            self._pending_scroll["dx"] += dx
-            self._pending_scroll["dy"] += dy
-        else:
-            self._pending_scroll = {"x": x, "y": y, "dx": dx, "dy": dy, "target": target}
-        self._last_scroll_ms = now
+       
+        self._enqueue(("scroll", {"x": x, "y": y, "dx": dx, "dy": dy, "target": target}))
 
     def emit_key_press(self, key: str, target: Optional[UITarget] = None) -> None:
-        self._emit(KeyPressEvent(key=key, target=target))
+        self._enqueue(("emit", KeyPressEvent(key=key, target=target)))
 
     def emit_key_combo(self, keys: list[str], target: Optional[UITarget] = None) -> None:
-        self._emit(KeyComboEvent(keys=keys, target=target))
+        self._enqueue(("emit", KeyComboEvent(keys=keys, target=target)))
 
     def emit_type_text(self, text: str, target: Optional[UITarget] = None,
                        clear_first: bool = False) -> None:
-        self._emit(TypeTextEvent(text=text, target=target, clear_first=clear_first))
+        self._enqueue(("emit", TypeTextEvent(text=text, target=target, clear_first=clear_first)))
 
     def emit_window_focus(self, title: str, process: str,
                           x: int, y: int, w: int, h: int) -> None:
-        self._emit(WindowFocusEvent(
+        self._enqueue(("emit", WindowFocusEvent(
             window_title=title, process_name=process,
             x=x, y=y, width=w, height=h,
-        ))
+        )))
 
     def emit_screenshot(self, path: str, monitor: int = 0) -> None:
-        self._emit(ScreenshotCheckpointEvent(path=path))
+        self._enqueue(("emit", ScreenshotCheckpointEvent(path=path)))
 
     def emit_wait(self, duration_ms: int) -> None:
-        self._emit(ExplicitWaitEvent(duration_ms=duration_ms))
+        self._enqueue(("emit", ExplicitWaitEvent(duration_ms=duration_ms)))
 
-    # ──────────────────────────────────────────────────────────────────
-    # Internal
-    # ──────────────────────────────────────────────────────────────────
+    # ── Internal queue helpers ─────────────────────────────────────────────
+
+    def _enqueue(self, msg) -> None:
+        try:
+            self._q.put_nowait(msg)
+        except queue.Full:
+            # Back-pressure: drop the oldest message and retry
+            try:
+                self._q.get_nowait()
+            except queue.Empty:
+                pass
+            try:
+                self._q.put_nowait(msg)
+            except queue.Full:
+                pass
+
+    # ── Worker thread ──────────────────────────────────────────────────────
+
+    def _worker(self) -> None:
+        """Single worker thread — processes messages in FIFO order."""
+        while True:
+            try:
+                msg = self._q.get(timeout=self._WORKER_POLL_S)
+            except queue.Empty:
+                # Periodic auto-flush: emit accumulated scroll if idle
+                self._maybe_autoflush_scroll()
+                continue
+
+            if msg is _SENTINEL:
+                break
+
+            kind, data = msg
+
+            if kind == "emit":
+                self._flush_pending_scroll()
+                self._emit_direct(data)
+
+            elif kind == "flush_scroll":
+                self._flush_pending_scroll()
+
+            elif kind == "scroll":
+                self._accumulate_scroll(data)
+
+        # Drain remaining items after sentinel
+        while not self._q.empty():
+            try:
+                msg = self._q.get_nowait()
+                if msg is _SENTINEL:
+                    continue
+                kind, data = msg
+                if kind == "emit":
+                    self._emit_direct(data)
+                elif kind == "scroll":
+                    self._accumulate_scroll(data)
+            except queue.Empty:
+                break
+
+        # Final flush
+        self._flush_pending_scroll()
+
+    # ── Scroll accumulation (worker-thread only) ───────────────────────────
+
+    def _accumulate_scroll(self, s: dict) -> None:
+        now = self._now_ms()
+        dx, dy = s["dx"], s["dy"]
+
+        # Determine dominant axis for this event
+        new_axis = "y" if abs(dy) >= abs(dx) else "x"
+        new_sign = (dy > 0) if new_axis == "y" else (dx > 0)
+
+        if self._pending_scroll is None:
+            # No pending — start fresh
+            self._pending_scroll = dict(s)
+            self._last_scroll_ms = now
+            return
+
+        p = self._pending_scroll
+        elapsed = now - self._last_scroll_ms
+
+        # Within debounce window → always merge (minor direction flips ignored)
+        if elapsed < self._debounce_scroll:
+            p["dx"] += dx
+            p["dy"] += dy
+            self._last_scroll_ms = now
+            return
+
+        # Outside debounce window — check axis and direction
+        pending_axis = "y" if abs(p["dy"]) >= abs(p["dx"]) else "x"
+        pending_sign = (p["dy"] > 0) if pending_axis == "y" else (p["dx"] > 0)
+
+        if new_axis != pending_axis or new_sign != pending_sign:
+            # Axis changed OR direction reversed → flush pending, start fresh
+            self._flush_pending_scroll()
+            self._pending_scroll = dict(s)
+        else:
+            # Same axis + same direction → accumulate
+            p["dx"] += dx
+            p["dy"] += dy
+
+        self._last_scroll_ms = now
+
+    def _maybe_autoflush_scroll(self) -> None:
+        """Auto-flush pending scroll if it has been idle > 3× debounce window."""
+        if self._pending_scroll is None:
+            return
+        elapsed = self._now_ms() - self._last_scroll_ms
+        if elapsed > self._debounce_scroll * 3:
+            self._flush_pending_scroll()
 
     def _flush_pending_scroll(self) -> None:
-        if self._pending_scroll:
-            s = self._pending_scroll
-            self._pending_scroll = None
-            self._emit(MouseScrollEvent(
-                x=s["x"], y=s["y"], dx=s["dx"], dy=s["dy"], target=s["target"]
-            ))
+        if self._pending_scroll is None:
+            return
+        s = self._pending_scroll
+        self._pending_scroll = None
+        self._emit_direct(MouseScrollEvent(
+            x=s["x"], y=s["y"], dx=s["dx"], dy=s["dy"], target=s["target"]
+        ))
 
-    def _emit(self, payload) -> None:
+    # ── Core emitter (worker-thread only) ─────────────────────────────────
+
+    def _emit_direct(self, payload) -> None:
+        """Build Event, log it, call consumer. Runs only in worker thread."""
         self._event_id += 1
-        now    = self._now_ms()
-        ts_ms  = now - (self._session_start_ms or now)
-        intent = _classify_intent(payload)
+        now   = self._now_ms()
+        ts_ms = now - (self._session_start_ms or now)
+        intent = classify_intent(payload)
 
         event = Event(
             id=self._event_id,
@@ -207,8 +327,8 @@ class EventPipeline:
             extra = f" pos=({payload.x},{payload.y})"
 
         logger.info(
-            "[EVENT #{:04d}] type={:<30} intent={:<12} {}{} — {}",
-            self._event_id, ptype, intent, extra, "", tsum
+            "[EVENT #{:04d}] type={:<30} intent={:<12}{} — {}",
+            self._event_id, ptype, intent, extra, tsum,
         )
 
         try:

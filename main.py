@@ -16,7 +16,6 @@ from pathlib import Path
 
 
 def is_admin() -> bool:
-    """Check whether the process has administrator privileges (Windows)."""
     try:
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
     except Exception:

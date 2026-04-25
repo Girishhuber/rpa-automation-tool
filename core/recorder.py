@@ -38,6 +38,7 @@ try:
 except ImportError:
     PYNPUT_OK = False
     logger.warning("[RECORD] pynput not installed - cannot record")
+    
 
 try:
     import win32clipboard, win32con
@@ -162,7 +163,163 @@ def _classify_intent(payload) -> str:
     return "system"
 
 
+_NAMEBOX_HWND_CACHE: dict[int, int] = {}   # excel_hwnd -> namebox_hwnd
+_NAMEBOX_HWND_LOCK  = threading.Lock()
+
+_WM_GETTEXT     = 0x000D
+_WM_SETTEXT     = 0x000C   # Write text directly to a control — instant, no clipboard race
+_GWL_STYLE      = -16
+_WS_VISIBLE     = 0x10000000
+
+EnumChildProc = ctypes.WINFUNCTYPE(
+    ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM
+)
+
+
+def _sendmsg_get_text(hwnd: int, max_chars: int = 512) -> str:
+    """Read control text via WM_GETTEXT — synchronous cross-thread, ~0ms."""
+    if not hwnd:
+        return ""
+    buf = ctypes.create_unicode_buffer(max_chars)
+    sent = ctypes.windll.user32.SendMessageW(hwnd, _WM_GETTEXT, max_chars, buf)
+    return buf.value if sent > 0 else ""
+
+
+def _sendmsg_set_text(hwnd: int, text: str) -> bool:
+    """Write text directly to a control via WM_SETTEXT — no clipboard, no race."""
+    if not hwnd:
+        return False
+    res = ctypes.windll.user32.SendMessageW(hwnd, _WM_SETTEXT, 0, text)
+    return bool(res)
+
+
+# Cache for formula bar HWND
+_FORMULABAR_HWND_CACHE: dict[int, int] = {}
+_FORMULABAR_HWND_LOCK  = threading.Lock()
+
+
+def _find_namebox_hwnd(excel_hwnd: int) -> int:
+   
+    candidates: list[tuple[int, str]] = []  # (hwnd, class)
+
+    def _cb(hwnd, _lp):
+        buf = ctypes.create_unicode_buffer(64)
+        ctypes.windll.user32.GetClassNameW(hwnd, buf, 64)
+        cls = buf.value
+        if cls in ("EXCEL71", "NameBox", "NetUICombobox"):
+            # Record width so we can separate Name Box (narrow) from Formula Bar (wide)
+            rect = ctypes.wintypes.RECT()
+            ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect))
+            w = rect.right - rect.left
+            candidates.append((hwnd, cls, w))
+        return True
+
+    proc = EnumChildProc(_cb)
+    ctypes.windll.user32.EnumChildWindows(excel_hwnd, proc, 0)
+
+    if not candidates:
+        return 0
+
+    # Prefer EXCEL71 — pick the NARROWEST one (Name Box is ~80-150px wide)
+    excel71 = [(h, c, w) for h, c, w in candidates if c == "EXCEL71"]
+    if excel71:
+        excel71.sort(key=lambda t: t[2])   # ascending by width → narrowest first
+        return excel71[0][0]
+    # NameBox fallback
+    for hwnd, cls, _ in candidates:
+        if cls == "NameBox":
+            return hwnd
+    return candidates[0][0]
+
+
+def _find_formulabar_hwnd(excel_hwnd: int) -> int:
+    """Find the Formula Bar EXCEL71 child — it is the WIDEST EXCEL71 control."""
+    candidates: list[tuple[int, int]] = []  # (hwnd, width)
+
+    def _cb(hwnd, _lp):
+        buf = ctypes.create_unicode_buffer(64)
+        ctypes.windll.user32.GetClassNameW(hwnd, buf, 64)
+        if buf.value == "EXCEL71":
+            rect = ctypes.wintypes.RECT()
+            ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect))
+            candidates.append((hwnd, rect.right - rect.left))
+        return True
+
+    proc = EnumChildProc(_cb)
+    ctypes.windll.user32.EnumChildWindows(excel_hwnd, proc, 0)
+    if not candidates:
+        return 0
+    candidates.sort(key=lambda t: t[1], reverse=True)  # widest first = formula bar
+    return candidates[0][0]
+
+
+def _excel_get_formulabar_hwnd(excel_hwnd: int) -> int:
+    """Cached formula bar HWND lookup."""
+    with _FORMULABAR_HWND_LOCK:
+        fb = _FORMULABAR_HWND_CACHE.get(excel_hwnd, 0)
+    if fb:
+        # Validate still alive
+        if _sendmsg_get_text(fb, 4) is not None:
+            return fb
+        with _FORMULABAR_HWND_LOCK:
+            _FORMULABAR_HWND_CACHE.pop(excel_hwnd, None)
+    fb = _find_formulabar_hwnd(excel_hwnd)
+    if fb:
+        with _FORMULABAR_HWND_LOCK:
+            _FORMULABAR_HWND_CACHE[excel_hwnd] = fb
+    return fb
+
+
+def _winapi_get_window_text(hwnd: int) -> str:
+    """Read window text via GetWindowText — no COM, ~0 ms."""
+    if not hwnd:
+        return ""
+    buf = ctypes.create_unicode_buffer(256)
+    ctypes.windll.user32.GetWindowTextW(hwnd, buf, 256)
+    return buf.value
+
+
+def _excel_get_name_box_fast(excel_hwnd: int) -> Optional[str]:
+    with _NAMEBOX_HWND_LOCK:
+        nb_hwnd = _NAMEBOX_HWND_CACHE.get(excel_hwnd, 0)
+
+    if nb_hwnd:
+        # Use SendMessage (WM_GETTEXT) — more reliable than GetWindowText for child controls
+        val = _sendmsg_get_text(nb_hwnd) or _winapi_get_window_text(nb_hwnd)
+        if val:
+            return val.strip() or None
+        # stale — clear cache
+        with _NAMEBOX_HWND_LOCK:
+            _NAMEBOX_HWND_CACHE.pop(excel_hwnd, None)
+        nb_hwnd = 0
+
+    # Scan child windows to find/refresh HWND
+    nb_hwnd = _find_namebox_hwnd(excel_hwnd)
+    if nb_hwnd:
+        with _NAMEBOX_HWND_LOCK:
+            _NAMEBOX_HWND_CACHE[excel_hwnd] = nb_hwnd
+        val = _sendmsg_get_text(nb_hwnd) or _winapi_get_window_text(nb_hwnd)
+        if val:
+            return val.strip() or None
+
+    return None
+
+
+def _excel_get_formulabar_value(excel_hwnd: int) -> Optional[str]:
+    """Read the formula bar text (current cell content) via WM_GETTEXT — ~0ms, no UIA."""
+    fb = _excel_get_formulabar_hwnd(excel_hwnd)
+    if not fb:
+        return None
+    val = _sendmsg_get_text(fb, 1024)
+    return val.strip() if val else None
+
+
 def _excel_get_name_box_value(hwnd: int) -> Optional[str]:
+    val = _excel_get_name_box_fast(hwnd)
+    if val:
+        return val
+
+    # Strategy C: pywinauto UIA — slow, last resort only
     if not UIA_OK:
         return None
     try:
@@ -171,21 +328,21 @@ def _excel_get_name_box_value(hwnd: int) -> Optional[str]:
 
         try:
             elem = win.child_window(auto_id="Box", control_type="Edit")
-            if elem.exists(timeout=0.3):
-                val = elem.wrapper_object().window_text() or ""
-                if val:
-                    return val.strip()
+            if elem.exists(timeout=0.15):
+                v = elem.wrapper_object().window_text() or ""
+                if v:
+                    return v.strip()
         except Exception:
             pass
 
         try:
             descs = win.descendants(auto_id="Box")
-            for d in descs[:3]:
+            for d in descs[:2]:
                 try:
                     wrapper = d.wrapper_object() if hasattr(d, "wrapper_object") else d
-                    val = wrapper.window_text() or ""
-                    clean = val.strip()
-                    if val and (
+                    v = wrapper.window_text() or ""
+                    clean = v.strip()
+                    if clean and (
                         _CELL_RE.match(clean.upper())
                         or _RANGE_RE.match(clean.upper())
                         or _SHEET_CELL_RE.match(clean)
@@ -195,25 +352,89 @@ def _excel_get_name_box_value(hwnd: int) -> Optional[str]:
                     continue
         except Exception:
             pass
-
-        try:
-            descs = win.descendants(class_name="NameBox")
-            for d in descs[:2]:
-                try:
-                    wrapper = d.wrapper_object() if hasattr(d, "wrapper_object") else d
-                    val = wrapper.window_text() or ""
-                    if val:
-                        return val.strip()
-                except Exception:
-                    continue
-        except Exception:
-            pass
     except Exception:
         pass
     return None
 
 
+
+
+_TABBAR_HWND_CACHE: dict[int, int] = {}  # excel_hwnd -> tab-bar HWND
+_TABBAR_HWND_LOCK  = threading.Lock()
+
+_EXCEL_TITLE_SHEET_RE = re.compile(
+    r"^(.+?)\s*-\s*\[",       # "SheetName - [Book1.xlsx]..."
+)
+
+
+def _excel_sheet_from_title(hwnd: int) -> Optional[str]:
+
+    title = _winapi_get_window_text(hwnd)
+    m = _EXCEL_TITLE_SHEET_RE.match(title)
+    return m.group(1).strip() if m else None
+
+
+def _find_tabbar_hwnd(excel_hwnd: int) -> int:
+    """Find the sheet tab-bar child (SysTabControl32 or similar)."""
+    result = [0]
+
+    def _cb(hwnd, _lp):
+        buf = ctypes.create_unicode_buffer(64)
+        ctypes.windll.user32.GetClassNameW(hwnd, buf, 64)
+        cls = buf.value
+        if cls in ("SysTabControl32", "XLSHEET"):
+            result[0] = hwnd
+            return False   # stop enum
+        return True
+
+    proc = EnumChildProc(_cb)
+    ctypes.windll.user32.EnumChildWindows(excel_hwnd, proc, 0)
+    return result[0]
+
+
 def _excel_get_active_sheet(hwnd: int) -> Optional[str]:
+    with _TABBAR_HWND_LOCK:
+        tb_hwnd = _TABBAR_HWND_CACHE.get(hwnd, 0)
+
+    if not tb_hwnd:
+        tb_hwnd = _find_tabbar_hwnd(hwnd)
+        if tb_hwnd:
+            with _TABBAR_HWND_LOCK:
+                _TABBAR_HWND_CACHE[hwnd] = tb_hwnd
+
+    if tb_hwnd:
+        TCM_GETCURSEL = 0x130B
+        cur = ctypes.windll.user32.SendMessageW(tb_hwnd, TCM_GETCURSEL, 0, 0)
+        if cur >= 0:
+        
+            if not UIA_OK:
+                return None
+            try:
+                from pywinauto import Application as _App
+                app = _App(backend="uia").connect(handle=hwnd)
+                win = app.window(handle=hwnd)
+                tabs = win.descendants(control_type="TabItem")
+                for i, tab in enumerate(tabs):
+                    try:
+                        wrapper = tab.wrapper_object() if hasattr(tab, "wrapper_object") else tab
+                        try:
+                            if wrapper.get_toggle_state() == 1:
+                                return wrapper.window_text() or None
+                        except Exception:
+                            pass
+                        try:
+                            if wrapper.is_selected():
+                                return wrapper.window_text() or None
+                        except Exception:
+                            pass
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+    # ------------------------------------------------------------------
+    # Fallback: original full UIA scan
+    # ------------------------------------------------------------------
     if not UIA_OK:
         return None
     try:
@@ -248,33 +469,26 @@ def _excel_get_active_sheet(hwnd: int) -> Optional[str]:
 
 
 def _excel_get_cell_value(hwnd: int, cell_ref: str) -> Optional[str]:
+    """Read current cell content from formula bar — fast WinAPI first, UIA fallback."""
+    # Fast path: formula bar via WM_GETTEXT (~0ms, no COM)
+    fb_val = _excel_get_formulabar_value(hwnd)
+    if fb_val is not None:
+        return fb_val
+
+    # Slow fallback: UIA (only if formula bar HWND scan failed)
     if not UIA_OK:
         return None
     try:
         app = Application(backend="uia").connect(handle=hwnd)
         win = app.window(handle=hwnd)
-
         for aid in ("FormulaBar", "formulaBar"):
             try:
                 fb = win.child_window(auto_id=aid)
-                if fb.exists(timeout=0.2):
+                if fb.exists(timeout=0.15):
                     val = fb.wrapper_object().window_text() or ""
                     return val if val else None
             except Exception:
                 pass
-
-        try:
-            descs = win.descendants(class_name="EXCEL71")
-            for d in descs[:2]:
-                try:
-                    wrapper = d.wrapper_object() if hasattr(d, "wrapper_object") else d
-                    val = wrapper.window_text() or ""
-                    if val:
-                        return val
-                except Exception:
-                    continue
-        except Exception:
-            pass
     except Exception:
         pass
     return None
@@ -507,9 +721,12 @@ class Recorder:
             self._kbd_listener.stop()
 
     def _monitor_excel_context(self) -> None:
+        _sheet_counter = 0
+        _SHEET_POLL_EVERY = 10   # check sheet every 10 × 50 ms = 500 ms
+
         while self._running:
             try:
-                time.sleep(0.5)
+                time.sleep(0.05)   # 50ms — fast enough to catch cell before first keystroke
 
                 hwnd = self._excel_hwnd
                 if not hwnd:
@@ -521,14 +738,22 @@ class Recorder:
                 if not hwnd:
                     continue
 
-                sheet = _excel_get_active_sheet(hwnd)
-                if sheet:
-                    with self._excel_context_lock:
-                        self._excel_active_sheet = sheet
-                        if self._excel_clicked_cell and not self._excel_clicked_sheet:
-                            self._excel_clicked_sheet = sheet
+                # ----- Sheet name poll (every 500 ms) -----
+                _sheet_counter += 1
+                if _sheet_counter >= _SHEET_POLL_EVERY:
+                    _sheet_counter = 0
+                    sheet = _excel_get_active_sheet(hwnd)
+                    if sheet:
+                        with self._excel_context_lock:
+                            self._excel_active_sheet = sheet
+                            if self._excel_clicked_cell and not self._excel_clicked_sheet:
+                                self._excel_clicked_sheet = sheet
 
-                if self._text_buffer or self._excel_in_edit_mode or self._excel_clicked_cell:
+                # ----- Name Box poll -----
+                # Only skip if we are mid-buffer AND already have a confirmed click cell.
+                # Never skip purely because _excel_clicked_cell is set — that would
+                # prevent us catching the cell when a buffer starts on a fresh click.
+                if self._text_buffer and self._excel_clicked_cell:
                     continue
 
                 name_val = _excel_get_name_box_value(hwnd)
@@ -536,7 +761,7 @@ class Recorder:
                     continue
 
                 parsed_range = _parse_range_ref(name_val)
-                parsed_cell = _parse_cell_ref(name_val)
+                parsed_cell  = _parse_cell_ref(name_val)
 
                 with self._excel_context_lock:
                     if parsed_range:
@@ -545,15 +770,24 @@ class Recorder:
                     elif parsed_cell:
                         self._excel_active_cell = parsed_cell
                         self._excel_cell_source = "poll"
+                        # Pre-populate clicked context if not already set —
+                        # ensures typing context is available before click UIA resolves
+                        if not self._excel_clicked_cell:
+                            self._excel_clicked_cell = parsed_cell
+                            self._excel_clicked_sheet = self._excel_active_sheet
+                            self._excel_cell_source = "poll_preload"
                     elif "!" in name_val:
                         parts = name_val.strip().split("!", 1)
                         if len(parts) == 2:
-                            sheet_name, cell = parts
+                            sheet_nm, cell = parts
                             parsed = _parse_cell_ref(cell)
                             if parsed:
                                 self._excel_active_cell = parsed
-                                self._excel_active_sheet = sheet_name.strip("'")
+                                self._excel_active_sheet = sheet_nm.strip("'")
                                 self._excel_cell_source = "poll"
+                                if not self._excel_clicked_cell:
+                                    self._excel_clicked_cell = parsed
+                                    self._excel_clicked_sheet = sheet_nm.strip("'")
 
             except Exception as exc:
                 logger.debug("[RECORD] excel_context thread: {}", exc)
@@ -607,23 +841,38 @@ class Recorder:
                     "cell_ref": self._excel_clicked_cell,
                     "sheet_name": self._excel_clicked_sheet or self._excel_active_sheet,
                     "target": self._excel_clicked_target,
-                    "source": "click",
+                    "source": self._excel_cell_source or "click",
                 }
-
-            if self._excel_cell_source in {"click", "namebox", "nav"} and self._excel_active_cell:
+            # Accept any poll-sourced cell — Name Box is authoritative
+            if self._excel_active_cell:
                 return {
                     "cell_ref": self._excel_active_cell,
                     "sheet_name": self._excel_active_sheet,
                     "target": None,
-                    "source": self._excel_cell_source,
+                    "source": self._excel_cell_source or "poll",
                 }
 
-        return {
-            "cell_ref": None,
-            "sheet_name": None,
-            "target": None,
-            "source": None,
-        }
+        # Last resort: synchronous Name Box read right now
+        hwnd = self._excel_hwnd
+        if not hwnd:
+            hwnd = _excel_find_hwnd()
+        if hwnd:
+            nb_val = _excel_get_name_box_value(hwnd)
+            cell = _parse_cell_ref(nb_val or "")
+            if cell:
+                with self._excel_context_lock:
+                    self._excel_active_cell = cell
+                    self._excel_clicked_cell = cell
+                    self._excel_cell_source = "typing_sync"
+                logger.info("[RECORD] Excel typing-sync namebox: {}", cell)
+                return {
+                    "cell_ref": cell,
+                    "sheet_name": self._excel_active_sheet,
+                    "target": None,
+                    "source": "typing_sync",
+                }
+
+        return {"cell_ref": None, "sheet_name": None, "target": None, "source": None}
 
 
     def _on_mouse_move(self, x: int, y: int) -> None:
@@ -787,13 +1036,26 @@ class Recorder:
             sheet_name = ctx.get("sheet_name")
 
             hwnd = self._excel_hwnd or _excel_find_hwnd()
-            value = _excel_get_cell_value(hwnd, cell) if hwnd else None
+
+            # Confirm with Name Box — ground truth, faster than UIA resolution
+            if hwnd:
+                nb_val = _excel_get_name_box_value(hwnd)
+                confirmed = _parse_cell_ref(nb_val or "")
+                if confirmed and confirmed != cell:
+                    logger.info(
+                        "[RECORD] Excel cell: UIA='{}' Name Box='{}' — trusting Name Box",
+                        cell, confirmed,
+                    )
+                    cell = confirmed
+
+            # Read cell value from formula bar (fast WinAPI, no UIA round-trip)
+            value = _excel_get_formulabar_value(hwnd) if hwnd else None
+            if value is None and hwnd:
+                value = _excel_get_cell_value(hwnd, cell)
 
             logger.info(
                 "[RECORD] Excel cell click: {} sheet={} value={}",
-                cell,
-                sheet_name,
-                (value or "")[:30],
+                cell, sheet_name, (value or "")[:30],
             )
 
             excel_target = self._make_excel_cell_target(cell, sheet_name, target)
@@ -1004,16 +1266,33 @@ class Recorder:
                 cell_ref = ctx.get("cell_ref")
                 sheet_name = ctx.get("sheet_name")
 
+                # Sync fallback: if context still missing, read Name Box RIGHT NOW
+                if not cell_ref:
+                    hwnd = self._excel_hwnd
+                    if not hwnd:
+                        hwnd = _excel_find_hwnd()
+                    if hwnd:
+                        nb_val = _excel_get_name_box_value(hwnd)
+                        cell_ref = _parse_cell_ref(nb_val or "")
+                        if cell_ref:
+                            with self._excel_context_lock:
+                                self._excel_active_cell = cell_ref
+                                self._excel_clicked_cell = cell_ref
+                                self._excel_clicked_sheet = self._excel_active_sheet
+                                self._excel_cell_source = "char_sync"
+                            sheet_name = self._excel_active_sheet
+                            logger.debug(
+                                "[RECORD] Excel char-sync namebox: {} on char '{}'",
+                                cell_ref, char,
+                            )
+
                 self._text_buffer_excel_context = (
                     {"cell_ref": cell_ref, "sheet_name": sheet_name}
-                    if cell_ref
-                    else None
+                    if cell_ref else None
                 )
-
                 self._text_buffer_target = (
                     self._make_excel_cell_target(cell_ref, sheet_name)
-                    if cell_ref
-                    else None
+                    if cell_ref else None
                 )
             else:
                 self._text_buffer_target = self._get_typing_target() or self._last_target
@@ -1054,6 +1333,7 @@ class Recorder:
 
                 target.backend = TargetBackend.UIA
                 target.name = cell_name
+                target.automation_id = cell_name   # replayer uses this for instant lookup
                 target.control_type = target.control_type or "SpreadsheetItem"
                 target.is_editable = True
 
@@ -1069,6 +1349,7 @@ class Recorder:
             process_name="EXCEL.EXE",
             control_type="SpreadsheetItem",
             name=cell_name or "UNKNOWN_CELL",
+            automation_id=cell_name or "",   # replayer instant lookup
             is_editable=True,
         )
 
@@ -1258,6 +1539,24 @@ class Recorder:
                 ctx = self._text_buffer_excel_context or self._get_excel_typing_context()
                 cell_ref = ctx.get("cell_ref")
                 sheet_name = ctx.get("sheet_name")
+
+                # Last resort: read Name Box synchronously RIGHT NOW
+                if not cell_ref:
+                    hwnd = self._excel_hwnd
+                    if not hwnd:
+                        hwnd = _excel_find_hwnd()
+                    if hwnd:
+                        nb_val = _excel_get_name_box_value(hwnd)
+                        cell_ref = _parse_cell_ref(nb_val or "")
+                        if cell_ref:
+                            logger.info(
+                                "[RECORD] Excel flush-sync namebox: {} for text '{}'",
+                                cell_ref, text[:30],
+                            )
+                            with self._excel_context_lock:
+                                self._excel_active_cell = cell_ref
+                                self._excel_clicked_cell = cell_ref
+                                self._excel_cell_source = "flush_sync"
 
                 if not cell_ref:
                     logger.error(
