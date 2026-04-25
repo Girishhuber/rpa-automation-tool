@@ -1231,10 +1231,10 @@ class ElementMatcher:
                 return False
             if target.name:
                 found_text = elem.window_text() or ""
-                sim        = _text_similarity(target.name, found_text)
-                # FIX: Lower threshold for Excel cells (they might have different naming)
+                sim  = _text_similarity(target.name, found_text)
+            
                 threshold = 0.50 if _is_excel_target(target) else 0.65
-                ok         = sim >= threshold
+                ok  = sim >= threshold
                 logger.debug("[MATCH] cross-validate name sim={:.2f} ok={}", sim, ok)
                 return ok
             if target.control_type:
@@ -1271,7 +1271,7 @@ class ElementMatcher:
 
     _stability_check = _stability_check_fast
 
-    # ── Context gate ──────────────────────────────────────────────────────
+
 
     def _context_gate(self, results: list[MatchResult], target: UITarget) -> list[MatchResult]:
         if not target.window_title and not target.process_name:
@@ -1283,7 +1283,7 @@ class ElementMatcher:
                 continue
             bonus = 0.0
             try:
-                raw      = r.element.raw() if hasattr(r.element, "raw") else r.element
+                raw  = r.element.raw() if hasattr(r.element, "raw") else r.element
                 win_text = raw.top_level_parent().window_text() or ""
                 if target.window_title:
                     if any(v.lower() in win_text.lower()
@@ -1512,40 +1512,17 @@ class ElementMatcher:
     # ── Coordinate fallback ───────────────────────────────────────────────
 
     def _coord_fallback(self, t: UITarget, event_id: int):
-        rel = getattr(t, "relative_to_window", None)
-        if rel and t.window_title:
-            try:
-                handles = _find_window_handles(t.window_title)
-                if handles:
-                    app = self._get_app(handles[0])
-                    win = app.window(handle=handles[0])
-                    wr  = win.rectangle()
-                    cx  = wr.left + rel["x"] + rel["w"] // 2
-                    cy  = wr.top  + rel["y"] + rel["h"] // 2
-                    logger.debug("[MATCH] Event #{} relative coord fallback ({},{})",
-                                 event_id, cx, cy)
-                    return (cx, cy)
-            except Exception:
-                pass
-
-        raw = getattr(t, "raw_bbox", None)
-        if raw:
-            cx = (raw.left + raw.right)  // 2
-            cy = (raw.top  + raw.bottom) // 2
-            recorded_dpi = t.dpi_scale or 1.0
-            current_dpi  = _primary_dpi()
-            if abs(current_dpi - recorded_dpi) > 0.05:
-                cx = int(cx * current_dpi / recorded_dpi)
-                cy = int(cy * current_dpi / recorded_dpi)
-            return (cx, cy)
-
+        
         if t.bbox:
-            cx_logical  = (t.bbox.left + t.bbox.right)  / 2
-            cy_logical  = (t.bbox.top  + t.bbox.bottom) / 2
-            current_dpi = _dpi_for_point(int(cx_logical), int(cy_logical))
-            return (int(cx_logical * current_dpi), int(cy_logical * current_dpi))
-
+            scale = _primary_dpi() / (t.dpi_scale or 1.0)
+            cx    = int(((t.bbox.left + t.bbox.right)  / 2) * scale)
+            cy    = int(((t.bbox.top  + t.bbox.bottom) / 2) * scale)
+            # Adjust for per-monitor DPI
+            actual = _dpi_for_point(cx, cy)
+            if abs(actual - _primary_dpi()) > 0.05:
+                cx = int(cx * actual / _primary_dpi())
+                cy = int(cy * actual / _primary_dpi())
+            return (cx, cy)
         if t.screen_x is not None:
             return (t.screen_x, t.screen_y)
-
         raise ElementNotFoundError(f"Event #{event_id}: no fallback coordinates", event_id)

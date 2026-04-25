@@ -84,7 +84,7 @@ EnumChildProc = ctypes.WINFUNCTYPE(
 
 
 def _winapi_sendmsg_get(hwnd: int, max_chars: int = 512) -> str:
-    """Read a control's text via WM_GETTEXT — synchronous, ~0ms."""
+   
     if not hwnd:
         return ""
     buf = ctypes.create_unicode_buffer(max_chars)
@@ -93,14 +93,14 @@ def _winapi_sendmsg_get(hwnd: int, max_chars: int = 512) -> str:
 
 
 def _winapi_sendmsg_set(hwnd: int, text: str) -> bool:
-    """Write text to a control via WM_SETTEXT — synchronous, no clipboard race."""
+   
     if not hwnd:
         return False
     return bool(ctypes.windll.user32.SendMessageW(hwnd, _WM_SETTEXT, 0, text))
 
 
 def _winapi_press_enter(hwnd: int) -> None:
-    """Send VK_RETURN keydown+up to a control via PostMessage."""
+    
     ctypes.windll.user32.PostMessageW(hwnd, _WM_KEYDOWN, _VK_RETURN, 0)
     ctypes.windll.user32.PostMessageW(hwnd, _WM_KEYUP,   _VK_RETURN, 0)
 
@@ -252,9 +252,6 @@ class ReplayEngine:
         # REP-7: track expected active sheet
         self._excel_expected_sheet: Optional[str] = None
 
-    # ──────────────────────────────────────────────────────────────────
-    # Main entry
-    # ──────────────────────────────────────────────────────────────────
 
     def replay(self, session: Session) -> ReplayResult:
         self._abort.clear()
@@ -335,10 +332,7 @@ class ReplayEngine:
         if self._overlay:
             self._overlay.set_replaying(False)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Adaptive retry
-    # ──────────────────────────────────────────────────────────────────
-
+   
     def _execute_with_adaptive_retry(self, event: Event) -> tuple[bool, bool]:
         attempts      = self._config.replay.retry_attempts
         used_fallback = False
@@ -391,11 +385,9 @@ class ReplayEngine:
         else:
             self._dispatch(event)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Dispatcher
-    # ──────────────────────────────────────────────────────────────────
 
     def _dispatch(self, event: Event) -> None:
+        
         p = event.payload
 
         if isinstance(p, ScreenshotCheckpointEvent):
@@ -404,11 +396,22 @@ class ReplayEngine:
             time.sleep(max(p.duration_ms / 1000 / self._config.replay.speed, 0.05))
             return
         if isinstance(p, ProcessLaunchEvent):
-            import subprocess
-            subprocess.Popen([p.executable] + p.arguments)
-            if p.wait_for_window_title:
-                self._wait_for_window(p.wait_for_window_title, event.id)
-            return
+            if hasattr(self, "_browser") and self._browser and self._browser.is_connected:
+                logger.info("[REPLAY] Using existing browser session")
+
+                if hasattr(p, "arguments") and p.arguments:
+                    for arg in p.arguments:
+                        if isinstance(arg, str) and arg.startswith("http"):
+                            logger.info("[REPLAY] Navigating to {}", arg)
+                            self._browser.navigate(arg)
+                            return
+
+                logger.warning("[REPLAY] No URL found in ProcessLaunchEvent, skipping launch")
+                return
+
+            else:
+                logger.error("[REPLAY] Browser not connected — cannot launch Chrome deterministically")
+                raise ReplayTimeoutError("Browser not connected")
 
         if isinstance(p, WindowFocusEvent):
             self._smart_focus_window(p.window_title, event.id)
@@ -483,9 +486,6 @@ class ReplayEngine:
         if isinstance(p, MouseDragEvent):
             self._drag(p.start_x, p.start_y, p.end_x, p.end_y); return
 
-    # ──────────────────────────────────────────────────────────────────
-    # Excel: sheet management (REP-7)
-    # ──────────────────────────────────────────────────────────────────
 
     def _excel_ensure_sheet(self, sheet_name: Optional[str], event_id: int) -> None:
         """
@@ -503,7 +503,6 @@ class ReplayEngine:
         time.sleep(0.3)
 
     def _excel_get_active_sheet_name(self, event_id: int) -> Optional[str]:
-        """Read the currently active sheet name from Excel's tab bar."""
         if not UIA_OK:
             return None
         hwnd = self._get_excel_hwnd(event_id)
@@ -538,16 +537,7 @@ class ReplayEngine:
 
     def _excel_navigate_to_cell(self, cell_ref: str, event_id: int,
                                  sheet_name: Optional[str] = None) -> None:
-        """Navigate to an Excel cell using the fastest available strategy.
-
-        Priority:
-          1. WinAPI WM_SETTEXT into Name Box HWND — ~5ms, no COM, no clipboard
-          2. pywinauto UIA click on Name Box + clipboard paste
-          3. Ctrl+G GoTo dialog
-          4. F5 GoTo dialog
-          5. Direct UIA cell click (only visible cells)
-          6. Keyboard Ctrl+G last resort
-        """
+        
         if not UIA_OK:
             return
 
@@ -572,15 +562,13 @@ class ReplayEngine:
         if self._excel_nav_via_goto(ref, event_id):
             return
 
-        # Strategy 4: F5 GoTo dialog
+        
         if self._excel_nav_via_f5(ref, event_id):
             return
 
-        # Strategy 5: Direct UIA cell click (only works for visible cells)
         if self._excel_nav_via_uia_click(hwnd, ref, event_id):
             return
 
-        # Strategy 6: Last-resort keyboard Ctrl+G
         logger.warning("[REPLAY] All Excel nav strategies failed for {} — keyboard last resort", ref)
         try:
             self._focus_window_by_hwnd(hwnd)
@@ -604,9 +592,7 @@ class ReplayEngine:
         return cell_ref.strip().upper()
 
     def _get_excel_hwnd(self, event_id: int) -> Optional[int]:
-        """Find the Excel (or WPS Spreadsheet) main window handle.
-        Tries class name XLMAIN first (fastest), then title regex, then any visible
-        window whose process name contains 'excel' or 'wps'."""
+        
         if not UIA_OK:
             return None
 
@@ -630,8 +616,7 @@ class ReplayEngine:
         return None
 
     def _excel_nav_via_namebox(self, hwnd: int, cell_ref: str, event_id: int) -> bool:
-        """Strategy 1: Write cell ref directly to Name Box via WM_SETTEXT + VK_RETURN.
-        No UIA attach, no clipboard — sub-10ms. Falls back to pywinauto if WinAPI fails."""
+       
 
         ref = cell_ref.strip().upper()
 
@@ -696,7 +681,7 @@ class ReplayEngine:
             return False
 
     def _excel_nav_via_goto(self, cell_ref: str, event_id: int) -> bool:
-        """REP-1/REP-6: Strategy 2 — Ctrl+G GoTo dialog."""
+    
         try:
             self._focus_window_by_process("excel.exe", event_id)
             send_keys("{ESC}")
@@ -748,7 +733,7 @@ class ReplayEngine:
             return False
 
     def _excel_nav_via_f5(self, cell_ref: str, event_id: int) -> bool:
-        """REP-6: Strategy 3 — F5 GoTo (alternative shortcut)."""
+       
         try:
             self._focus_window_by_process("excel.exe", event_id)
             send_keys("{ESC}")
@@ -774,7 +759,7 @@ class ReplayEngine:
             return False
 
     def _excel_nav_via_uia_click(self, hwnd: int, cell_ref: str, event_id: int) -> bool:
-        """REP-6: Strategy 4 — find cell by UIA name and click it directly."""
+       
         try:
             app  = Application(backend="uia").connect(handle=hwnd)
             win  = app.window(handle=hwnd)
@@ -795,9 +780,7 @@ class ReplayEngine:
         return False
 
     def _excel_verify_cell(self, win, expected_ref: str) -> bool:
-        """
-        REP-7/REP-8: Read Name Box to verify we arrived at the expected cell.
-        """
+  
         try:
             for aid in ["Box"]:
                 try:
@@ -812,14 +795,9 @@ class ReplayEngine:
             pass
         return False
 
-    # ──────────────────────────────────────────────────────────────────
-    # REP-6: Range selection
-    # ──────────────────────────────────────────────────────────────────
-
+  
     def _excel_select_range(self, range_ref: str, event_id: int) -> None:
-        """
-        Select a range like A1:C5. Navigate to start cell, then extend selection.
-        """
+
         if ":" not in range_ref:
             self._excel_navigate_to_cell(range_ref, event_id)
             return
@@ -866,12 +844,7 @@ class ReplayEngine:
     # ──────────────────────────────────────────────────────────────────
 
     def _excel_switch_sheet(self, sheet_name: str, event_id: int) -> None:
-        """
-        REP-4: Switch to a named sheet tab.
-        Strategy 1: Find TabItem by name via descendants (not find_elements)
-        Strategy 2: Right-click tab scrollers to find hidden tabs
-        Strategy 3: Ctrl+Page Up/Down to cycle through sheets
-        """
+
         if not UIA_OK:
             return
 
@@ -937,21 +910,10 @@ class ReplayEngine:
                 break
         logger.error("[REPLAY] Cannot switch to sheet '{}'", sheet_name)
 
-    # ──────────────────────────────────────────────────────────────────
-    # REP-5/8/9: Excel cell typing
-    # ──────────────────────────────────────────────────────────────────
-
     def _excel_type_into_cell(self, text: str, elem, event_id: int,
                                is_formula: bool = False,
                                force_plain_text: bool = False,
                                excel_hwnd: int = 0) -> None:
-        """Type text into the currently-selected Excel cell.
-
-        Strategy A (fastest): Write directly to Formula Bar via WM_SETTEXT + VK_RETURN.
-          Works for plain text. Skipped for formulas (need Excel to evaluate).
-        Strategy B: Navigate to cell, ESC to clear, clipboard paste, ENTER to confirm.
-        Strategy C: F2 enter-edit-mode, Ctrl+A Delete, clipboard paste, ENTER.
-        """
         try:
             send_keys("{ESC}")
             time.sleep(0.05)
@@ -970,14 +932,12 @@ class ReplayEngine:
                         time.sleep(0.02)
                         _winapi_press_enter(fb_hwnd)
                         time.sleep(0.10)
-                        # Quick verify via formula bar
+                    
                         actual = _read_formulabar(excel_hwnd)
                         if actual.strip() == text.strip() or not actual:
                             logger.info("[REPLAY] Excel WinAPI formula-bar write ✓: '{}'", text[:30])
                             return
-                        # If verify failed, fall through to Strategy B
 
-            # ── Strategy B: clipboard paste ──────────────────────────────────────
             try:
                 elem.click_input()
                 time.sleep(0.08)
@@ -1009,12 +969,7 @@ class ReplayEngine:
             raise
 
     def _type_formula(self, formula: str) -> None:
-        """
-        REP-9: Type a formula character by character.
-        Handles: Escape key in formula (unlikely), function names, cell refs.
-        For array formulas that should be confirmed with Ctrl+Shift+Enter,
-        the formula text ends with a special marker (not implemented in model yet).
-        """
+     
         for ch in formula:
             if ch in set("{}()[]^+%~"):
                 send_keys(f"{{{ch}}}")
@@ -1026,11 +981,7 @@ class ReplayEngine:
 
     def _excel_verify_cell_value(self, elem, expected: str, event_id: int,
                                    retry: bool = False) -> None:
-        """
-        FIX REP-8: Read the cell value back and compare with expected.
-        If the cell is still empty and retry=True, wait 150ms and check again
-        before logging the warning (avoids false-positive warnings on slow Excel).
-        """
+        
         try:
             time.sleep(0.1)
             actual = elem.window_text() or ""
@@ -1469,9 +1420,6 @@ class ReplayEngine:
         """Escape cell refs for send_keys: uppercase letters become {A} etc."""
         return "".join(f"{{{c}}}" if c.isupper() else c for c in ref)
 
-    # ──────────────────────────────────────────────────────────────────
-    # SendInput
-    # ──────────────────────────────────────────────────────────────────
 
     def _sendinput_click(self, x: int, y: int, double: bool = False) -> None:
         self._move_mouse(x, y); time.sleep(0.04)
@@ -1510,10 +1458,7 @@ class ReplayEngine:
         time.sleep(0.05)
         ctypes.windll.user32.mouse_event(0x0004, 0, 0, 0, 0)
 
-    # ──────────────────────────────────────────────────────────────────
-    # Clipboard
-    # ──────────────────────────────────────────────────────────────────
-
+ 
     def _set_clipboard(self, text: str) -> None:
         if not WIN32_OK:
             return

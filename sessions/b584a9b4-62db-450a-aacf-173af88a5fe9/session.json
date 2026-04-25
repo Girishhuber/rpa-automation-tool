@@ -1,0 +1,5555 @@
+{
+  "id": "b584a9b4-62db-450a-aacf-173af88a5fe9",
+  "name": "My workflowsamplexcel",
+  "description": "",
+  "tags": [],
+  "created_at": "2026-04-25T12:29:57.249897+00:00",
+  "updated_at": "2026-04-25T12:30:38.968564+00:00",
+  "duration_ms": 41710,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.26200",
+    "screen_width": 1920,
+    "screen_height": 1200,
+    "dpi_scale": 1.25,
+    "monitor_count": 1,
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "machine_name": null,
+    "cpu_info": null,
+    "gpu_info": null,
+    "schema_version": "2.0"
+  },
+  "environment": null,
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 6164,
+      "wall_time": "2026-04-25T12:30:03.422704+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 520,
+        "y": 1160,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 131484,
+          "browser": null,
+          "bbox": {
+            "left": 314,
+            "top": 920,
+            "right": 534,
+            "bottom": 952
+          },
+          "screen_x": 520,
+          "screen_y": 1160,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "SearchButton",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Search",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "ToggleButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 314,
+                "top": 920,
+                "right": 534,
+                "bottom": 952
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "SearchButton",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Search",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Search",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "ToggleButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane::TaskbarFrame"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 314,
+                        "top": 920,
+                        "right": 534,
+                        "bottom": 952,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 520,
+                        "y": 1160
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "explorer.exe",
+              "window_title": "Taskbar",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 520,
+              "screen_y": 1160,
+              "selector_version": "2.3",
+              "recorded_at": 1777120203.4227045,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "6119ce6e6bb264a5",
+              "element_role": "button",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 131484,
+              "raw_bbox": {
+                "left": 393,
+                "top": 1150,
+                "right": 667,
+                "bottom": 1190
+              },
+              "relative_to_window": {
+                "x": 393,
+                "y": 10,
+                "w": 274,
+                "h": 40,
+                "win_w": 1920,
+                "win_h": 60
+              },
+              "relative_to_parent": {
+                "x": 393,
+                "y": 10,
+                "w": 274,
+                "h": 40
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 393,
+            "top": 1150,
+            "right": 667,
+            "bottom": 1190
+          },
+          "element_hash": "6119ce6e6bb264a5",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 393,
+            "y": 10,
+            "w": 274,
+            "h": 40,
+            "win_w": 1920,
+            "win_h": 60
+          },
+          "relative_to_parent": {
+            "x": 393,
+            "y": 10,
+            "w": 274,
+            "h": 40
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 8598,
+      "wall_time": "2026-04-25T12:30:05.855526+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "excel",
+        "target": null,
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 9218,
+      "wall_time": "2026-04-25T12:30:06.467994+00:00",
+      "payload": {
+        "type": "key_press",
+        "key": "enter",
+        "target": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 12978,
+      "wall_time": "2026-04-25T12:30:10.228640+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 474,
+        "y": 381,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank workbook",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 292,
+            "top": 251,
+            "right": 472,
+            "bottom": 403
+          },
+          "screen_x": 474,
+          "screen_y": 381,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Blank workbook",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIListViewItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 292,
+                "top": 251,
+                "right": 472,
+                "bottom": 403
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank workbook",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank workbook",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIListViewItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Templates",
+                        "GroupBox:New:HomePageSlabCreateNew",
+                        "GroupBox:Home:PlaceTabHomeContent"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 292,
+                        "top": 251,
+                        "right": 472,
+                        "bottom": 403,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 474,
+                        "y": 381
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Excel",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 474,
+              "screen_y": 381,
+              "selector_version": "2.3",
+              "recorded_at": 1777120210.2286406,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "00bf4ae2a422b768",
+              "element_role": "list",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 365,
+                "top": 314,
+                "right": 590,
+                "bottom": 504
+              },
+              "relative_to_window": {
+                "x": 234,
+                "y": 170,
+                "w": 225,
+                "h": 190,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 225,
+                "h": 190
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 365,
+            "top": 314,
+            "right": 590,
+            "bottom": 504
+          },
+          "element_hash": "00bf4ae2a422b768",
+          "element_role": "list",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 234,
+            "y": 170,
+            "w": 225,
+            "h": 190,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 225,
+            "h": 190
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 13074,
+      "wall_time": "2026-04-25T12:30:10.329643+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120210228.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 15980,
+      "wall_time": "2026-04-25T12:30:13.237621+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "N",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank workbook",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 292,
+            "top": 251,
+            "right": 472,
+            "bottom": 403
+          },
+          "screen_x": 474,
+          "screen_y": 381,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Blank workbook",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIListViewItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 292,
+                "top": 251,
+                "right": 472,
+                "bottom": 403
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank workbook",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank workbook",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIListViewItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Templates",
+                        "GroupBox:New:HomePageSlabCreateNew",
+                        "GroupBox:Home:PlaceTabHomeContent"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 292,
+                        "top": 251,
+                        "right": 472,
+                        "bottom": 403,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 474,
+                        "y": 381
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Excel",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 474,
+              "screen_y": 381,
+              "selector_version": "2.3",
+              "recorded_at": 1777120210.2286406,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "00bf4ae2a422b768",
+              "element_role": "list",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 365,
+                "top": 314,
+                "right": 590,
+                "bottom": 504
+              },
+              "relative_to_window": {
+                "x": 234,
+                "y": 170,
+                "w": 225,
+                "h": 190,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 225,
+                "h": 190
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 365,
+            "top": 314,
+            "right": 590,
+            "bottom": 504
+          },
+          "element_hash": "00bf4ae2a422b768",
+          "element_role": "list",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 234,
+            "y": 170,
+            "w": 225,
+            "h": 190,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 225,
+            "h": 190
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 15981,
+      "wall_time": "2026-04-25T12:30:13.237621+00:00",
+      "payload": {
+        "type": "excel_cell_select",
+        "cell_ref": "A1",
+        "sheet_name": null,
+        "target": {
+          "backend": "uia",
+          "automation_id": "A1",
+          "name": "A1",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 139,
+            "top": 335,
+            "right": 203,
+            "bottom": 354
+          },
+          "screen_x": 209,
+          "screen_y": 434,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "A1",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "A1",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 139,
+                "top": 335,
+                "right": 203,
+                "bottom": 354
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "A1",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A1",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A1",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 139,
+                        "top": 335,
+                        "right": 203,
+                        "bottom": 354,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 209,
+                        "y": 434
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 209,
+              "screen_y": 434,
+              "selector_version": "2.3",
+              "recorded_at": 1777120213.2376218,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Select All",
+                  "control_type": "HeaderItem",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": -24
+                },
+                {
+                  "direction": "right",
+                  "name": "B1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "below",
+                  "name": "A2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 24
+                },
+                {
+                  "direction": "right",
+                  "name": "B2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": 24
+                }
+              ],
+              "element_hash": "e63391b6ab36a8dc",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 174,
+                "top": 419,
+                "right": 254,
+                "bottom": 443
+              },
+              "relative_to_window": {
+                "x": 43,
+                "y": 275,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 34,
+                "y": 24,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 174,
+            "top": 419,
+            "right": 254,
+            "bottom": 443
+          },
+          "element_hash": "e63391b6ab36a8dc",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 43,
+            "y": 275,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 34,
+            "y": 24,
+            "w": 80,
+            "h": 24
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 8,
+      "timestamp_ms": 16073,
+      "wall_time": "2026-04-25T12:30:13.317446+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120213237.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 9,
+      "timestamp_ms": 17799,
+      "wall_time": "2026-04-25T12:30:15.057639+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "ame",
+        "target": {
+          "backend": "uia",
+          "automation_id": "A1",
+          "name": "A1",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 139,
+            "top": 335,
+            "right": 203,
+            "bottom": 354
+          },
+          "screen_x": 209,
+          "screen_y": 434,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "A1",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "A1",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 139,
+                "top": 335,
+                "right": 203,
+                "bottom": 354
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "A1",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A1",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A1",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 139,
+                        "top": 335,
+                        "right": 203,
+                        "bottom": 354,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 209,
+                        "y": 434
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 209,
+              "screen_y": 434,
+              "selector_version": "2.3",
+              "recorded_at": 1777120213.2376218,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Select All",
+                  "control_type": "HeaderItem",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": -24
+                },
+                {
+                  "direction": "right",
+                  "name": "B1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "below",
+                  "name": "A2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 24
+                },
+                {
+                  "direction": "right",
+                  "name": "B2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": 24
+                }
+              ],
+              "element_hash": "e63391b6ab36a8dc",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 174,
+                "top": 419,
+                "right": 254,
+                "bottom": 443
+              },
+              "relative_to_window": {
+                "x": 43,
+                "y": 275,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 34,
+                "y": 24,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 174,
+            "top": 419,
+            "right": 254,
+            "bottom": 443
+          },
+          "element_hash": "e63391b6ab36a8dc",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 43,
+            "y": 275,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 34,
+            "y": 24,
+            "w": 80,
+            "h": 24
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 10,
+      "timestamp_ms": 19387,
+      "wall_time": "2026-04-25T12:30:16.641346+00:00",
+      "payload": {
+        "type": "excel_cell_select",
+        "cell_ref": "E7",
+        "sheet_name": null,
+        "target": {
+          "backend": "uia",
+          "automation_id": "E7",
+          "name": "E7",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 395,
+            "top": 450,
+            "right": 459,
+            "bottom": 470
+          },
+          "screen_x": 530,
+          "screen_y": 583,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "E7",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "E7",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 395,
+                "top": 450,
+                "right": 459,
+                "bottom": 470
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "E7",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "E7",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "E7",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 395,
+                        "top": 450,
+                        "right": 459,
+                        "bottom": 470,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 530,
+                        "y": 583
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 530,
+              "screen_y": 583,
+              "selector_version": "2.3",
+              "recorded_at": 1777120216.6413465,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "above",
+                  "name": "E1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -144
+                },
+                {
+                  "direction": "left",
+                  "name": "D2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "above",
+                  "name": "E2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "right",
+                  "name": "F2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -120
+                }
+              ],
+              "element_hash": "a5e71c3cfef566b7",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 494,
+                "top": 563,
+                "right": 574,
+                "bottom": 587
+              },
+              "relative_to_window": {
+                "x": 363,
+                "y": 419,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 354,
+                "y": 168,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 494,
+            "top": 563,
+            "right": 574,
+            "bottom": 587
+          },
+          "element_hash": "a5e71c3cfef566b7",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 363,
+            "y": 419,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 354,
+            "y": 168,
+            "w": 80,
+            "h": 24
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 11,
+      "timestamp_ms": 19492,
+      "wall_time": "2026-04-25T12:30:16.747491+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120216641.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 12,
+      "timestamp_ms": 21711,
+      "wall_time": "2026-04-25T12:30:18.968173+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Email",
+        "target": {
+          "backend": "uia",
+          "automation_id": "E7",
+          "name": "E7",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 395,
+            "top": 450,
+            "right": 459,
+            "bottom": 470
+          },
+          "screen_x": 530,
+          "screen_y": 583,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "E7",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "E7",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 395,
+                "top": 450,
+                "right": 459,
+                "bottom": 470
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "E7",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "E7",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "E7",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 395,
+                        "top": 450,
+                        "right": 459,
+                        "bottom": 470,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 530,
+                        "y": 583
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 530,
+              "screen_y": 583,
+              "selector_version": "2.3",
+              "recorded_at": 1777120216.6413465,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "above",
+                  "name": "E1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -144
+                },
+                {
+                  "direction": "left",
+                  "name": "D2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "above",
+                  "name": "E2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "right",
+                  "name": "F2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -120
+                }
+              ],
+              "element_hash": "a5e71c3cfef566b7",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 494,
+                "top": 563,
+                "right": 574,
+                "bottom": 587
+              },
+              "relative_to_window": {
+                "x": 363,
+                "y": 419,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 354,
+                "y": 168,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 494,
+            "top": 563,
+            "right": 574,
+            "bottom": 587
+          },
+          "element_hash": "a5e71c3cfef566b7",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 363,
+            "y": 419,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 354,
+            "y": 168,
+            "w": 80,
+            "h": 24
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 13,
+      "timestamp_ms": 23000,
+      "wall_time": "2026-04-25T12:30:20.245782+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "A",
+        "target": {
+          "backend": "uia",
+          "automation_id": "E7",
+          "name": "E7",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 395,
+            "top": 450,
+            "right": 459,
+            "bottom": 470
+          },
+          "screen_x": 530,
+          "screen_y": 583,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "E7",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "E7",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 395,
+                "top": 450,
+                "right": 459,
+                "bottom": 470
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "E7",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "E7",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "E7",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 395,
+                        "top": 450,
+                        "right": 459,
+                        "bottom": 470,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 530,
+                        "y": 583
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 530,
+              "screen_y": 583,
+              "selector_version": "2.3",
+              "recorded_at": 1777120216.6413465,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "above",
+                  "name": "E1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -144
+                },
+                {
+                  "direction": "left",
+                  "name": "D2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "above",
+                  "name": "E2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "right",
+                  "name": "F2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -120
+                }
+              ],
+              "element_hash": "a5e71c3cfef566b7",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 494,
+                "top": 563,
+                "right": 574,
+                "bottom": 587
+              },
+              "relative_to_window": {
+                "x": 363,
+                "y": 419,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 354,
+                "y": 168,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 494,
+            "top": 563,
+            "right": 574,
+            "bottom": 587
+          },
+          "element_hash": "a5e71c3cfef566b7",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 363,
+            "y": 419,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 354,
+            "y": 168,
+            "w": 80,
+            "h": 24
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 14,
+      "timestamp_ms": 23001,
+      "wall_time": "2026-04-25T12:30:20.245782+00:00",
+      "payload": {
+        "type": "excel_cell_select",
+        "cell_ref": "I4",
+        "sheet_name": null,
+        "target": {
+          "backend": "uia",
+          "automation_id": "I4",
+          "name": "I4",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 651,
+            "top": 393,
+            "right": 715,
+            "bottom": 412
+          },
+          "screen_x": 857,
+          "screen_y": 506,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "I4",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "I4",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 651,
+                "top": 393,
+                "right": 715,
+                "bottom": 412
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "I4",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "I4",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "I4",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 651,
+                        "top": 393,
+                        "right": 715,
+                        "bottom": 412,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 857,
+                        "y": 506
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 857,
+              "screen_y": 506,
+              "selector_version": "2.3",
+              "recorded_at": 1777120220.2457824,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "H1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "above",
+                  "name": "I1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "right",
+                  "name": "J1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "left",
+                  "name": "H2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -48
+                }
+              ],
+              "element_hash": "1cc4cb30e3fcb929",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 814,
+                "top": 491,
+                "right": 894,
+                "bottom": 515
+              },
+              "relative_to_window": {
+                "x": 683,
+                "y": 347,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 674,
+                "y": 96,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 814,
+            "top": 491,
+            "right": 894,
+            "bottom": 515
+          },
+          "element_hash": "1cc4cb30e3fcb929",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 683,
+            "y": 347,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 674,
+            "y": 96,
+            "w": 80,
+            "h": 24
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 15,
+      "timestamp_ms": 23089,
+      "wall_time": "2026-04-25T12:30:20.344201+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120220245.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 16,
+      "timestamp_ms": 24407,
+      "wall_time": "2026-04-25T12:30:21.664304+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "ge",
+        "target": {
+          "backend": "uia",
+          "automation_id": "I4",
+          "name": "I4",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 651,
+            "top": 393,
+            "right": 715,
+            "bottom": 412
+          },
+          "screen_x": 857,
+          "screen_y": 506,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "I4",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "I4",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 651,
+                "top": 393,
+                "right": 715,
+                "bottom": 412
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "I4",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "I4",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "I4",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 651,
+                        "top": 393,
+                        "right": 715,
+                        "bottom": 412,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 857,
+                        "y": 506
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 857,
+              "screen_y": 506,
+              "selector_version": "2.3",
+              "recorded_at": 1777120220.2457824,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "H1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "above",
+                  "name": "I1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "right",
+                  "name": "J1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "left",
+                  "name": "H2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": -80,
+                  "offset_y": -48
+                }
+              ],
+              "element_hash": "1cc4cb30e3fcb929",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 814,
+                "top": 491,
+                "right": 894,
+                "bottom": 515
+              },
+              "relative_to_window": {
+                "x": 683,
+                "y": 347,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 674,
+                "y": 96,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 814,
+            "top": 491,
+            "right": 894,
+            "bottom": 515
+          },
+          "element_hash": "1cc4cb30e3fcb929",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 683,
+            "y": 347,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 674,
+            "y": 96,
+            "w": 80,
+            "h": 24
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 17,
+      "timestamp_ms": 25960,
+      "wall_time": "2026-04-25T12:30:23.215822+00:00",
+      "payload": {
+        "type": "excel_cell_select",
+        "cell_ref": "A4",
+        "sheet_name": null,
+        "target": {
+          "backend": "uia",
+          "automation_id": "A4",
+          "name": "A4",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 139,
+            "top": 393,
+            "right": 203,
+            "bottom": 412
+          },
+          "screen_x": 202,
+          "screen_y": 511,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "A4",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "A4",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 139,
+                "top": 393,
+                "right": 203,
+                "bottom": 412
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "A4",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A4",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A4",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 139,
+                        "top": 393,
+                        "right": 203,
+                        "bottom": 412,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 202,
+                        "y": 511
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 202,
+              "screen_y": 511,
+              "selector_version": "2.3",
+              "recorded_at": 1777120223.2158222,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Select All",
+                  "control_type": "HeaderItem",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": -96
+                },
+                {
+                  "direction": "above",
+                  "name": "Name",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "right",
+                  "name": "B1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "above",
+                  "name": "A2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -48
+                }
+              ],
+              "element_hash": "36172dd789340d31",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 174,
+                "top": 491,
+                "right": 254,
+                "bottom": 515
+              },
+              "relative_to_window": {
+                "x": 43,
+                "y": 347,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 34,
+                "y": 96,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 174,
+            "top": 491,
+            "right": 254,
+            "bottom": 515
+          },
+          "element_hash": "36172dd789340d31",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 43,
+            "y": 347,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 34,
+            "y": 96,
+            "w": 80,
+            "h": 24
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 18,
+      "timestamp_ms": 26056,
+      "wall_time": "2026-04-25T12:30:23.311290+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120223215.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 19,
+      "timestamp_ms": 28656,
+      "wall_time": "2026-04-25T12:30:25.913795+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Girish",
+        "target": {
+          "backend": "uia",
+          "automation_id": "A4",
+          "name": "A4",
+          "control_type": "DataItem",
+          "class_name": "XLSpreadsheetCell",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 139,
+            "top": 393,
+            "right": 203,
+            "bottom": 412
+          },
+          "screen_x": 202,
+          "screen_y": 511,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListView:Grid:Grid",
+            "Pane:Sheet Sheet1:Sheet1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "A4",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "A4",
+                "type": "DataItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "XLSpreadsheetCell",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 139,
+                "top": 393,
+                "right": 203,
+                "bottom": 412
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "A4",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A4",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "A4",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "DataItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "XLSpreadsheetCell",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListView:Grid:Grid",
+                        "Pane:Sheet Sheet1:Sheet1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 139,
+                        "top": 393,
+                        "right": 203,
+                        "bottom": 412,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 202,
+                        "y": 511
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "cell",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 202,
+              "screen_y": 511,
+              "selector_version": "2.3",
+              "recorded_at": 1777120223.2158222,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Select All",
+                  "control_type": "HeaderItem",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": -96
+                },
+                {
+                  "direction": "above",
+                  "name": "Name",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "right",
+                  "name": "B1",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 80,
+                  "offset_y": -72
+                },
+                {
+                  "direction": "above",
+                  "name": "A2",
+                  "control_type": "DataItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -48
+                }
+              ],
+              "element_hash": "36172dd789340d31",
+              "element_role": "cell",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 174,
+                "top": 491,
+                "right": 254,
+                "bottom": 515
+              },
+              "relative_to_window": {
+                "x": 43,
+                "y": 347,
+                "w": 80,
+                "h": 24,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 34,
+                "y": 96,
+                "w": 80,
+                "h": 24
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 174,
+            "top": 491,
+            "right": 254,
+            "bottom": 515
+          },
+          "element_hash": "36172dd789340d31",
+          "element_role": "cell",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 43,
+            "y": 347,
+            "w": 80,
+            "h": 24,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 34,
+            "y": 96,
+            "w": 80,
+            "h": 24
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 20,
+      "timestamp_ms": 30352,
+      "wall_time": "2026-04-25T12:30:27.595754+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1544,
+        "y": 165,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Close",
+          "control_type": "Button",
+          "class_name": "NetUIAppFrameHelper",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 1204,
+            "top": 116,
+            "right": 1250,
+            "bottom": 147
+          },
+          "screen_x": 1544,
+          "screen_y": 165,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Close",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIAppFrameHelper",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 1204,
+                "top": 116,
+                "right": 1250,
+                "bottom": 147
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Close",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Close",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIAppFrameHelper",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 1204,
+                        "top": 116,
+                        "right": 1250,
+                        "bottom": 147,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1544,
+                        "y": 165
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 1544,
+              "screen_y": 165,
+              "selector_version": "2.3",
+              "recorded_at": 1777120227.595754,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Minimize",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -114,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "left",
+                  "name": "Maximize",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "parent",
+                  "name": "Ribbon",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "6e693d9dad9fee62",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 1505,
+                "top": 145,
+                "right": 1562,
+                "bottom": 184
+              },
+              "relative_to_window": {
+                "x": 1374,
+                "y": 1,
+                "w": 57,
+                "h": 39,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 1365,
+                "y": 0,
+                "w": 57,
+                "h": 39
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1505,
+            "top": 145,
+            "right": 1562,
+            "bottom": 184
+          },
+          "element_hash": "6e693d9dad9fee62",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1374,
+            "y": 1,
+            "w": 57,
+            "h": 39,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 1365,
+            "y": 0,
+            "w": 57,
+            "h": 39
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 21,
+      "timestamp_ms": 30459,
+      "wall_time": "2026-04-25T12:30:27.706302+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120227611.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 22,
+      "timestamp_ms": 32692,
+      "wall_time": "2026-04-25T12:30:29.942919+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 878,
+        "y": 632,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Choose a Location",
+          "control_type": "ComboBox",
+          "class_name": "NetUIAnchor",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 483,
+            "top": 463,
+            "right": 879,
+            "bottom": 514
+          },
+          "screen_x": 878,
+          "screen_y": 632,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Choose a Location",
+                "type": "ComboBox"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIAnchor",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 483,
+                "top": 463,
+                "right": 879,
+                "bottom": 514
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Choose a Location",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ComboBox",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Choose a Location",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ComboBox",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIAnchor",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 483,
+                        "top": 463,
+                        "right": 879,
+                        "bottom": 514,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 878,
+                        "y": 632
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "dropdown",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 878,
+              "screen_y": 632,
+              "selector_version": "2.3",
+              "recorded_at": 1777120229.94292,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Book1",
+                  "control_type": "Edit",
+                  "automation_id": null,
+                  "offset_x": -19,
+                  "offset_y": -109
+                },
+                {
+                  "direction": "left",
+                  "name": "Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -16,
+                  "offset_y": 98
+                },
+                {
+                  "direction": "right",
+                  "name": "Don't Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 93,
+                  "offset_y": 98
+                }
+              ],
+              "element_hash": "f4b5981e2cf6df8b",
+              "element_role": "dropdown",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 604,
+                "top": 579,
+                "right": 1099,
+                "bottom": 642
+              },
+              "relative_to_window": {
+                "x": 473,
+                "y": 435,
+                "w": 495,
+                "h": 63,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 31,
+                "y": 181,
+                "w": 495,
+                "h": 63
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 604,
+            "top": 579,
+            "right": 1099,
+            "bottom": 642
+          },
+          "element_hash": "f4b5981e2cf6df8b",
+          "element_role": "dropdown",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 473,
+            "y": 435,
+            "w": 495,
+            "h": 63,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 31,
+            "y": 181,
+            "w": 495,
+            "h": 63
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 23,
+      "timestamp_ms": 32788,
+      "wall_time": "2026-04-25T12:30:30.046708+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120229942.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 24,
+      "timestamp_ms": 34491,
+      "wall_time": "2026-04-25T12:30:31.736833+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 802,
+        "y": 733,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Documents",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 483,
+            "top": 574,
+            "right": 879,
+            "bottom": 634
+          },
+          "screen_x": 802,
+          "screen_y": 733,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:",
+            "Custom:",
+            "ComboBox:Choose a Location",
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Documents",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIListViewItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 483,
+                "top": 574,
+                "right": 879,
+                "bottom": 634
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Documents",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Documents",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIListViewItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:",
+                        "Custom:",
+                        "ComboBox:Choose a Location"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 483,
+                        "top": 574,
+                        "right": 879,
+                        "bottom": 634,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 802,
+                        "y": 733
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 802,
+              "screen_y": 733,
+              "selector_version": "2.3",
+              "recorded_at": 1777120231.7368338,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "above",
+                  "name": "Documents",
+                  "control_type": "ListItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": -75
+                },
+                {
+                  "direction": "below",
+                  "name": "More locations",
+                  "control_type": "ListItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 63
+                }
+              ],
+              "element_hash": "702329f61518e3da",
+              "element_role": "list",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 604,
+                "top": 717,
+                "right": 1099,
+                "bottom": 792
+              },
+              "relative_to_window": {
+                "x": 473,
+                "y": 573,
+                "w": 495,
+                "h": 75,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 75,
+                "w": 495,
+                "h": 75
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 604,
+            "top": 717,
+            "right": 1099,
+            "bottom": 792
+          },
+          "element_hash": "702329f61518e3da",
+          "element_role": "list",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 473,
+            "y": 573,
+            "w": 495,
+            "h": 75,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 75,
+            "w": 495,
+            "h": 75
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 25,
+      "timestamp_ms": 34588,
+      "wall_time": "2026-04-25T12:30:31.845196+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120231750.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 26,
+      "timestamp_ms": 36079,
+      "wall_time": "2026-04-25T12:30:33.336998+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 819,
+        "y": 716,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 633,
+            "top": 555,
+            "right": 703,
+            "bottom": 579
+          },
+          "screen_x": 819,
+          "screen_y": 716,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Save",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 633,
+                "top": 555,
+                "right": 703,
+                "bottom": 579
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Save",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Save",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 633,
+                        "top": 555,
+                        "right": 703,
+                        "bottom": 579,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 819,
+                        "y": 716
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 819,
+              "screen_y": 716,
+              "selector_version": "2.3",
+              "recorded_at": 1777120233.3369985,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "right",
+                  "name": "Choose a Location",
+                  "control_type": "ComboBox",
+                  "automation_id": null,
+                  "offset_x": 16,
+                  "offset_y": -98
+                },
+                {
+                  "direction": "right",
+                  "name": "Don't Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 110,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "25b1e6b288b312a8",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 791,
+                "top": 694,
+                "right": 879,
+                "bottom": 724
+              },
+              "relative_to_window": {
+                "x": 660,
+                "y": 550,
+                "w": 88,
+                "h": 30,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 218,
+                "y": 296,
+                "w": 88,
+                "h": 30
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 791,
+            "top": 694,
+            "right": 879,
+            "bottom": 724
+          },
+          "element_hash": "25b1e6b288b312a8",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 660,
+            "y": 550,
+            "w": 88,
+            "h": 30,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 218,
+            "y": 296,
+            "w": 88,
+            "h": 30
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 27,
+      "timestamp_ms": 36169,
+      "wall_time": "2026-04-25T12:30:33.426479+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120233336.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 28,
+      "timestamp_ms": 40669,
+      "wall_time": "2026-04-25T12:30:37.928038+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Book1 - Excel",
+          "process_name": "EXCEL.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3475704,
+          "browser": null,
+          "bbox": {
+            "left": 633,
+            "top": 555,
+            "right": 703,
+            "bottom": 579
+          },
+          "screen_x": 819,
+          "screen_y": 716,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Save",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 633,
+                "top": 555,
+                "right": 703,
+                "bottom": 579
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Save",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Book1 - Excel",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Save",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 633,
+                        "top": 555,
+                        "right": 703,
+                        "bottom": 579,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 819,
+                        "y": 716
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "EXCEL.EXE",
+              "window_title": "Book1 - Excel",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 819,
+              "screen_y": 716,
+              "selector_version": "2.3",
+              "recorded_at": 1777120233.3369985,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "right",
+                  "name": "Choose a Location",
+                  "control_type": "ComboBox",
+                  "automation_id": null,
+                  "offset_x": 16,
+                  "offset_y": -98
+                },
+                {
+                  "direction": "right",
+                  "name": "Don't Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 110,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "25b1e6b288b312a8",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 3475704,
+              "raw_bbox": {
+                "left": 791,
+                "top": 694,
+                "right": 879,
+                "bottom": 724
+              },
+              "relative_to_window": {
+                "x": 660,
+                "y": 550,
+                "w": 88,
+                "h": 30,
+                "win_w": 1440,
+                "win_h": 830
+              },
+              "relative_to_parent": {
+                "x": 218,
+                "y": 296,
+                "w": 88,
+                "h": 30
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 791,
+            "top": 694,
+            "right": 879,
+            "bottom": 724
+          },
+          "element_hash": "25b1e6b288b312a8",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 660,
+            "y": 550,
+            "w": 88,
+            "h": 30,
+            "win_w": 1440,
+            "win_h": 830
+          },
+          "relative_to_parent": {
+            "x": 218,
+            "y": 296,
+            "w": 88,
+            "h": 30
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 29,
+      "timestamp_ms": 40684,
+      "wall_time": "2026-04-25T12:30:37.932179+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 702,
+        "y": 664,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2034276,
+          "browser": null,
+          "bbox": {
+            "left": 26,
+            "top": 26,
+            "right": 921,
+            "bottom": 543
+          },
+          "screen_x": 702,
+          "screen_y": 664,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 26,
+                "top": 26,
+                "right": 921,
+                "bottom": 543
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:C:\\Users\\Girish\\Documents\\rpa_:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 26,
+                        "top": 26,
+                        "right": 921,
+                        "bottom": 543,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 702,
+                        "y": 664
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 702,
+              "screen_y": 664,
+              "selector_version": "2.3",
+              "recorded_at": 1777120237.9321795,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2034276,
+              "raw_bbox": {
+                "left": 32,
+                "top": 32,
+                "right": 1151,
+                "bottom": 679
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 32,
+            "top": 32,
+            "right": 1151,
+            "bottom": 679
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 30,
+      "timestamp_ms": 40799,
+      "wall_time": "2026-04-25T12:30:38.052880+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777120237932.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 31,
+      "timestamp_ms": 41305,
+      "wall_time": "2026-04-25T12:30:38.562406+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2034276,
+          "browser": null,
+          "bbox": {
+            "left": 26,
+            "top": 26,
+            "right": 921,
+            "bottom": 543
+          },
+          "screen_x": 702,
+          "screen_y": 664,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 26,
+                "top": 26,
+                "right": 921,
+                "bottom": 543
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:C:\\Users\\Girish\\Documents\\rpa_:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 26,
+                        "top": 26,
+                        "right": 921,
+                        "bottom": 543,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 702,
+                        "y": 664
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 702,
+              "screen_y": 664,
+              "selector_version": "2.3",
+              "recorded_at": 1777120237.9321795,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2034276,
+              "raw_bbox": {
+                "left": 32,
+                "top": 32,
+                "right": 1151,
+                "bottom": 679
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 32,
+            "top": 32,
+            "right": 1151,
+            "bottom": 679
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    }
+  ],
+  "replay_history": [],
+  "session_setings": {
+    "screenshot_on_click": true,
+    "capture_scroll_events": true,
+    "replay_mode": "adaptive",
+    "failure_strategy": "retry",
+    "max_retries": 2,
+    "retry_interval_ms": 500,
+    "default_timeout_ms": 5000,
+    "use_ocr_fallback": true,
+    "use_image_fallback": true,
+    "use_bbox_fallback": true,
+    "speed_factor": 1.0
+  },
+  "stats": {
+    "total_events": 31,
+    "click_count": 0,
+    "typing_count": 0,
+    "scroll_count": 0,
+    "error_count": 0,
+    "avg_event_interval_ms": null
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true
+}

@@ -1,12 +1,3 @@
-"""
-selector.py — Element selector model with:
-  • Fixed _is_unstable (was too aggressive; now pattern-only, not length-based)
-  • Dynamic scoring based on replay success (per-strategy adaptive weights)
-  • Context-aware confidence (environment + window stability)
-  • Selector versioning migration (from_dict handles old schemas gracefully)
-  • Selector compression (removes redundant low-signal attributes)
-  • Time-decay for stale selectors
-"""
 from __future__ import annotations
 
 import time
@@ -14,9 +5,6 @@ from dataclasses import dataclass, field
 from typing import Optional, Any
 import re
 
-
-# ── Attribute score table ──────────────────────────────────────────────────
-# Higher = more stable / unique identifier.
 
 ATTR_SCORES: dict[str, int] = {
     "automation_id":  100,
@@ -37,9 +25,6 @@ ATTR_SCORES: dict[str, int] = {
     "window_title":    50,
 }
 
-# ── Unstable-ID detection ──────────────────────────────────────────────────
-# FIX: was incorrectly treating any 3-char alphanum as stable;
-#      now checks *only* known-stable whitelist + known-bad patterns.
 
 _UNSTABLE_PATTERNS = [
     re.compile(r"^[0-9]{5,}$"),               # pure numeric ≥ 5 digits
@@ -63,15 +48,7 @@ _KNOWN_STABLE_IDS: frozenset[str] = frozenset({
 
 
 def _is_unstable(value: str) -> bool:
-    """
-    Return True if value looks like a dynamic/generated identifier that will
-    NOT survive across sessions or UI reloads.
 
-    Fixed:
-    - No longer marks short 3-char alphanum as unconditionally stable (e.g. "abc"
-      could be a generated suffix). Whitelist covers known-stable short IDs.
-    - Only triggers on concrete bad-pattern matches, not on length alone.
-    """
     if not value:
         return True
     if value in _KNOWN_STABLE_IDS:
@@ -172,10 +149,7 @@ class SelectorStrategy:
 
 @dataclass
 class AnchorElement:
-    """
-    A nearby stable element that helps disambiguate the primary target.
-    Example: label "Username:" to the left of an input field.
-    """
+
     direction:     str            # "left", "right", "above", "below", "parent"
     name:          Optional[str]  = None
     control_type:  Optional[str]  = None
@@ -215,10 +189,7 @@ _DECAY_HALF_LIFE_S    = _DECAY_HALF_LIFE_DAYS * 86400
 
 @dataclass
 class Selector:
-    """
-    Full selector for one recorded UI element.
-    Supports multiple strategies tried in priority order during replay.
-    """
+    
     strategies:       list[SelectorStrategy]
     process_name:     Optional[str] = None
     window_title:     Optional[str] = None
@@ -267,11 +238,6 @@ class Selector:
         return 0.5 ** (age_s / _DECAY_HALF_LIFE_S)
 
     def effective_confidence(self) -> float:
-        """
-        Base confidence × time decay × success rate × environment stability.
-
-        Environment stability: window_handle present = small bonus (stable session).
-        """
         env_factor = 1.05 if self.window_handle else 1.0
         return min(
             self.confidence * self.time_decay_score() * max(self.success_rate, 0.1) * env_factor,
@@ -279,7 +245,6 @@ class Selector:
         )
 
     def best_strategy(self) -> Optional[SelectorStrategy]:
-        """Return strategy with highest success_rate, else first."""
         if not self.strategies:
             return None
         return max(self.strategies, key=lambda s: (s.success_rate, s.effective_total_score))
@@ -288,10 +253,7 @@ class Selector:
         return [s.name for s in self.strategies]
 
     def ordered_strategies(self) -> list[SelectorStrategy]:
-        """
-        Return strategies sorted by (success_rate DESC, effective_total_score DESC).
-        Used by matcher for adaptive ordering.
-        """
+
         return sorted(
             self.strategies,
             key=lambda s: (s.success_rate, s.effective_total_score),
@@ -299,7 +261,6 @@ class Selector:
         )
 
     def record_replay(self, strategy_used: str, success: bool) -> None:
-        """Update per-selector and per-strategy stats."""
         if success:
             self.replay_successes += 1
         else:
@@ -315,7 +276,6 @@ class Selector:
                 break
 
     def compress(self) -> "Selector":
-        """Return a copy with low-signal attributes stripped from all strategies."""
         compressed = [s.compress() for s in self.strategies]
         import copy
         c = copy.copy(self)
@@ -327,12 +287,10 @@ class Selector:
         return age_days > threshold_days
 
     def needs_refresh(self) -> bool:
-        """True if success_rate is low enough to warrant re-recording."""
         if self.replay_successes + self.replay_failures < 5:
             return False
         return self.success_rate < 0.5
 
-    # ── Serialisation ──────────────────────────────────────────────────────
 
     def to_dict(self) -> dict:
         return {
@@ -474,7 +432,6 @@ class SelectorBuilder:
 
         strategies: list[SelectorStrategy] = []
 
-        # 1: STRICT — automation_id + window context
         if aid_stable:
             strict_attrs = [a for a in raw if a.name == "automation_id"]
             if window_title:

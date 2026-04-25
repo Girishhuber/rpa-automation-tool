@@ -1,13 +1,4 @@
-"""
-uia_enricher.py — UI Automation element enricher with:
-  • Region-based cache (was pixel-exact; now tolerates 8px shift)
-  • Cache TTL extended to 1.5 s (was 0.5 s — too short)
-  • Multi-layer fallback: UIA → WinAPI focused-element → last-known
-  • Better Excel cell detection (DataItem + SpreadsheetItem + name-box patterns)
-  • Improved automation_id capture (filters known-unstable patterns early)
-  • Ancestor chain stops at natural boundaries (Window/Dialog)
-  • All UIA calls wrapped in _UIA_CALL_TIMEOUT thread guard
-"""
+
 from __future__ import annotations
 
 import ctypes
@@ -322,13 +313,7 @@ class UIAEnricher:
     # ── Wrapper retrieval (multi-layer) ───────────────────────────────────
 
     def _get_wrapper_at(self, x: int, y: int):
-        """
-        Multi-layer fallback:
-          Layer 1: LRU cache (region-based, TTL 1.5 s)
-          Layer 2: UIA from_point with timeout thread guard
-          Layer 3: Focused element (if from_point times out)
-          Layer 4: Last-known wrapper (if all else fails)
-        """
+  
         if not PYWINAUTO_OK:
             return None
 

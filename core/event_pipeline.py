@@ -176,8 +176,7 @@ class EventPipeline:
     def emit_wait(self, duration_ms: int) -> None:
         self._enqueue(("emit", ExplicitWaitEvent(duration_ms=duration_ms)))
 
-    # ── Internal queue helpers ─────────────────────────────────────────────
-
+   
     def _enqueue(self, msg) -> None:
         try:
             self._q.put_nowait(msg)
@@ -192,8 +191,7 @@ class EventPipeline:
             except queue.Full:
                 pass
 
-    # ── Worker thread ──────────────────────────────────────────────────────
-
+  
     def _worker(self) -> None:
         """Single worker thread — processes messages in FIFO order."""
         while True:
@@ -235,8 +233,6 @@ class EventPipeline:
 
         # Final flush
         self._flush_pending_scroll()
-
-    # ── Scroll accumulation (worker-thread only) ───────────────────────────
 
     def _accumulate_scroll(self, s: dict) -> None:
         now = self._now_ms()

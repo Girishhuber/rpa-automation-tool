@@ -1,0 +1,4821 @@
+{
+  "id": "f1e0adfb-b637-4b65-94b0-21eb624889fb",
+  "name": "My workflowsampleppt",
+  "description": "",
+  "tags": [],
+  "created_at": "2026-04-25T12:16:01.903919+00:00",
+  "updated_at": "2026-04-25T12:16:43.768386+00:00",
+  "duration_ms": 41857,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.26200",
+    "screen_width": 1920,
+    "screen_height": 1200,
+    "dpi_scale": 1.25,
+    "monitor_count": 1,
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "machine_name": null,
+    "cpu_info": null,
+    "gpu_info": null,
+    "schema_version": "2.0"
+  },
+  "environment": null,
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 7251,
+      "wall_time": "2026-04-25T12:16:09.156585+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 479,
+        "y": 1165,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 131484,
+          "browser": null,
+          "bbox": {
+            "left": 314,
+            "top": 920,
+            "right": 534,
+            "bottom": 952
+          },
+          "screen_x": 479,
+          "screen_y": 1165,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "SearchButton",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Search",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "ToggleButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 314,
+                "top": 920,
+                "right": 534,
+                "bottom": 952
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "SearchButton",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Search",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Search",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "ToggleButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane::TaskbarFrame"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 314,
+                        "top": 920,
+                        "right": 534,
+                        "bottom": 952,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 479,
+                        "y": 1165
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "explorer.exe",
+              "window_title": "Taskbar",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 479,
+              "screen_y": 1165,
+              "selector_version": "2.3",
+              "recorded_at": 1777119369.1565855,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "6119ce6e6bb264a5",
+              "element_role": "button",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 131484,
+              "raw_bbox": {
+                "left": 393,
+                "top": 1150,
+                "right": 667,
+                "bottom": 1190
+              },
+              "relative_to_window": {
+                "x": 393,
+                "y": 10,
+                "w": 274,
+                "h": 40,
+                "win_w": 1920,
+                "win_h": 60
+              },
+              "relative_to_parent": {
+                "x": 393,
+                "y": 10,
+                "w": 274,
+                "h": 40
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 393,
+            "top": 1150,
+            "right": 667,
+            "bottom": 1190
+          },
+          "element_hash": "6119ce6e6bb264a5",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 393,
+            "y": 10,
+            "w": 274,
+            "h": 40,
+            "win_w": 1920,
+            "win_h": 60
+          },
+          "relative_to_parent": {
+            "x": 393,
+            "y": 10,
+            "w": 274,
+            "h": 40
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 9243,
+      "wall_time": "2026-04-25T12:16:11.146723+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "ppt",
+        "target": null,
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 9296,
+      "wall_time": "2026-04-25T12:16:11.194317+00:00",
+      "payload": {
+        "type": "key_press",
+        "key": "enter",
+        "target": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 11974,
+      "wall_time": "2026-04-25T12:16:13.876229+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 325,
+        "y": 283,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank Presentation",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 325,
+          "screen_y": 283,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Blank Presentation",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIListViewItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 180,
+                "top": 135,
+                "right": 360,
+                "bottom": 287
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank Presentation",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank Presentation",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIListViewItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Templates",
+                        "GroupBox:New:HomePageSlabCreateNew",
+                        "GroupBox:Home:PlaceTabHomeContent"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 180,
+                        "top": 135,
+                        "right": 360,
+                        "bottom": 287,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 325,
+                        "y": 283
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "PowerPoint",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 325,
+              "screen_y": 283,
+              "selector_version": "2.3",
+              "recorded_at": 1777119373.8762293,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "f17fecc432e10480",
+              "element_role": "list",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 225,
+                "top": 169,
+                "right": 450,
+                "bottom": 359
+              },
+              "relative_to_window": {
+                "x": 234,
+                "y": 178,
+                "w": 225,
+                "h": 190,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 225,
+                "h": 190
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 225,
+            "top": 169,
+            "right": 450,
+            "bottom": 359
+          },
+          "element_hash": "f17fecc432e10480",
+          "element_role": "list",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 234,
+            "y": 178,
+            "w": 225,
+            "h": 190,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 225,
+            "h": 190
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 12101,
+      "wall_time": "2026-04-25T12:16:14.006461+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119373876.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 14201,
+      "wall_time": "2026-04-25T12:16:16.101779+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 867,
+        "y": 538,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "1071",
+          "name": null,
+          "control_type": "Pane",
+          "class_name": null,
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": -7,
+            "top": 126,
+            "right": 1543,
+            "bottom": 898
+          },
+          "screen_x": 867,
+          "screen_y": 538,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Workspace:3244"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "1071",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": -7,
+                "top": 126,
+                "right": 1543,
+                "bottom": 898
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "1071",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Pane",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:Workspace:3244"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": -7,
+                        "top": 126,
+                        "right": 1543,
+                        "bottom": 898,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 867,
+                        "y": 538
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "pane",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.8125,
+              "screen_x": 867,
+              "screen_y": 538,
+              "selector_version": "2.3",
+              "recorded_at": 1777119376.1017797,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "parent",
+                  "name": "Workspace",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "7e172921328f2680",
+              "element_role": "container",
+              "confidence_level": "high",
+              "visibility_score": "partial",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": -9,
+                "top": 158,
+                "right": 1929,
+                "bottom": 1122
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 167,
+                "w": 1938,
+                "h": 964,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": -9,
+                "y": -38,
+                "w": 1938,
+                "h": 964
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": -9,
+            "top": 158,
+            "right": 1929,
+            "bottom": 1122
+          },
+          "element_hash": "7e172921328f2680",
+          "element_role": "container",
+          "confidence_level": "high",
+          "visibility_score": "partial",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 167,
+            "w": 1938,
+            "h": 964,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": -9,
+            "y": -38,
+            "w": 1938,
+            "h": 964
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 14403,
+      "wall_time": "2026-04-25T12:16:16.301978+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119376101.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 8,
+      "timestamp_ms": 18800,
+      "wall_time": "2026-04-25T12:16:20.704665+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Just Checking",
+        "target": {
+          "backend": "uia",
+          "automation_id": "1071",
+          "name": null,
+          "control_type": "Pane",
+          "class_name": null,
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": -7,
+            "top": 126,
+            "right": 1543,
+            "bottom": 898
+          },
+          "screen_x": 867,
+          "screen_y": 538,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Workspace:3244"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "1071",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": -7,
+                "top": 126,
+                "right": 1543,
+                "bottom": 898
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "1071",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Pane",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:Workspace:3244"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": -7,
+                        "top": 126,
+                        "right": 1543,
+                        "bottom": 898,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 867,
+                        "y": 538
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "pane",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.8125,
+              "screen_x": 867,
+              "screen_y": 538,
+              "selector_version": "2.3",
+              "recorded_at": 1777119376.1017797,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "parent",
+                  "name": "Workspace",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "7e172921328f2680",
+              "element_role": "container",
+              "confidence_level": "high",
+              "visibility_score": "partial",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": -9,
+                "top": 158,
+                "right": 1929,
+                "bottom": 1122
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 167,
+                "w": 1938,
+                "h": 964,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": -9,
+                "y": -38,
+                "w": 1938,
+                "h": 964
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": -9,
+            "top": 158,
+            "right": 1929,
+            "bottom": 1122
+          },
+          "element_hash": "7e172921328f2680",
+          "element_role": "container",
+          "confidence_level": "high",
+          "visibility_score": "partial",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 167,
+            "w": 1938,
+            "h": 964,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": -9,
+            "y": -38,
+            "w": 1938,
+            "h": 964
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 9,
+      "timestamp_ms": 20701,
+      "wall_time": "2026-04-25T12:16:22.600250+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 172,
+        "y": 63,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "TabInsert",
+          "name": "Insert",
+          "control_type": "TabItem",
+          "class_name": "NetUIRibbonTab",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 115,
+            "top": 34,
+            "right": 166,
+            "bottom": 65
+          },
+          "screen_x": 172,
+          "screen_y": 63,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "TabControl:Ribbon Tabs",
+            "Pane:Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "TabInsert",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Insert",
+                "type": "TabItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIRibbonTab",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 115,
+                "top": 34,
+                "right": 166,
+                "bottom": 65
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "TabInsert",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Insert",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "TabItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Insert",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "TabItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIRibbonTab",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "TabControl:Ribbon Tabs",
+                        "Pane:Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 115,
+                        "top": 34,
+                        "right": 166,
+                        "bottom": 65,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 172,
+                        "y": 63
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "tab",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 172,
+              "screen_y": 63,
+              "selector_version": "2.3",
+              "recorded_at": 1777119382.6002505,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Home",
+                  "control_type": "TabItem",
+                  "automation_id": null,
+                  "offset_x": -66,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Draw",
+                  "control_type": "TabItem",
+                  "automation_id": null,
+                  "offset_x": 63,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Design",
+                  "control_type": "TabItem",
+                  "automation_id": null,
+                  "offset_x": 132,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "86cc2466a0813f30",
+              "element_role": "tab",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 144,
+                "top": 43,
+                "right": 207,
+                "bottom": 81
+              },
+              "relative_to_window": {
+                "x": 153,
+                "y": 52,
+                "w": 63,
+                "h": 38,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 69,
+                "y": 0,
+                "w": 63,
+                "h": 38
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 144,
+            "top": 43,
+            "right": 207,
+            "bottom": 81
+          },
+          "element_hash": "86cc2466a0813f30",
+          "element_role": "tab",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 153,
+            "y": 52,
+            "w": 63,
+            "h": 38,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 69,
+            "y": 0,
+            "w": 63,
+            "h": 38
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 10,
+      "timestamp_ms": 20857,
+      "wall_time": "2026-04-25T12:16:22.757686+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119382600.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 11,
+      "timestamp_ms": 22088,
+      "wall_time": "2026-04-25T12:16:23.983200+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 180,
+        "y": 168,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "FlyoutAnchorInsertPictures",
+          "name": "Pictures",
+          "control_type": "MenuItem",
+          "class_name": "NetUIAnchor",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 124,
+            "top": 67,
+            "right": 170,
+            "bottom": 137
+          },
+          "screen_x": 180,
+          "screen_y": 168,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Images",
+            "GroupBox:Insert",
+            "Pane:Lower Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "FlyoutAnchorInsertPictures",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Pictures",
+                "type": "MenuItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIAnchor",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 124,
+                "top": 67,
+                "right": 170,
+                "bottom": 137
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "FlyoutAnchorInsertPictures",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Pictures",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "MenuItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Pictures",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "MenuItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIAnchor",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "GroupBox:Images",
+                        "GroupBox:Insert",
+                        "Pane:Lower Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 124,
+                        "top": 67,
+                        "right": 170,
+                        "bottom": 137,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 180,
+                        "y": 168
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "menu",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 180,
+              "screen_y": 168,
+              "selector_version": "2.3",
+              "recorded_at": 1777119383.9832003,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "right",
+                  "name": "Screenshot",
+                  "control_type": "MenuItem",
+                  "automation_id": null,
+                  "offset_x": 67,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Photo Album...",
+                  "control_type": "SplitButton",
+                  "automation_id": null,
+                  "offset_x": 138,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "parent",
+                  "name": "Images",
+                  "control_type": "GroupBox",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "5e6e7fb34ad7c4ac",
+              "element_role": "menu",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 155,
+                "top": 84,
+                "right": 212,
+                "bottom": 171
+              },
+              "relative_to_window": {
+                "x": 164,
+                "y": 93,
+                "w": 57,
+                "h": 87,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 10,
+                "y": 2,
+                "w": 57,
+                "h": 87
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 155,
+            "top": 84,
+            "right": 212,
+            "bottom": 171
+          },
+          "element_hash": "5e6e7fb34ad7c4ac",
+          "element_role": "menu",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 164,
+            "y": 93,
+            "w": 57,
+            "h": 87,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 10,
+            "y": 2,
+            "w": 57,
+            "h": 87
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 12,
+      "timestamp_ms": 22241,
+      "wall_time": "2026-04-25T12:16:24.146468+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119383983.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 13,
+      "timestamp_ms": 23761,
+      "wall_time": "2026-04-25T12:16:25.652721+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 185,
+        "y": 231,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "This Device...",
+          "control_type": "MenuItem",
+          "class_name": "NetUITWBtnMenuItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 126,
+            "top": 166,
+            "right": 266,
+            "bottom": 190
+          },
+          "screen_x": 185,
+          "screen_y": 231,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Insert Picture From",
+            "Menu:Pictures",
+            "Menu:Pictures",
+            "MenuItem:Pictures:FlyoutAnchorInsertPictures",
+            "GroupBox:Images",
+            "GroupBox:Insert",
+            "Pane:Lower Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "This Device...",
+                "type": "MenuItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUITWBtnMenuItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 126,
+                "top": 166,
+                "right": 266,
+                "bottom": 190
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "This Device...",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "MenuItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "This Device...",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "MenuItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUITWBtnMenuItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "GroupBox:Insert Picture From",
+                        "Menu:Pictures",
+                        "Menu:Pictures"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 126,
+                        "top": 166,
+                        "right": 266,
+                        "bottom": 190,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 185,
+                        "y": 231
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "menu",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 185,
+              "screen_y": 231,
+              "selector_version": "2.3",
+              "recorded_at": 1777119385.6527212,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "below",
+                  "name": "Online Pictures...",
+                  "control_type": "MenuItem",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 30
+                },
+                {
+                  "direction": "parent",
+                  "name": "Insert Picture From",
+                  "control_type": "GroupBox",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "d8df0d5ad8b302c1",
+              "element_role": "menu",
+              "confidence_level": "medium",
+              "visibility_score": "offscreen",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": -1602929790,
+                "top": 599,
+                "right": -1602929615,
+                "bottom": 629
+              },
+              "relative_to_window": null,
+              "relative_to_parent": null
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 157,
+            "top": 207,
+            "right": 332,
+            "bottom": 237
+          },
+          "element_hash": "d8df0d5ad8b302c1",
+          "element_role": "menu",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 166,
+            "y": 216,
+            "w": 175,
+            "h": 30,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 33,
+            "w": 175,
+            "h": 30
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 14,
+      "timestamp_ms": 23919,
+      "wall_time": "2026-04-25T12:16:25.817340+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119385652.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 15,
+      "timestamp_ms": 26491,
+      "wall_time": "2026-04-25T12:16:28.388997+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 101,
+        "y": 363,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Pictures (pinned)",
+          "control_type": "TreeItem",
+          "class_name": null,
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 60,
+            "top": 274,
+            "right": 104,
+            "bottom": 306
+          },
+          "screen_x": 101,
+          "screen_y": 363,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "TreeItem:Desktop",
+            "TreeView:Navigation Pane:100",
+            "Pane:Control Host:ProperTreeHost"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Pictures (pinned)",
+                "type": "TreeItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 60,
+                "top": 274,
+                "right": 104,
+                "bottom": 306
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Pictures (pinned)",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "TreeItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Pictures (pinned)",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "TreeItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "TreeItem:Desktop",
+                        "TreeView:Navigation Pane:100",
+                        "Pane:Control Host:ProperTreeHost"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 60,
+                        "top": 274,
+                        "right": 104,
+                        "bottom": 306,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 101,
+                        "y": 363
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "tree",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.7291666666666666,
+              "screen_x": 101,
+              "screen_y": 363,
+              "selector_version": "2.3",
+              "recorded_at": 1777119388.388997,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "above",
+                  "name": "Start of Quick Access - Desktop (pinned)",
+                  "control_type": "TreeItem",
+                  "automation_id": null,
+                  "offset_x": 2,
+                  "offset_y": -120
+                },
+                {
+                  "direction": "right",
+                  "name": "Downloads (pinned)",
+                  "control_type": "TreeItem",
+                  "automation_id": null,
+                  "offset_x": 12,
+                  "offset_y": -80
+                },
+                {
+                  "direction": "right",
+                  "name": "Documents (pinned)",
+                  "control_type": "TreeItem",
+                  "automation_id": null,
+                  "offset_x": 12,
+                  "offset_y": -40
+                },
+                {
+                  "direction": "below",
+                  "name": "Music (pinned)",
+                  "control_type": "TreeItem",
+                  "automation_id": null,
+                  "offset_x": -6,
+                  "offset_y": 40
+                }
+              ],
+              "element_hash": "8b16b948ecbd8682",
+              "element_role": "tree",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 75,
+                "top": 342,
+                "right": 130,
+                "bottom": 382
+              },
+              "relative_to_window": {
+                "x": 84,
+                "y": 351,
+                "w": 55,
+                "h": 40,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 75,
+                "y": 342,
+                "w": 55,
+                "h": 40
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 75,
+            "top": 342,
+            "right": 130,
+            "bottom": 382
+          },
+          "element_hash": "8b16b948ecbd8682",
+          "element_role": "tree",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 84,
+            "y": 351,
+            "w": 55,
+            "h": 40,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 75,
+            "y": 342,
+            "w": 55,
+            "h": 40
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 16,
+      "timestamp_ms": 26691,
+      "wall_time": "2026-04-25T12:16:28.591262+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119388388.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 17,
+      "timestamp_ms": 28381,
+      "wall_time": "2026-04-25T12:16:30.281532+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 241,
+        "y": 251,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "0",
+          "name": "Screenshots",
+          "control_type": "ListItem",
+          "class_name": "UIItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 182,
+            "top": 120,
+            "right": 286,
+            "bottom": 238
+          },
+          "screen_x": 241,
+          "screen_y": 251,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "0",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Screenshots",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "UIItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 182,
+                "top": 120,
+                "right": 286,
+                "bottom": 238
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "0",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Screenshots",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Screenshots",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "UIItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Items View",
+                        "Pane:Shell Folder View:listview"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 182,
+                        "top": 120,
+                        "right": 286,
+                        "bottom": 238,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 241,
+                        "y": 251
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 241,
+              "screen_y": 251,
+              "selector_version": "2.3",
+              "recorded_at": 1777119390.2815328,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "363e7209ca4105ed",
+              "element_role": "list",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 227,
+                "top": 150,
+                "right": 358,
+                "bottom": 297
+              },
+              "relative_to_window": {
+                "x": 236,
+                "y": 159,
+                "w": 131,
+                "h": 147,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 18,
+                "y": 8,
+                "w": 131,
+                "h": 147
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 227,
+            "top": 150,
+            "right": 358,
+            "bottom": 297
+          },
+          "element_hash": "363e7209ca4105ed",
+          "element_role": "list",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 236,
+            "y": 159,
+            "w": 131,
+            "h": 147,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 18,
+            "y": 8,
+            "w": 131,
+            "h": 147
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 18,
+      "timestamp_ms": 28544,
+      "wall_time": "2026-04-25T12:16:30.439375+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119390281.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 19,
+      "timestamp_ms": 28754,
+      "wall_time": "2026-04-25T12:16:30.659819+00:00",
+      "payload": {
+        "type": "mouse_double_click",
+        "x": 241,
+        "y": 251,
+        "target": {
+          "backend": "uia",
+          "automation_id": "0",
+          "name": "Screenshots",
+          "control_type": "ListItem",
+          "class_name": "UIItem",
+          "window_title": null,
+          "process_name": "python.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": null,
+          "browser": null,
+          "bbox": null,
+          "screen_x": 241,
+          "screen_y": 251,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "0",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Screenshots",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "UIItem",
+              "priority": 3,
+              "confidence": 0.7
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "0",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Screenshot 2026-01-05 092644",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Screenshot 2026-01-05 092644",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "UIItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Items View",
+                        "Pane:Shell Folder View:listview"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 182,
+                        "top": 120,
+                        "right": 286,
+                        "bottom": 270,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 241,
+                        "y": 251
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 241,
+              "screen_y": 251,
+              "selector_version": "2.3",
+              "recorded_at": 1777119390.6533964,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "right",
+                  "name": "Screenshot 2026-01-05 145736",
+                  "control_type": "ListItem",
+                  "automation_id": null,
+                  "offset_x": 140,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "963eb9ee5637e144",
+              "element_role": "list",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 227,
+                "top": 150,
+                "right": 358,
+                "bottom": 337
+              },
+              "relative_to_window": {
+                "x": 236,
+                "y": 159,
+                "w": 131,
+                "h": 187,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 18,
+                "y": 8,
+                "w": 131,
+                "h": 187
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": null,
+          "element_hash": "363e7209ca4105ed",
+          "element_role": "list",
+          "confidence_level": "high",
+          "visibility_score": "hidden",
+          "is_active_window": false,
+          "relative_to_window": null,
+          "relative_to_parent": null
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 20,
+      "timestamp_ms": 28893,
+      "wall_time": "2026-04-25T12:16:30.793152+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119390659.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 21,
+      "timestamp_ms": 30379,
+      "wall_time": "2026-04-25T12:16:32.271441+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 694,
+        "y": 413,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "8",
+          "name": "Screenshot 2026-01-23 104106",
+          "control_type": "ListItem",
+          "class_name": "UIItem",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 518,
+            "top": 270,
+            "right": 622,
+            "bottom": 420
+          },
+          "screen_x": 694,
+          "screen_y": 413,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Items View",
+            "Pane:Shell Folder View:listview"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "8",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Screenshot 2026-01-23 104106",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "UIItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 518,
+                "top": 270,
+                "right": 622,
+                "bottom": 420
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "8",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Screenshot 2026-01-23 104106",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Screenshot 2026-01-23 104106",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "UIItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Items View",
+                        "Pane:Shell Folder View:listview"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 518,
+                        "top": 270,
+                        "right": 622,
+                        "bottom": 420,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 694,
+                        "y": 413
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 694,
+              "screen_y": 413,
+              "selector_version": "2.3",
+              "recorded_at": 1777119392.271442,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Screenshot 2026-01-21 095858",
+                  "control_type": "ListItem",
+                  "automation_id": null,
+                  "offset_x": -140,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Screenshot 2026-01-27 141241",
+                  "control_type": "ListItem",
+                  "automation_id": null,
+                  "offset_x": 140,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "50767cc65adf58f7",
+              "element_role": "list",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 647,
+                "top": 338,
+                "right": 778,
+                "bottom": 525
+              },
+              "relative_to_window": {
+                "x": 656,
+                "y": 347,
+                "w": 131,
+                "h": 187,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 438,
+                "y": 196,
+                "w": 131,
+                "h": 187
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 647,
+            "top": 338,
+            "right": 778,
+            "bottom": 525
+          },
+          "element_hash": "50767cc65adf58f7",
+          "element_role": "list",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 656,
+            "y": 347,
+            "w": 131,
+            "h": 187,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 438,
+            "y": 196,
+            "w": 131,
+            "h": 187
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 22,
+      "timestamp_ms": 30551,
+      "wall_time": "2026-04-25T12:16:32.445360+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119392285.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 23,
+      "timestamp_ms": 31856,
+      "wall_time": "2026-04-25T12:16:33.748816+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 718,
+        "y": 550,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "1",
+          "name": "Insert",
+          "control_type": "SplitButton",
+          "class_name": "Button",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 556,
+            "top": 430,
+            "right": 644,
+            "bottom": 456
+          },
+          "screen_x": 718,
+          "screen_y": 550,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Insert Picture"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "1",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Insert",
+                "type": "SplitButton"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "Button",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 556,
+                "top": 430,
+                "right": 644,
+                "bottom": 456
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "1",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Insert",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "SplitButton",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Insert",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "SplitButton",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "Button",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Insert Picture"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 556,
+                        "top": 430,
+                        "right": 644,
+                        "bottom": 456,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 718,
+                        "y": 550
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 718,
+              "screen_y": 550,
+              "selector_version": "2.3",
+              "recorded_at": 1777119393.7488165,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "File name:",
+                  "control_type": "Static",
+                  "automation_id": null,
+                  "offset_x": -559,
+                  "offset_y": -38
+                },
+                {
+                  "direction": "right",
+                  "name": "Files of type:",
+                  "control_type": "ComboBox",
+                  "automation_id": null,
+                  "offset_x": 62,
+                  "offset_y": -38
+                },
+                {
+                  "direction": "left",
+                  "name": "Tools",
+                  "control_type": "Toolbar",
+                  "automation_id": null,
+                  "offset_x": -108,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Cancel",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 125,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "61a2fbe5a6971409",
+              "element_role": "button",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 695,
+                "top": 537,
+                "right": 805,
+                "bottom": 570
+              },
+              "relative_to_window": {
+                "x": 704,
+                "y": 546,
+                "w": 110,
+                "h": 33,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 695,
+                "y": 537,
+                "w": 110,
+                "h": 33
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 695,
+            "top": 537,
+            "right": 805,
+            "bottom": 570
+          },
+          "element_hash": "61a2fbe5a6971409",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 704,
+            "y": 546,
+            "w": 110,
+            "h": 33,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 695,
+            "y": 537,
+            "w": 110,
+            "h": 33
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 24,
+      "timestamp_ms": 31992,
+      "wall_time": "2026-04-25T12:16:33.897689+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119393763.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 25,
+      "timestamp_ms": 34806,
+      "wall_time": "2026-04-25T12:16:36.699051+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1876,
+        "y": 0,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Close",
+          "control_type": "Button",
+          "class_name": "NetUIAppFrameHelper",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 1490,
+            "top": 0,
+            "right": 1536,
+            "bottom": 31
+          },
+          "screen_x": 1876,
+          "screen_y": 0,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Close",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIAppFrameHelper",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 1490,
+                "top": 0,
+                "right": 1536,
+                "bottom": 31
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Close",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Close",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIAppFrameHelper",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 1490,
+                        "top": 0,
+                        "right": 1536,
+                        "bottom": 31,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1876,
+                        "y": 0
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 1876,
+              "screen_y": 0,
+              "selector_version": "2.3",
+              "recorded_at": 1777119396.6990516,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Minimize",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -114,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "left",
+                  "name": "Restore Down",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "parent",
+                  "name": "Ribbon",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "6e693d9dad9fee62",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 1863,
+                "top": 0,
+                "right": 1920,
+                "bottom": 39
+              },
+              "relative_to_window": {
+                "x": 1872,
+                "y": 9,
+                "w": 57,
+                "h": 39,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 1863,
+                "y": 0,
+                "w": 57,
+                "h": 39
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1863,
+            "top": 0,
+            "right": 1920,
+            "bottom": 39
+          },
+          "element_hash": "6e693d9dad9fee62",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1872,
+            "y": 9,
+            "w": 57,
+            "h": 39,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 1863,
+            "y": 0,
+            "w": 57,
+            "h": 39
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 26,
+      "timestamp_ms": 34975,
+      "wall_time": "2026-04-25T12:16:36.871057+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119396713.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 27,
+      "timestamp_ms": 36112,
+      "wall_time": "2026-04-25T12:16:38.007951+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1070,
+        "y": 708,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Don't Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 799,
+            "top": 564,
+            "right": 887,
+            "bottom": 588
+          },
+          "screen_x": 1070,
+          "screen_y": 708,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Don't Save",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 799,
+                "top": 564,
+                "right": 887,
+                "bottom": 588
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Don't Save",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Don't Save",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 799,
+                        "top": 564,
+                        "right": 887,
+                        "bottom": 588,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1070,
+                        "y": 708
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 1070,
+              "screen_y": 708,
+              "selector_version": "2.3",
+              "recorded_at": 1777119398.0079513,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Choose a Location",
+                  "control_type": "ComboBox",
+                  "automation_id": null,
+                  "offset_x": -93,
+                  "offset_y": -98
+                },
+                {
+                  "direction": "left",
+                  "name": "Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -110,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Cancel",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 110,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "00abcab0e048a9a0",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 999,
+                "top": 705,
+                "right": 1109,
+                "bottom": 735
+              },
+              "relative_to_window": {
+                "x": 1008,
+                "y": 714,
+                "w": 110,
+                "h": 30,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 317,
+                "y": 296,
+                "w": 110,
+                "h": 30
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 999,
+            "top": 705,
+            "right": 1109,
+            "bottom": 735
+          },
+          "element_hash": "00abcab0e048a9a0",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1008,
+            "y": 714,
+            "w": 110,
+            "h": 30,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 317,
+            "y": 296,
+            "w": 110,
+            "h": 30
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 28,
+      "timestamp_ms": 36285,
+      "wall_time": "2026-04-25T12:16:38.189154+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119398007.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 29,
+      "timestamp_ms": 39624,
+      "wall_time": "2026-04-25T12:16:41.530029+00:00",
+      "payload": {
+        "type": "mouse_scroll",
+        "x": 831,
+        "y": 701,
+        "dx": 0,
+        "dy": -15,
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3017010,
+          "browser": null,
+          "bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1023,
+            "bottom": 646
+          },
+          "screen_x": 831,
+          "screen_y": 701,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:C:\\Users\\Girish\\Documents\\rpa_:Console Window"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 160,
+            "top": 160,
+            "right": 1279,
+            "bottom": 807
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 30,
+      "timestamp_ms": 40440,
+      "wall_time": "2026-04-25T12:16:42.345295+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Don't Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Presentation1 - PowerPoint",
+          "process_name": "POWERPNT.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 657824,
+          "browser": null,
+          "bbox": {
+            "left": 799,
+            "top": 564,
+            "right": 887,
+            "bottom": 588
+          },
+          "screen_x": 1070,
+          "screen_y": 708,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Don't Save",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 799,
+                "top": 564,
+                "right": 887,
+                "bottom": 588
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Don't Save",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Presentation1 - PowerPoint",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Don't Save",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 799,
+                        "top": 564,
+                        "right": 887,
+                        "bottom": 588,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1070,
+                        "y": 708
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "POWERPNT.EXE",
+              "window_title": "Presentation1 - PowerPoint",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 1070,
+              "screen_y": 708,
+              "selector_version": "2.3",
+              "recorded_at": 1777119398.0079513,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Choose a Location",
+                  "control_type": "ComboBox",
+                  "automation_id": null,
+                  "offset_x": -93,
+                  "offset_y": -98
+                },
+                {
+                  "direction": "left",
+                  "name": "Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -110,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Cancel",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 110,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "00abcab0e048a9a0",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 657824,
+              "raw_bbox": {
+                "left": 999,
+                "top": 705,
+                "right": 1109,
+                "bottom": 735
+              },
+              "relative_to_window": {
+                "x": 1008,
+                "y": 714,
+                "w": 110,
+                "h": 30,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 317,
+                "y": 296,
+                "w": 110,
+                "h": 30
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 999,
+            "top": 705,
+            "right": 1109,
+            "bottom": 735
+          },
+          "element_hash": "00abcab0e048a9a0",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1008,
+            "y": 714,
+            "w": 110,
+            "h": 30,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 317,
+            "y": 296,
+            "w": 110,
+            "h": 30
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 31,
+      "timestamp_ms": 40458,
+      "wall_time": "2026-04-25T12:16:42.356668+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 619,
+        "y": 663,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3017010,
+          "browser": null,
+          "bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1023,
+            "bottom": 646
+          },
+          "screen_x": 619,
+          "screen_y": 663,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 128,
+                "top": 128,
+                "right": 1023,
+                "bottom": 646
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:C:\\Users\\Girish\\Documents\\rpa_:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 128,
+                        "top": 128,
+                        "right": 1023,
+                        "bottom": 646,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 619,
+                        "y": 663
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 619,
+              "screen_y": 663,
+              "selector_version": "2.3",
+              "recorded_at": 1777119402.356669,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3017010,
+              "raw_bbox": {
+                "left": 160,
+                "top": 160,
+                "right": 1279,
+                "bottom": 807
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 160,
+            "top": 160,
+            "right": 1279,
+            "bottom": 807
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 32,
+      "timestamp_ms": 40554,
+      "wall_time": "2026-04-25T12:16:42.457230+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777119402356.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 33,
+      "timestamp_ms": 41452,
+      "wall_time": "2026-04-25T12:16:43.356273+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 3017010,
+          "browser": null,
+          "bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1023,
+            "bottom": 646
+          },
+          "screen_x": 619,
+          "screen_y": 663,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 128,
+                "top": 128,
+                "right": 1023,
+                "bottom": 646
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:C:\\Users\\Girish\\Documents\\rpa_:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 128,
+                        "top": 128,
+                        "right": 1023,
+                        "bottom": 646,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 619,
+                        "y": 663
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 619,
+              "screen_y": 663,
+              "selector_version": "2.3",
+              "recorded_at": 1777119402.356669,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 3017010,
+              "raw_bbox": {
+                "left": 160,
+                "top": 160,
+                "right": 1279,
+                "bottom": 807
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 160,
+            "top": 160,
+            "right": 1279,
+            "bottom": 807
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    }
+  ],
+  "replay_history": [],
+  "session_setings": {
+    "screenshot_on_click": true,
+    "capture_scroll_events": true,
+    "replay_mode": "adaptive",
+    "failure_strategy": "retry",
+    "max_retries": 2,
+    "retry_interval_ms": 500,
+    "default_timeout_ms": 5000,
+    "use_ocr_fallback": true,
+    "use_image_fallback": true,
+    "use_bbox_fallback": true,
+    "speed_factor": 1.0
+  },
+  "stats": {
+    "total_events": 33,
+    "click_count": 0,
+    "typing_count": 0,
+    "scroll_count": 0,
+    "error_count": 0,
+    "avg_event_interval_ms": null
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true
+}

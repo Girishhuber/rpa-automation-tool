@@ -558,10 +558,7 @@ class BrowserBridge:
             logger.error("[BROWSER] switch_to_tab failed: {}", exc)
         return False
 
-    # ──────────────────────────────────────────────────────────────────
-    # WebSocket management
-    # ──────────────────────────────────────────────────────────────────
-
+ 
     def _open_ws(self, tab: dict) -> bool:
         ws_url = tab.get("webSocketDebuggerUrl")
         if not ws_url:
