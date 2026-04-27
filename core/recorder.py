@@ -31,6 +31,7 @@ from .uia_enricher import UIAEnricher, detect_excel_cell, BROWSER_PROCS, _ELECTR
 from .browser_bridge import BrowserBridge
 from .overlay import RecordingOverlay
 from .screenshot import ScreenCapture
+from .selector import _is_unstable
 
 try:
     from pynput import mouse, keyboard
@@ -124,6 +125,12 @@ _APP_ACTION_GROUPS = {
 
 # Scroll events within this window are merged into a single event
 SCROLL_MERGE_WINDOW_MS = 1500
+
+_WEAK_RECORDING_TYPES = {
+    "Pane", "Group", "ToolBar", "StatusBar", "ScrollBar", "Window",
+    "Text", "Label", "StaticText",
+}
+_REPEATED_RECORDING_TYPES = {"ListItem", "DataItem", "Custom"}
 
 
 def _classify_intent(payload) -> str:
@@ -396,18 +403,31 @@ class Recorder:
         # Build enriched target (single UIA call)
         target = self._build_target_at(x, y)
 
-        # ── Pre-flush: detect Excel cell BEFORE flushing the text buffer ──────
-        # This ensures TypeText('Name') typed before clicking A1 gets cell_ref=A1
+        # ── Pre-flush: detect the cell being clicked ──────────────────────────
+        # Two distinct cases:
+        #
+        # Case A — No current cell (first click ever, or typing before any cell click):
+        #   The buffered text has no cell anchor. Assign the NEW cell's ref so the
+        #   text goes to the cell the user is about to click. E.g. user types "Name"
+        #   then clicks E8 — "Name" should land in E8.
+        #
+        # Case B — Already in a cell (user typed in cell X, now clicking cell Y):
+        #   The buffered text was typed in cell X. Keep the existing ref so the flush
+        #   records it in X. The new ref (Y) will be set AFTER the flush by the
+        #   ExcelCellSelectEvent block below.
+        #   E.g. user types "Age" in E8, clicks G8 — "Age" should stay in E8.
+        _clicked_cell = None
         if (target
                 and self._config.recorder.detect_excel_cells
                 and self._is_excel_target(target)
                 and target.backend == TargetBackend.UIA):
-            _pre_cell = detect_excel_cell(target.name or "", target.control_type or "")
-            if _pre_cell:
-                self._last_excel_cell_ref = _pre_cell
+            _clicked_cell = detect_excel_cell(target.name or "", target.control_type or "")
+            if _clicked_cell and not self._last_excel_cell_ref:
+                # Case A: no existing anchor — assign new cell so buffered text lands here
+                self._last_excel_cell_ref = _clicked_cell
                 self._last_typing_target  = target
 
-        # Flush text buffer (will now have correct cell_ref if target is Excel cell)
+        # Flush text buffer — uses existing _last_excel_cell_ref (correct for Case B)
         self._flush_text_buffer()
 
         # ── Filters ──────────────────────────────────────────────────
@@ -679,7 +699,7 @@ class Recorder:
             return
 
         text   = self._text_buffer
-        target = self._text_buffer_target or self._last_target
+        target = self._text_buffer_target or self._get_typing_target() or self._last_target
 
         self._text_buffer        = ""
         self._text_buffer_target = None
@@ -801,6 +821,78 @@ class Recorder:
                 time.sleep(0.5)
 
 
+
+    def _sanitize_recorded_target(self, target: Optional[UITarget]) -> Optional[UITarget]:
+        if not target:
+            return None
+        if target.automation_id and _is_unstable(target.automation_id):
+            logger.warning("[RECORD] Discarding unstable automation_id='{}'", target.automation_id)
+            target.automation_id = None
+        if target.class_name and _is_unstable(target.class_name):
+            logger.debug("[RECORD] Discarding unstable class_name='{}'", target.class_name)
+            target.class_name = None
+        return target
+
+    @staticmethod
+    def _target_anchor_count(target: Optional[UITarget]) -> int:
+        if not target:
+            return 0
+        count = 0
+        for rich in getattr(target, "rich_selectors", None) or []:
+            count += len(getattr(rich, "anchor_elements", None) or [])
+        return count
+
+    def _recording_quality_score(self, target: Optional[UITarget]) -> int:
+        if not target:
+            return 0
+        if target.backend == TargetBackend.BROWSER and target.browser:
+            score = 0
+            bt = target.browser
+            if bt.xpath: score += 35
+            if bt.css_selector: score += 30
+            if bt.aria_label: score += 25
+            if bt.inner_text and len(bt.inner_text.strip()) > 2: score += 15
+            return min(score, 100)
+
+        score = 0
+        if target.automation_id and not _is_unstable(target.automation_id):
+            score += 55
+        if target.name and len(target.name.strip()) > 3:
+            score += 25
+        if target.control_type:
+            score += 10
+        if target.window_title or target.process_name:
+            score += 10
+        if target.ancestor_chain:
+            score += 10
+        if self._target_anchor_count(target):
+            score += 15
+        if (target.control_type or "") in _WEAK_RECORDING_TYPES:
+            score -= 25
+        if (target.control_type or "") in _REPEATED_RECORDING_TYPES and not target.automation_id:
+            score -= 10
+        return max(0, min(score, 100))
+
+    def _apply_recording_quality(self, target: Optional[UITarget]) -> None:
+        if not target:
+            return
+        score = self._recording_quality_score(target)
+        target.confidence_score = max(target.confidence_score or 0.0, score / 100)
+        if score >= 75:
+            target.confidence_level = "high"
+            target.confidence_reason = "stable_selector"
+        elif score >= 50:
+            target.confidence_level = "medium"
+            target.confidence_reason = "anchored_selector"
+        else:
+            target.confidence_level = "low"
+            target.confidence_reason = "weak_selector"
+            logger.warning(
+                "[RECORD] Weak target captured: score={} ctrl={} auto_id={} name='{}' anchors={}",
+                score, target.control_type or "?", target.automation_id or "(none)",
+                (target.name or "")[:40], self._target_anchor_count(target),
+            )
+
     def _build_target_at(self, x: int, y: int) -> Optional[UITarget]:
         target = self._enricher.get_target_at(x, y)
 
@@ -820,9 +912,9 @@ class Recorder:
                 target.backend = TargetBackend.BROWSER
                 target.browser = bt
 
-        # v2.0: enrich with selectors and editability flag
+        # v2.0: sanitize unstable selectors, enrich, then score target quality.
         if target:
-            target.build_selectors()
+            target = self._sanitize_recorded_target(target)
 
             if target.control_type in _EDITABLE_CONTROL_TYPES:
                 target.is_editable = True
@@ -833,6 +925,9 @@ class Recorder:
                     target.rich_selectors = [rich_sel]
             except Exception:
                 pass
+
+            target.build_selectors()
+            self._apply_recording_quality(target)
 
         return target
 
@@ -924,6 +1019,8 @@ class Recorder:
             try:
                 focused = self._enricher.get_focused_element()
                 if focused:
+                    focused = self._sanitize_recorded_target(focused)
+                    self._apply_recording_quality(focused)
                     ctrl = focused.control_type or ""
                     if ctrl in _EDITABLE_CONTROL_TYPES or focused.is_editable:
                         self._last_typing_target = focused

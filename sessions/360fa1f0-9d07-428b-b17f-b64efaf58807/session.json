@@ -1,19 +1,19 @@
 {
-  "id": "becdcee7-9be4-449b-9a04-11cf552cd5bc",
-  "name": "My workflow1",
+  "id": "360fa1f0-9d07-428b-b17f-b64efaf58807",
+  "name": "My workflow chrome",
   "description": "",
   "tags": [],
-  "created_at": "2026-04-26T10:49:14.838739+00:00",
-  "updated_at": "2026-04-26T10:49:56.797811+00:00",
-  "duration_ms": 41957,
+  "created_at": "2026-04-27T06:18:04.905765+00:00",
+  "updated_at": "2026-04-27T06:19:11.530556+00:00",
+  "duration_ms": 66620,
   "status": "complete",
   "system_info": {
     "os_version": "10.0.26200",
     "screen_width": 1920,
-    "screen_height": 1080,
+    "screen_height": 1200,
     "dpi_scale": 1.25,
     "monitor_count": 1,
-    "python_version": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
     "machine_name": null,
     "cpu_info": null,
     "gpu_info": null,
@@ -23,8 +23,8 @@
   "events": [
     {
       "id": 1,
-      "timestamp_ms": 7276,
-      "wall_time": "2026-04-26T10:49:22.112235+00:00",
+      "timestamp_ms": 23519,
+      "wall_time": "2026-04-27T06:18:28.422893+00:00",
       "payload": {
         "type": "process_launch",
         "executable": "chrome.exe",
@@ -37,33 +37,33 @@
     },
     {
       "id": 2,
-      "timestamp_ms": 10005,
-      "wall_time": "2026-04-26T10:49:24.845670+00:00",
+      "timestamp_ms": 25915,
+      "wall_time": "2026-04-27T06:18:30.814786+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 1610,
-        "y": 200,
+        "x": 1671,
+        "y": 191,
         "button": "left",
         "target": {
           "backend": "browser",
           "automation_id": null,
-          "name": null,
-          "control_type": "Pane",
-          "class_name": "Chrome_WidgetWin_1",
-          "window_title": "New Tab - Google Chrome",
+          "name": "Gmail ",
+          "control_type": "Hyperlink",
+          "class_name": "gb_4",
+          "window_title": "New tab - Google Chrome",
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": null,
           "bbox": {
-            "left": 0,
-            "top": 121,
-            "right": 1536,
-            "bottom": 816
+            "left": 1327,
+            "top": 141,
+            "right": 1362,
+            "bottom": 165
           },
-          "screen_x": 1610,
-          "screen_y": 200,
+          "screen_x": 1671,
+          "screen_y": 191,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -71,55 +71,67 @@
           "template_path": null,
           "ocr_text": null,
           "ancestor_chain": [
+            "GroupBox::gb",
+            "Document::RootWebArea",
+            "Document:New tab:RootWebArea",
             "Pane:"
           ],
           "selectors": [
             {
+              "type": "name_type",
+              "value": {
+                "name": "Gmail ",
+                "type": "Hyperlink"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
               "type": "class_name",
-              "value": "Chrome_WidgetWin_1",
+              "value": "gb_4",
               "priority": 3,
               "confidence": 0.7
             },
             {
               "type": "bbox",
               "value": {
-                "left": 0,
-                "top": 121,
-                "right": 1536,
-                "bottom": 816
+                "left": 1327,
+                "top": 141,
+                "right": 1362,
+                "bottom": 165
               },
               "priority": 5,
               "confidence": 0.5
             }
           ],
           "rich_selectors": [],
-          "confidence_score": 0.7,
-          "confidence_reason": "class_name",
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
           "is_editable": false,
           "raw_bbox": {
-            "left": 0,
-            "top": 151,
-            "right": 1920,
-            "bottom": 1020
+            "left": 1659,
+            "top": 176,
+            "right": 1702,
+            "bottom": 206
           },
-          "element_hash": "4ac6db227de4394e",
-          "element_role": "container",
-          "confidence_level": "low",
+          "element_hash": "a148229a1f6d4cd7",
+          "element_role": "unknown",
+          "confidence_level": "medium",
           "visibility_score": "full",
           "is_active_window": true,
           "relative_to_window": {
-            "x": 9,
-            "y": 160,
-            "w": 1920,
-            "h": 869,
+            "x": 1668,
+            "y": 185,
+            "w": 43,
+            "h": 30,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
-            "x": 0,
-            "y": 1,
-            "w": 1920,
-            "h": 869
+            "x": 1659,
+            "y": 25,
+            "w": 43,
+            "h": 30
           }
         }
       },
@@ -129,11 +141,11 @@
     },
     {
       "id": 3,
-      "timestamp_ms": 10270,
-      "wall_time": "2026-04-26T10:49:25.109637+00:00",
+      "timestamp_ms": 26034,
+      "wall_time": "2026-04-27T06:18:30.941862+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200564847.png",
+        "path": "screen_1777270710814.png",
         "monitor_index": 0,
         "label": null
       },
@@ -143,12 +155,12 @@
     },
     {
       "id": 4,
-      "timestamp_ms": 17306,
-      "wall_time": "2026-04-26T10:49:32.146251+00:00",
+      "timestamp_ms": 33116,
+      "wall_time": "2026-04-27T06:18:38.013593+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 115,
-        "y": 277,
+        "x": 100,
+        "y": 280,
         "button": "left",
         "target": {
           "backend": "browser",
@@ -160,7 +172,7 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": {
             "xpath": "/html/body/div[6]/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]",
             "css_selector": "div.nH:nth-of-type(3) > div.nH > div.nH.aqk:nth-of-type(2) > div.aeN.WR > div.aic > div.z0 > div.T-I.T-I-KE",
@@ -178,11 +190,11 @@
           "bbox": {
             "left": 8,
             "top": 193,
-            "right": 153,
+            "right": 151,
             "bottom": 249
           },
-          "screen_x": 115,
-          "screen_y": 277,
+          "screen_x": 100,
+          "screen_y": 280,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -223,7 +235,7 @@
               "value": {
                 "left": 8,
                 "top": 193,
-                "right": 153,
+                "right": 151,
                 "bottom": 249
               },
               "priority": 5,
@@ -237,7 +249,7 @@
           "raw_bbox": {
             "left": 10,
             "top": 241,
-            "right": 191,
+            "right": 189,
             "bottom": 311
           },
           "element_hash": "adbd01317eac9f30",
@@ -248,15 +260,15 @@
           "relative_to_window": {
             "x": 19,
             "y": 250,
-            "w": 181,
+            "w": 179,
             "h": 70,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
             "x": 10,
             "y": 10,
-            "w": 181,
+            "w": 179,
             "h": 70
           }
         }
@@ -267,11 +279,11 @@
     },
     {
       "id": 5,
-      "timestamp_ms": 17546,
-      "wall_time": "2026-04-26T10:49:32.385682+00:00",
+      "timestamp_ms": 33308,
+      "wall_time": "2026-04-27T06:18:38.209516+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200572148.png",
+        "path": "screen_1777270718013.png",
         "monitor_index": 0,
         "label": null
       },
@@ -281,12 +293,12 @@
     },
     {
       "id": 6,
-      "timestamp_ms": 22112,
-      "wall_time": "2026-04-26T10:49:36.951573+00:00",
+      "timestamp_ms": 36427,
+      "wall_time": "2026-04-27T06:18:41.327903+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 1258,
-        "y": 466,
+        "x": 1207,
+        "y": 500,
         "button": "left",
         "target": {
           "backend": "browser",
@@ -298,7 +310,7 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": {
             "xpath": "//*[@id=\":qj\"]",
             "css_selector": "#:qj",
@@ -314,13 +326,13 @@
             "tab_url": "chrome://newtab/"
           },
           "bbox": {
-            "left": 982,
-            "top": 356,
-            "right": 1407,
-            "bottom": 392
+            "left": 914,
+            "top": 385,
+            "right": 1409,
+            "bottom": 422
           },
-          "screen_x": 1258,
-          "screen_y": 466,
+          "screen_x": 1207,
+          "screen_y": 500,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -368,10 +380,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 982,
-                "top": 356,
-                "right": 1407,
-                "bottom": 392
+                "left": 914,
+                "top": 385,
+                "right": 1409,
+                "bottom": 422
               },
               "priority": 5,
               "confidence": 0.5
@@ -382,10 +394,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 1227,
-            "top": 445,
-            "right": 1759,
-            "bottom": 490
+            "left": 1143,
+            "top": 481,
+            "right": 1761,
+            "bottom": 527
           },
           "element_hash": "554ab3d8a7e83c98",
           "element_role": "dropdown",
@@ -393,18 +405,18 @@
           "visibility_score": "full",
           "is_active_window": true,
           "relative_to_window": {
-            "x": 1236,
-            "y": 454,
-            "w": 532,
-            "h": 45,
+            "x": 1152,
+            "y": 490,
+            "w": 618,
+            "h": 46,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
             "x": 5,
             "y": 0,
-            "w": 532,
-            "h": 45
+            "w": 618,
+            "h": 46
           }
         }
       },
@@ -414,11 +426,11 @@
     },
     {
       "id": 7,
-      "timestamp_ms": 22317,
-      "wall_time": "2026-04-26T10:49:37.156232+00:00",
+      "timestamp_ms": 36582,
+      "wall_time": "2026-04-27T06:18:41.489068+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200576954.png",
+        "path": "screen_1777270721327.png",
         "monitor_index": 0,
         "label": null
       },
@@ -428,11 +440,11 @@
     },
     {
       "id": 8,
-      "timestamp_ms": 23990,
-      "wall_time": "2026-04-26T10:49:38.829930+00:00",
+      "timestamp_ms": 37992,
+      "wall_time": "2026-04-27T06:18:42.900711+00:00",
       "payload": {
         "type": "type_text",
-        "text": "hari",
+        "text": "ha",
         "target": {
           "backend": "browser",
           "automation_id": ":uc",
@@ -443,7 +455,7 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": {
             "xpath": "//*[@id=\":qj\"]",
             "css_selector": "#:qj",
@@ -459,13 +471,13 @@
             "tab_url": "chrome://newtab/"
           },
           "bbox": {
-            "left": 982,
-            "top": 356,
-            "right": 1407,
-            "bottom": 392
+            "left": 914,
+            "top": 385,
+            "right": 1409,
+            "bottom": 422
           },
-          "screen_x": 1258,
-          "screen_y": 466,
+          "screen_x": 1207,
+          "screen_y": 500,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -513,10 +525,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 982,
-                "top": 356,
-                "right": 1407,
-                "bottom": 392
+                "left": 914,
+                "top": 385,
+                "right": 1409,
+                "bottom": 422
               },
               "priority": 5,
               "confidence": 0.5
@@ -527,10 +539,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 1227,
-            "top": 445,
-            "right": 1759,
-            "bottom": 490
+            "left": 1143,
+            "top": 481,
+            "right": 1761,
+            "bottom": 527
           },
           "element_hash": "554ab3d8a7e83c98",
           "element_role": "dropdown",
@@ -538,18 +550,18 @@
           "visibility_score": "full",
           "is_active_window": true,
           "relative_to_window": {
-            "x": 1236,
-            "y": 454,
-            "w": 532,
-            "h": 45,
+            "x": 1152,
+            "y": 490,
+            "w": 618,
+            "h": 46,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
             "x": 5,
             "y": 0,
-            "w": 532,
-            "h": 45
+            "w": 618,
+            "h": 46
           }
         },
         "clear_first": false,
@@ -564,16 +576,16 @@
     },
     {
       "id": 9,
-      "timestamp_ms": 25404,
-      "wall_time": "2026-04-26T10:49:40.244271+00:00",
+      "timestamp_ms": 38951,
+      "wall_time": "2026-04-27T06:18:43.858673+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 1388,
-        "y": 511,
+        "x": 1242,
+        "y": 569,
         "button": "left",
         "target": {
           "backend": "browser",
-          "automation_id": ":vs",
+          "automation_id": ":vg",
           "name": "harishfree777@gmail.com harishfree777@gmail.com",
           "control_type": "ListItem",
           "class_name": "agJ aFw bjE",
@@ -581,15 +593,15 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": {
-            "xpath": "//*[@id=\":rz\"]",
-            "css_selector": "#:rz",
-            "aria_label": "Message Body",
-            "aria_role": "textbox",
-            "inner_text": null,
+            "xpath": "//*[@id=\":vh\"]",
+            "css_selector": "#:vh",
+            "aria_label": null,
+            "aria_role": "option",
+            "inner_text": "GIRISH S\nharishkrishna728@gmail.com",
             "tag_name": "div",
-            "element_id": ":rz",
+            "element_id": ":vh",
             "name_attr": null,
             "placeholder": null,
             "href": null,
@@ -597,13 +609,13 @@
             "tab_url": "chrome://newtab/"
           },
           "bbox": {
-            "left": 982,
-            "top": 400,
-            "right": 1402,
-            "bottom": 452
+            "left": 914,
+            "top": 429,
+            "right": 1335,
+            "bottom": 482
           },
-          "screen_x": 1388,
-          "screen_y": 511,
+          "screen_x": 1242,
+          "screen_y": 569,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -611,10 +623,10 @@
           "template_path": null,
           "ocr_text": null,
           "ancestor_chain": [
-            "ListBox:::vr",
+            "ListBox:::vf",
             "GroupBox:",
-            "ListItem:harishfree777@gmail.comharishf::vp",
-            "ListBox:hari::ud",
+            "ListItem:harishfree777@gmail.comharishf::vd",
+            "ListBox:ha::ud",
             "GroupBox:",
             "GroupBox:",
             "GroupBox:",
@@ -623,13 +635,13 @@
           "selectors": [
             {
               "type": "automation_id",
-              "value": ":vs",
+              "value": ":vg",
               "priority": 1,
               "confidence": 0.95
             },
             {
               "type": "xpath",
-              "value": "//*[@id=\":rz\"]",
+              "value": "//*[@id=\":vh\"]",
               "priority": 1,
               "confidence": 0.95
             },
@@ -651,101 +663,44 @@
             {
               "type": "bbox",
               "value": {
-                "left": 982,
-                "top": 400,
-                "right": 1402,
-                "bottom": 452
+                "left": 914,
+                "top": 429,
+                "right": 1335,
+                "bottom": 482
               },
               "priority": 5,
               "confidence": 0.5
             }
           ],
-          "rich_selectors": [
-            {
-              "strategies": [
-                {
-                  "name": "positional",
-                  "attributes": [
-                    {
-                      "name": "bbox",
-                      "value": {
-                        "left": 0,
-                        "top": 0,
-                        "right": 0,
-                        "bottom": 0,
-                        "dpi": 1.25
-                      },
-                      "score": 10
-                    },
-                    {
-                      "name": "screen_coord",
-                      "value": {
-                        "x": 1388,
-                        "y": 511
-                      },
-                      "score": 5
-                    }
-                  ],
-                  "total_score": 15,
-                  "backend": "uia",
-                  "successes": 0,
-                  "failures": 0,
-                  "_score_boost": 0.0
-                }
-              ],
-              "process_name": "python.exe",
-              "window_title": null,
-              "semantic_role": "list",
-              "is_editable": false,
-              "is_clickable": true,
-              "confidence": 0.3125,
-              "screen_x": 1388,
-              "screen_y": 511,
-              "selector_version": "2.3",
-              "recorded_at": 1777200580.2366788,
-              "last_used_at": null,
-              "replay_successes": 0,
-              "replay_failures": 0,
-              "last_strategy_used": null,
-              "anchor_elements": [],
-              "element_hash": "fbd33f1dbdfbf8e4",
-              "element_role": "list",
-              "confidence_level": "low",
-              "visibility_score": "hidden",
-              "window_handle": null,
-              "raw_bbox": {
-                "left": 0,
-                "top": 0,
-                "right": 0,
-                "bottom": 0
-              },
-              "relative_to_window": {
-                "x": 0,
-                "y": 0,
-                "w": 0,
-                "h": 0,
-                "win_w": 0,
-                "win_h": 0
-              },
-              "relative_to_parent": null
-            }
-          ],
+          "rich_selectors": [],
           "confidence_score": 0.95,
           "confidence_reason": "automation_id",
           "is_editable": false,
           "raw_bbox": {
-            "left": 1227,
-            "top": 500,
-            "right": 1753,
-            "bottom": 565
+            "left": 1143,
+            "top": 536,
+            "right": 1669,
+            "bottom": 602
           },
-          "element_hash": "2edb7b9f17fdf2fc",
+          "element_hash": "a100b903baaae70e",
           "element_role": "list",
           "confidence_level": "high",
-          "visibility_score": "hidden",
+          "visibility_score": "full",
           "is_active_window": true,
-          "relative_to_window": null,
-          "relative_to_parent": null
+          "relative_to_window": {
+            "x": 1152,
+            "y": 545,
+            "w": 526,
+            "h": 66,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 526,
+            "h": 66
+          }
         }
       },
       "note": null,
@@ -754,11 +709,11 @@
     },
     {
       "id": 10,
-      "timestamp_ms": 25625,
-      "wall_time": "2026-04-26T10:49:40.464509+00:00",
+      "timestamp_ms": 39075,
+      "wall_time": "2026-04-27T06:18:43.983111+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200580246.png",
+        "path": "screen_1777270723858.png",
         "monitor_index": 0,
         "label": null
       },
@@ -768,12 +723,12 @@
     },
     {
       "id": 11,
-      "timestamp_ms": 28597,
-      "wall_time": "2026-04-26T10:49:43.432748+00:00",
+      "timestamp_ms": 41077,
+      "wall_time": "2026-04-27T06:18:45.984116+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 1312,
-        "y": 582,
+        "x": 1214,
+        "y": 632,
         "button": "left",
         "target": {
           "backend": "browser",
@@ -785,7 +740,7 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": {
             "xpath": "//*[@id=\":rz\"]",
             "css_selector": "#:rz",
@@ -801,13 +756,13 @@
             "tab_url": "chrome://newtab/"
           },
           "bbox": {
-            "left": 957,
-            "top": 444,
+            "left": 890,
+            "top": 473,
             "right": 1459,
-            "bottom": 746
+            "bottom": 842
           },
-          "screen_x": 1312,
-          "screen_y": 582,
+          "screen_x": 1214,
+          "screen_y": 632,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -854,10 +809,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 957,
-                "top": 444,
+                "left": 890,
+                "top": 473,
                 "right": 1459,
-                "bottom": 746
+                "bottom": 842
               },
               "priority": 5,
               "confidence": 0.5
@@ -868,10 +823,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 1196,
-            "top": 555,
+            "left": 1113,
+            "top": 591,
             "right": 1824,
-            "bottom": 933
+            "bottom": 1053
           },
           "element_hash": "b0dd5d6350b26109",
           "element_role": "input",
@@ -879,18 +834,18 @@
           "visibility_score": "full",
           "is_active_window": true,
           "relative_to_window": {
-            "x": 1205,
-            "y": 564,
-            "w": 628,
-            "h": 378,
+            "x": 1122,
+            "y": 600,
+            "w": 711,
+            "h": 462,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
             "x": 0,
             "y": 13,
-            "w": 628,
-            "h": 378
+            "w": 711,
+            "h": 462
           }
         }
       },
@@ -900,11 +855,11 @@
     },
     {
       "id": 12,
-      "timestamp_ms": 28813,
-      "wall_time": "2026-04-26T10:49:43.652446+00:00",
+      "timestamp_ms": 41256,
+      "wall_time": "2026-04-27T06:18:46.164095+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200583439.png",
+        "path": "screen_1777270725985.png",
         "monitor_index": 0,
         "label": null
       },
@@ -914,11 +869,11 @@
     },
     {
       "id": 13,
-      "timestamp_ms": 32832,
-      "wall_time": "2026-04-26T10:49:47.670668+00:00",
+      "timestamp_ms": 45268,
+      "wall_time": "2026-04-27T06:18:50.176221+00:00",
       "payload": {
         "type": "type_text",
-        "text": "Hi Testing",
+        "text": "Hi,Testing",
         "target": {
           "backend": "browser",
           "automation_id": ":rz",
@@ -929,7 +884,7 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": {
             "xpath": "//*[@id=\":rz\"]",
             "css_selector": "#:rz",
@@ -945,13 +900,13 @@
             "tab_url": "chrome://newtab/"
           },
           "bbox": {
-            "left": 957,
-            "top": 444,
+            "left": 890,
+            "top": 473,
             "right": 1459,
-            "bottom": 746
+            "bottom": 842
           },
-          "screen_x": 1312,
-          "screen_y": 582,
+          "screen_x": 1214,
+          "screen_y": 632,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -998,10 +953,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 957,
-                "top": 444,
+                "left": 890,
+                "top": 473,
                 "right": 1459,
-                "bottom": 746
+                "bottom": 842
               },
               "priority": 5,
               "confidence": 0.5
@@ -1012,10 +967,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 1196,
-            "top": 555,
+            "left": 1113,
+            "top": 591,
             "right": 1824,
-            "bottom": 933
+            "bottom": 1053
           },
           "element_hash": "b0dd5d6350b26109",
           "element_role": "input",
@@ -1023,18 +978,18 @@
           "visibility_score": "full",
           "is_active_window": true,
           "relative_to_window": {
-            "x": 1205,
-            "y": 564,
-            "w": 628,
-            "h": 378,
+            "x": 1122,
+            "y": 600,
+            "w": 711,
+            "h": 462,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
             "x": 0,
             "y": 13,
-            "w": 628,
-            "h": 378
+            "w": 711,
+            "h": 462
           }
         },
         "clear_first": false,
@@ -1049,12 +1004,12 @@
     },
     {
       "id": 14,
-      "timestamp_ms": 34461,
-      "wall_time": "2026-04-26T10:49:49.300116+00:00",
+      "timestamp_ms": 46460,
+      "wall_time": "2026-04-27T06:18:51.361288+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 1240,
-        "y": 981,
+        "x": 1149,
+        "y": 1104,
         "button": "left",
         "target": {
           "backend": "browser",
@@ -1066,16 +1021,16 @@
           "process_name": "chrome.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 199748,
+          "window_handle": 1640748,
           "browser": null,
           "bbox": {
-            "left": 957,
-            "top": 766,
-            "right": 1030,
-            "bottom": 803
+            "left": 890,
+            "top": 862,
+            "right": 963,
+            "bottom": 899
           },
-          "screen_x": 1240,
-          "screen_y": 981,
+          "screen_x": 1149,
+          "screen_y": 1104,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -1112,93 +1067,24 @@
             {
               "type": "bbox",
               "value": {
-                "left": 957,
-                "top": 766,
-                "right": 1030,
-                "bottom": 803
+                "left": 890,
+                "top": 862,
+                "right": 963,
+                "bottom": 899
               },
               "priority": 5,
               "confidence": 0.5
             }
           ],
-          "rich_selectors": [
-            {
-              "strategies": [
-                {
-                  "name": "positional",
-                  "attributes": [
-                    {
-                      "name": "bbox",
-                      "value": {
-                        "left": 0,
-                        "top": 0,
-                        "right": 0,
-                        "bottom": 0,
-                        "dpi": 1.25
-                      },
-                      "score": 10
-                    },
-                    {
-                      "name": "screen_coord",
-                      "value": {
-                        "x": 1240,
-                        "y": 981
-                      },
-                      "score": 5
-                    }
-                  ],
-                  "total_score": 15,
-                  "backend": "uia",
-                  "successes": 0,
-                  "failures": 0,
-                  "_score_boost": 0.0
-                }
-              ],
-              "process_name": "python.exe",
-              "window_title": null,
-              "semantic_role": "button",
-              "is_editable": false,
-              "is_clickable": true,
-              "confidence": 0.3125,
-              "screen_x": 1240,
-              "screen_y": 981,
-              "selector_version": "2.3",
-              "recorded_at": 1777200589.300116,
-              "last_used_at": null,
-              "replay_successes": 0,
-              "replay_failures": 0,
-              "last_strategy_used": null,
-              "anchor_elements": [],
-              "element_hash": "a0d71a1e271ae094",
-              "element_role": "button",
-              "confidence_level": "low",
-              "visibility_score": "hidden",
-              "window_handle": null,
-              "raw_bbox": {
-                "left": 0,
-                "top": 0,
-                "right": 0,
-                "bottom": 0
-              },
-              "relative_to_window": {
-                "x": 0,
-                "y": 0,
-                "w": 0,
-                "h": 0,
-                "win_w": 0,
-                "win_h": 0
-              },
-              "relative_to_parent": null
-            }
-          ],
+          "rich_selectors": [],
           "confidence_score": 0.95,
           "confidence_reason": "automation_id",
           "is_editable": false,
           "raw_bbox": {
-            "left": 1196,
-            "top": 958,
-            "right": 1287,
-            "bottom": 1004
+            "left": 1113,
+            "top": 1078,
+            "right": 1204,
+            "bottom": 1124
           },
           "element_hash": "4ed35cb849c897e8",
           "element_role": "button",
@@ -1206,12 +1092,12 @@
           "visibility_score": "full",
           "is_active_window": true,
           "relative_to_window": {
-            "x": 1205,
-            "y": 967,
+            "x": 1122,
+            "y": 1087,
             "w": 91,
             "h": 46,
             "win_w": 1938,
-            "win_h": 1038
+            "win_h": 1158
           },
           "relative_to_parent": {
             "x": 0,
@@ -1227,11 +1113,11 @@
     },
     {
       "id": 15,
-      "timestamp_ms": 34687,
-      "wall_time": "2026-04-26T10:49:49.525797+00:00",
+      "timestamp_ms": 46604,
+      "wall_time": "2026-04-27T06:18:51.512218+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200589302.png",
+        "path": "screen_1777270731361.png",
         "monitor_index": 0,
         "label": null
       },
@@ -1241,12 +1127,435 @@
     },
     {
       "id": 16,
-      "timestamp_ms": 38368,
-      "wall_time": "2026-04-26T10:49:53.207159+00:00",
+      "timestamp_ms": 58407,
+      "wall_time": "2026-04-27T06:19:03.309403+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 1426,
-        "y": 954,
+        "x": 18,
+        "y": 90,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": "view_1001",
+          "name": "Back",
+          "control_type": "Button",
+          "class_name": "BackForwardButton",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 1640748,
+          "browser": null,
+          "bbox": {
+            "left": 0,
+            "top": 46,
+            "right": 39,
+            "bottom": 81
+          },
+          "screen_x": 18,
+          "screen_y": 90,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Toolbar::view_1000",
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "view_1001",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Back",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "BackForwardButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 0,
+                "top": 46,
+                "right": 39,
+                "bottom": 81
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 0,
+            "top": 58,
+            "right": 49,
+            "bottom": 101
+          },
+          "element_hash": "bf235f63d5ac7cb6",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 9,
+            "y": 67,
+            "w": 49,
+            "h": 43,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 8,
+            "w": 49,
+            "h": 43
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 17,
+      "timestamp_ms": 58595,
+      "wall_time": "2026-04-27T06:19:03.503287+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777270743309.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 18,
+      "timestamp_ms": 62102,
+      "wall_time": "2026-04-27T06:19:07.009571+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1363,
+        "y": 1188,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Appid: C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "name": "Python - 2 running windows",
+          "control_type": "Button",
+          "class_name": "Taskbar.TaskListButtonAutomationPeer",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 65936,
+          "browser": null,
+          "bbox": {
+            "left": 1065,
+            "top": 912,
+            "right": 1109,
+            "bottom": 960
+          },
+          "screen_x": 1363,
+          "screen_y": 1188,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Appid: C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Python - 2 running windows",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "Taskbar.TaskListButtonAutomationPeer",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 1065,
+                "top": 912,
+                "right": 1109,
+                "bottom": 960
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Appid: C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Python - 2 running windows",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Python - 2 running windows",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "Taskbar.TaskListButtonAutomationPeer",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane::TaskbarFrame"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 1065,
+                        "top": 912,
+                        "right": 1109,
+                        "bottom": 960,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1363,
+                        "y": 1188
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "explorer.exe",
+              "window_title": "Taskbar",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 1363,
+              "screen_y": 1188,
+              "selector_version": "2.3",
+              "recorded_at": 1777270747.009571,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Claude - 1 running window",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -110,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "left",
+                  "name": "Notepad - 1 running window",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -55,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Terminal - 1 running window",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 55,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Google Chrome - 1 running window",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 110,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "1100e4dd19d87e91",
+              "element_role": "button",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 65936,
+              "raw_bbox": {
+                "left": 1331,
+                "top": 1140,
+                "right": 1386,
+                "bottom": 1200
+              },
+              "relative_to_window": {
+                "x": 1331,
+                "y": 0,
+                "w": 55,
+                "h": 60,
+                "win_w": 1920,
+                "win_h": 60
+              },
+              "relative_to_parent": {
+                "x": 1331,
+                "y": 0,
+                "w": 55,
+                "h": 60
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1331,
+            "top": 1140,
+            "right": 1386,
+            "bottom": 1200
+          },
+          "element_hash": "1100e4dd19d87e91",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1331,
+            "y": 0,
+            "w": 55,
+            "h": 60,
+            "win_w": 1920,
+            "win_h": 60
+          },
+          "relative_to_parent": {
+            "x": 1331,
+            "y": 0,
+            "w": 55,
+            "h": 60
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 19,
+      "timestamp_ms": 63143,
+      "wall_time": "2026-04-27T06:19:08.050809+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1421,
+        "y": 1100,
         "button": "left",
         "target": {
           "backend": "uia",
@@ -1258,16 +1567,16 @@
           "process_name": "explorer.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 131770,
+          "window_handle": 197982,
           "browser": null,
           "bbox": {
             "left": 0,
             "top": 0,
             "right": 1229,
-            "bottom": 691
+            "bottom": 768
           },
-          "screen_x": 1426,
-          "screen_y": 954,
+          "screen_x": 1421,
+          "screen_y": 1100,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -1290,7 +1599,7 @@
                 "left": 0,
                 "top": 0,
                 "right": 1229,
-                "bottom": 691
+                "bottom": 768
               },
               "priority": 5,
               "confidence": 0.5
@@ -1335,7 +1644,7 @@
                         "left": 0,
                         "top": 0,
                         "right": 1229,
-                        "bottom": 691,
+                        "bottom": 768,
                         "dpi": 1.25
                       },
                       "score": 10
@@ -1343,8 +1652,8 @@
                     {
                       "name": "screen_coord",
                       "value": {
-                        "x": 1426,
-                        "y": 954
+                        "x": 1421,
+                        "y": 1100
                       },
                       "score": 5
                     }
@@ -1362,10 +1671,10 @@
               "is_editable": false,
               "is_clickable": true,
               "confidence": 0.5625,
-              "screen_x": 1426,
-              "screen_y": 954,
+              "screen_x": 1421,
+              "screen_y": 1100,
               "selector_version": "2.3",
-              "recorded_at": 1777200593.197472,
+              "recorded_at": 1777270748.0487933,
               "last_used_at": null,
               "replay_successes": 0,
               "replay_failures": 0,
@@ -1375,26 +1684,26 @@
               "element_role": "container",
               "confidence_level": "low",
               "visibility_score": "full",
-              "window_handle": 131770,
+              "window_handle": 197982,
               "raw_bbox": {
                 "left": 0,
                 "top": 0,
                 "right": 1536,
-                "bottom": 864
+                "bottom": 960
               },
               "relative_to_window": {
                 "x": 0,
                 "y": 0,
                 "w": 1536,
-                "h": 864,
+                "h": 960,
                 "win_w": 1920,
-                "win_h": 1080
+                "win_h": 1200
               },
               "relative_to_parent": {
                 "x": 0,
                 "y": 0,
                 "w": 1536,
-                "h": 864
+                "h": 960
               }
             }
           ],
@@ -1405,7 +1714,7 @@
             "left": 0,
             "top": 0,
             "right": 1536,
-            "bottom": 864
+            "bottom": 960
           },
           "element_hash": "2190c7693835a40e",
           "element_role": "container",
@@ -1416,15 +1725,15 @@
             "x": 0,
             "y": 0,
             "w": 1536,
-            "h": 864,
+            "h": 960,
             "win_w": 1920,
-            "win_h": 1080
+            "win_h": 1200
           },
           "relative_to_parent": {
             "x": 0,
             "y": 0,
             "w": 1536,
-            "h": 864
+            "h": 960
           }
         }
       },
@@ -1433,13 +1742,13 @@
       "action_group": null
     },
     {
-      "id": 17,
-      "timestamp_ms": 40886,
-      "wall_time": "2026-04-26T10:49:55.724110+00:00",
+      "id": 20,
+      "timestamp_ms": 65566,
+      "wall_time": "2026-04-27T06:19:10.472747+00:00",
       "payload": {
         "type": "mouse_click",
-        "x": 841,
-        "y": 739,
+        "x": 875,
+        "y": 884,
         "button": "left",
         "target": {
           "backend": "uia",
@@ -1447,20 +1756,20 @@
           "name": "Text Area",
           "control_type": "Document",
           "class_name": null,
-          "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
           "process_name": "conhost.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 2886380,
+          "window_handle": 2361424,
           "browser": null,
           "bbox": {
-            "left": 102,
-            "top": 102,
-            "right": 998,
-            "bottom": 620
+            "left": 205,
+            "top": 205,
+            "right": 1100,
+            "bottom": 722
           },
-          "screen_x": 841,
-          "screen_y": 739,
+          "screen_x": 875,
+          "screen_y": 884,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -1468,7 +1777,7 @@
           "template_path": null,
           "ocr_text": null,
           "ancestor_chain": [
-            "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
           ],
           "selectors": [
             {
@@ -1489,10 +1798,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 102,
-                "top": 102,
-                "right": 998,
-                "bottom": 620
+                "left": 205,
+                "top": 205,
+                "right": 1100,
+                "bottom": 722
               },
               "priority": 5,
               "confidence": 0.5
@@ -1511,7 +1820,7 @@
                     },
                     {
                       "name": "window_title",
-                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
                       "score": 50
                     }
                   ],
@@ -1536,7 +1845,7 @@
                     },
                     {
                       "name": "window_title",
-                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
                       "score": 50
                     }
                   ],
@@ -1572,7 +1881,7 @@
                     {
                       "name": "ancestor_chain",
                       "value": [
-                        "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+                        "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
                       ],
                       "score": 35
                     }
@@ -1589,10 +1898,10 @@
                     {
                       "name": "bbox",
                       "value": {
-                        "left": 102,
-                        "top": 102,
-                        "right": 998,
-                        "bottom": 620,
+                        "left": 205,
+                        "top": 205,
+                        "right": 1100,
+                        "bottom": 722,
                         "dpi": 1.25
                       },
                       "score": 10
@@ -1600,8 +1909,8 @@
                     {
                       "name": "screen_coord",
                       "value": {
-                        "x": 841,
-                        "y": 739
+                        "x": 875,
+                        "y": 884
                       },
                       "score": 5
                     }
@@ -1614,15 +1923,15 @@
                 }
               ],
               "process_name": "conhost.exe",
-              "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+              "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
               "semantic_role": "input",
               "is_editable": false,
               "is_clickable": true,
               "confidence": 1.0,
-              "screen_x": 841,
-              "screen_y": 739,
+              "screen_x": 875,
+              "screen_y": 884,
               "selector_version": "2.3",
-              "recorded_at": 1777200595.2693098,
+              "recorded_at": 1777270749.9316237,
               "last_used_at": null,
               "replay_successes": 0,
               "replay_failures": 0,
@@ -1632,12 +1941,12 @@
               "element_role": "input",
               "confidence_level": "high",
               "visibility_score": "full",
-              "window_handle": 2886380,
+              "window_handle": 2361424,
               "raw_bbox": {
-                "left": 128,
-                "top": 128,
-                "right": 1247,
-                "bottom": 775
+                "left": 256,
+                "top": 256,
+                "right": 1375,
+                "bottom": 903
               },
               "relative_to_window": {
                 "x": 0,
@@ -1659,10 +1968,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 128,
-            "top": 128,
-            "right": 1247,
-            "bottom": 775
+            "left": 256,
+            "top": 256,
+            "right": 1375,
+            "bottom": 903
           },
           "element_hash": "c73a21d8a41e9e29",
           "element_role": "input",
@@ -1690,9 +1999,9 @@
       "action_group": null
     },
     {
-      "id": 18,
-      "timestamp_ms": 40892,
-      "wall_time": "2026-04-26T10:49:55.727050+00:00",
+      "id": 21,
+      "timestamp_ms": 65570,
+      "wall_time": "2026-04-27T06:19:10.472747+00:00",
       "payload": {
         "type": "key_combo",
         "keys": [
@@ -1705,20 +2014,20 @@
           "name": "Text Area",
           "control_type": "Document",
           "class_name": null,
-          "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
           "process_name": "conhost.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 2886380,
+          "window_handle": 2361424,
           "browser": null,
           "bbox": {
-            "left": 102,
-            "top": 102,
-            "right": 998,
-            "bottom": 620
+            "left": 205,
+            "top": 205,
+            "right": 1100,
+            "bottom": 722
           },
-          "screen_x": 841,
-          "screen_y": 739,
+          "screen_x": 875,
+          "screen_y": 884,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -1726,7 +2035,7 @@
           "template_path": null,
           "ocr_text": null,
           "ancestor_chain": [
-            "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
           ],
           "selectors": [
             {
@@ -1747,10 +2056,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 102,
-                "top": 102,
-                "right": 998,
-                "bottom": 620
+                "left": 205,
+                "top": 205,
+                "right": 1100,
+                "bottom": 722
               },
               "priority": 5,
               "confidence": 0.5
@@ -1769,7 +2078,7 @@
                     },
                     {
                       "name": "window_title",
-                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
                       "score": 50
                     }
                   ],
@@ -1794,7 +2103,7 @@
                     },
                     {
                       "name": "window_title",
-                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
                       "score": 50
                     }
                   ],
@@ -1830,7 +2139,7 @@
                     {
                       "name": "ancestor_chain",
                       "value": [
-                        "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+                        "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
                       ],
                       "score": 35
                     }
@@ -1847,10 +2156,10 @@
                     {
                       "name": "bbox",
                       "value": {
-                        "left": 102,
-                        "top": 102,
-                        "right": 998,
-                        "bottom": 620,
+                        "left": 205,
+                        "top": 205,
+                        "right": 1100,
+                        "bottom": 722,
                         "dpi": 1.25
                       },
                       "score": 10
@@ -1858,8 +2167,8 @@
                     {
                       "name": "screen_coord",
                       "value": {
-                        "x": 841,
-                        "y": 739
+                        "x": 875,
+                        "y": 884
                       },
                       "score": 5
                     }
@@ -1872,15 +2181,15 @@
                 }
               ],
               "process_name": "conhost.exe",
-              "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+              "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
               "semantic_role": "input",
               "is_editable": false,
               "is_clickable": true,
               "confidence": 1.0,
-              "screen_x": 841,
-              "screen_y": 739,
+              "screen_x": 875,
+              "screen_y": 884,
               "selector_version": "2.3",
-              "recorded_at": 1777200595.2693098,
+              "recorded_at": 1777270749.9316237,
               "last_used_at": null,
               "replay_successes": 0,
               "replay_failures": 0,
@@ -1890,12 +2199,12 @@
               "element_role": "input",
               "confidence_level": "high",
               "visibility_score": "full",
-              "window_handle": 2886380,
+              "window_handle": 2361424,
               "raw_bbox": {
-                "left": 128,
-                "top": 128,
-                "right": 1247,
-                "bottom": 775
+                "left": 256,
+                "top": 256,
+                "right": 1375,
+                "bottom": 903
               },
               "relative_to_window": {
                 "x": 0,
@@ -1917,10 +2226,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 128,
-            "top": 128,
-            "right": 1247,
-            "bottom": 775
+            "left": 256,
+            "top": 256,
+            "right": 1375,
+            "bottom": 903
           },
           "element_hash": "c73a21d8a41e9e29",
           "element_role": "input",
@@ -1948,12 +2257,12 @@
       "action_group": null
     },
     {
-      "id": 19,
-      "timestamp_ms": 41144,
-      "wall_time": "2026-04-26T10:49:55.983036+00:00",
+      "id": 22,
+      "timestamp_ms": 65675,
+      "wall_time": "2026-04-27T06:19:10.581858+00:00",
       "payload": {
         "type": "screenshot_checkpoint",
-        "path": "screen_1777200595727.png",
+        "path": "screen_1777270750472.png",
         "monitor_index": 0,
         "label": null
       },
@@ -1962,9 +2271,9 @@
       "action_group": null
     },
     {
-      "id": 20,
-      "timestamp_ms": 41548,
-      "wall_time": "2026-04-26T10:49:56.386910+00:00",
+      "id": 23,
+      "timestamp_ms": 66217,
+      "wall_time": "2026-04-27T06:19:11.122796+00:00",
       "payload": {
         "type": "key_combo",
         "keys": [
@@ -1977,20 +2286,20 @@
           "name": "Text Area",
           "control_type": "Document",
           "class_name": null,
-          "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
           "process_name": "conhost.exe",
           "framework_id": null,
           "process_id": null,
-          "window_handle": 2886380,
+          "window_handle": 2361424,
           "browser": null,
           "bbox": {
-            "left": 102,
-            "top": 102,
-            "right": 998,
-            "bottom": 620
+            "left": 205,
+            "top": 205,
+            "right": 1100,
+            "bottom": 722
           },
-          "screen_x": 841,
-          "screen_y": 739,
+          "screen_x": 875,
+          "screen_y": 884,
           "monitor_index": 0,
           "dpi_scale": 1.25,
           "screenshot_ref": null,
@@ -1998,7 +2307,7 @@
           "template_path": null,
           "ocr_text": null,
           "ancestor_chain": [
-            "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
           ],
           "selectors": [
             {
@@ -2019,10 +2328,10 @@
             {
               "type": "bbox",
               "value": {
-                "left": 102,
-                "top": 102,
-                "right": 998,
-                "bottom": 620
+                "left": 205,
+                "top": 205,
+                "right": 1100,
+                "bottom": 722
               },
               "priority": 5,
               "confidence": 0.5
@@ -2041,7 +2350,7 @@
                     },
                     {
                       "name": "window_title",
-                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
                       "score": 50
                     }
                   ],
@@ -2066,7 +2375,7 @@
                     },
                     {
                       "name": "window_title",
-                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
                       "score": 50
                     }
                   ],
@@ -2102,7 +2411,7 @@
                     {
                       "name": "ancestor_chain",
                       "value": [
-                        "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+                        "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
                       ],
                       "score": 35
                     }
@@ -2119,10 +2428,10 @@
                     {
                       "name": "bbox",
                       "value": {
-                        "left": 102,
-                        "top": 102,
-                        "right": 998,
-                        "bottom": 620,
+                        "left": 205,
+                        "top": 205,
+                        "right": 1100,
+                        "bottom": 722,
                         "dpi": 1.25
                       },
                       "score": 10
@@ -2130,8 +2439,8 @@
                     {
                       "name": "screen_coord",
                       "value": {
-                        "x": 841,
-                        "y": 739
+                        "x": 875,
+                        "y": 884
                       },
                       "score": 5
                     }
@@ -2144,15 +2453,15 @@
                 }
               ],
               "process_name": "conhost.exe",
-              "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+              "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
               "semantic_role": "input",
               "is_editable": false,
               "is_clickable": true,
               "confidence": 1.0,
-              "screen_x": 841,
-              "screen_y": 739,
+              "screen_x": 875,
+              "screen_y": 884,
               "selector_version": "2.3",
-              "recorded_at": 1777200595.2693098,
+              "recorded_at": 1777270749.9316237,
               "last_used_at": null,
               "replay_successes": 0,
               "replay_failures": 0,
@@ -2162,12 +2471,12 @@
               "element_role": "input",
               "confidence_level": "high",
               "visibility_score": "full",
-              "window_handle": 2886380,
+              "window_handle": 2361424,
               "raw_bbox": {
-                "left": 128,
-                "top": 128,
-                "right": 1247,
-                "bottom": 775
+                "left": 256,
+                "top": 256,
+                "right": 1375,
+                "bottom": 903
               },
               "relative_to_window": {
                 "x": 0,
@@ -2189,10 +2498,10 @@
           "confidence_reason": "automation_id",
           "is_editable": true,
           "raw_bbox": {
-            "left": 128,
-            "top": 128,
-            "right": 1247,
-            "bottom": 775
+            "left": 256,
+            "top": 256,
+            "right": 1375,
+            "bottom": 903
           },
           "element_hash": "c73a21d8a41e9e29",
           "element_role": "input",
@@ -2235,7 +2544,7 @@
     "speed_factor": 1.0
   },
   "stats": {
-    "total_events": 20,
+    "total_events": 23,
     "click_count": 0,
     "typing_count": 0,
     "scroll_count": 0,

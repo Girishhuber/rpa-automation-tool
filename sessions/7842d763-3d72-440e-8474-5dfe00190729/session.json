@@ -1,0 +1,4011 @@
+{
+  "id": "7842d763-3d72-440e-8474-5dfe00190729",
+  "name": "My workflow word",
+  "description": "",
+  "tags": [],
+  "created_at": "2026-04-27T09:45:34.358148+00:00",
+  "updated_at": "2026-04-27T09:46:19.529809+00:00",
+  "duration_ms": 45151,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.26200",
+    "screen_width": 1920,
+    "screen_height": 1200,
+    "dpi_scale": 1.25,
+    "monitor_count": 1,
+    "python_version": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "machine_name": null,
+    "cpu_info": null,
+    "gpu_info": null,
+    "schema_version": "2.0"
+  },
+  "environment": null,
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 6476,
+      "wall_time": "2026-04-27T09:45:40.838636+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 532,
+        "y": 1164,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "SearchButton",
+          "name": "Search",
+          "control_type": "Button",
+          "class_name": "ToggleButton",
+          "window_title": "Taskbar",
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 65936,
+          "browser": null,
+          "bbox": {
+            "left": 270,
+            "top": 920,
+            "right": 490,
+            "bottom": 952
+          },
+          "screen_x": 532,
+          "screen_y": 1164,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane::TaskbarFrame"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "SearchButton",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Search",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "ToggleButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 270,
+                "top": 920,
+                "right": 490,
+                "bottom": 952
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "SearchButton",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Search",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Taskbar",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Search",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "ToggleButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane::TaskbarFrame"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 270,
+                        "top": 920,
+                        "right": 490,
+                        "bottom": 952,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 532,
+                        "y": 1164
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "explorer.exe",
+              "window_title": "Taskbar",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 532,
+              "screen_y": 1164,
+              "selector_version": "2.3",
+              "recorded_at": 1777283140.8207765,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "6119ce6e6bb264a5",
+              "element_role": "button",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 65936,
+              "raw_bbox": {
+                "left": 338,
+                "top": 1150,
+                "right": 613,
+                "bottom": 1190
+              },
+              "relative_to_window": {
+                "x": 338,
+                "y": 10,
+                "w": 275,
+                "h": 40,
+                "win_w": 1920,
+                "win_h": 60
+              },
+              "relative_to_parent": {
+                "x": 338,
+                "y": 10,
+                "w": 275,
+                "h": 40
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 338,
+            "top": 1150,
+            "right": 613,
+            "bottom": 1190
+          },
+          "element_hash": "6119ce6e6bb264a5",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 338,
+            "y": 10,
+            "w": 275,
+            "h": 40,
+            "win_w": 1920,
+            "win_h": 60
+          },
+          "relative_to_parent": {
+            "x": 338,
+            "y": 10,
+            "w": 275,
+            "h": 40
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 8705,
+      "wall_time": "2026-04-27T09:45:43.068007+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "word",
+        "target": null,
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 10082,
+      "wall_time": "2026-04-27T09:45:44.441594+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 574,
+        "y": 391,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "CoreInput",
+          "control_type": "Pane",
+          "class_name": "Windows.UI.Core.CoreComponentInputSource",
+          "window_title": "Search",
+          "process_name": "SearchHost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 197198,
+          "browser": null,
+          "bbox": {
+            "left": 272,
+            "top": 174,
+            "right": 1046,
+            "bottom": 899
+          },
+          "screen_x": 574,
+          "screen_y": 391,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:\"Search\""
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "CoreInput",
+                "type": "Pane"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "Windows.UI.Core.CoreComponentInputSource",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 272,
+                "top": 174,
+                "right": 1046,
+                "bottom": 899
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "CoreInput",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Pane",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Search",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "CoreInput",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Pane",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "Windows.UI.Core.CoreComponentInputSource",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:\"Search\""
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 272,
+                        "top": 174,
+                        "right": 1046,
+                        "bottom": 899,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 574,
+                        "y": 391
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "SearchHost.exe",
+              "window_title": "Search",
+              "semantic_role": "pane",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 574,
+              "screen_y": 391,
+              "selector_version": "2.3",
+              "recorded_at": 1777283144.4415941,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "parent",
+                  "name": "\"Search\"",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "a6232001456a6dde",
+              "element_role": "container",
+              "confidence_level": "medium",
+              "visibility_score": "hidden",
+              "window_handle": 197198,
+              "raw_bbox": {
+                "left": 340,
+                "top": 218,
+                "right": 1308,
+                "bottom": 1124
+              },
+              "relative_to_window": {
+                "x": 16,
+                "y": 16,
+                "w": 968,
+                "h": 906,
+                "win_w": 1000,
+                "win_h": 998
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 968,
+                "h": 906
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "weak_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 340,
+            "top": 218,
+            "right": 1308,
+            "bottom": 1124
+          },
+          "element_hash": "a6232001456a6dde",
+          "element_role": "container",
+          "confidence_level": "low",
+          "visibility_score": "hidden",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 16,
+            "y": 16,
+            "w": 968,
+            "h": 906,
+            "win_w": 1000,
+            "win_h": 998
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 968,
+            "h": 906
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 13017,
+      "wall_time": "2026-04-27T09:45:47.378698+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 316,
+        "y": 235,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Blank document",
+          "control_type": "ListItem",
+          "class_name": "NetUIListViewItem",
+          "window_title": "Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 180,
+            "top": 135,
+            "right": 360,
+            "bottom": 287
+          },
+          "screen_x": 316,
+          "screen_y": 235,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Templates",
+            "GroupBox:New:HomePageSlabCreateNew",
+            "GroupBox:Home:PlaceTabHomeContent",
+            "Pane:Backstage view:BackstageView"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Blank document",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIListViewItem",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 180,
+                "top": 135,
+                "right": 360,
+                "bottom": 287
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank document",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Blank document",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "ListItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIListViewItem",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "ListBox:Templates",
+                        "GroupBox:New:HomePageSlabCreateNew",
+                        "GroupBox:Home:PlaceTabHomeContent"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 180,
+                        "top": 135,
+                        "right": 360,
+                        "bottom": 287,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 316,
+                        "y": 235
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Word",
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 316,
+              "screen_y": 235,
+              "selector_version": "2.3",
+              "recorded_at": 1777283147.3626416,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "cc9a4e4324f26c20",
+              "element_role": "list",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 225,
+                "top": 169,
+                "right": 450,
+                "bottom": 359
+              },
+              "relative_to_window": {
+                "x": 234,
+                "y": 178,
+                "w": 225,
+                "h": 190,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 225,
+                "h": 190
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "weak_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 225,
+            "top": 169,
+            "right": 450,
+            "bottom": 359
+          },
+          "element_hash": "cc9a4e4324f26c20",
+          "element_role": "list",
+          "confidence_level": "low",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 234,
+            "y": 178,
+            "w": 225,
+            "h": 190,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 225,
+            "h": 190
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 13335,
+      "wall_time": "2026-04-27T09:45:47.696170+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283147378.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 14802,
+      "wall_time": "2026-04-27T09:45:49.165454+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 842,
+        "y": 385,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Body",
+          "name": "Page 1 content",
+          "control_type": "Edit",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 550,
+            "top": 294,
+            "right": 1343,
+            "bottom": 890
+          },
+          "screen_x": 842,
+          "screen_y": 385,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:",
+            "Pane:Document1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Body",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Page 1 content",
+                "type": "Edit"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 550,
+                "top": 294,
+                "right": 1343,
+                "bottom": 890
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Body",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Page 1 content",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Edit",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Page 1 content",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Edit",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+                        "Document:",
+                        "Pane:Document1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 550,
+                        "top": 294,
+                        "right": 1343,
+                        "bottom": 890,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 842,
+                        "y": 385
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 842,
+              "screen_y": 385,
+              "selector_version": "2.3",
+              "recorded_at": 1777283149.1616473,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "f4ca5b2b554875a1",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 687,
+                "top": 367,
+                "right": 1679,
+                "bottom": 1113
+              },
+              "relative_to_window": {
+                "x": 696,
+                "y": 376,
+                "w": 992,
+                "h": 746,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 120,
+                "w": 992,
+                "h": 746
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 687,
+            "top": 367,
+            "right": 1679,
+            "bottom": 1113
+          },
+          "element_hash": "f4ca5b2b554875a1",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 696,
+            "y": 376,
+            "w": 992,
+            "h": 746,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 120,
+            "w": 992,
+            "h": 746
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 14942,
+      "wall_time": "2026-04-27T09:45:49.304501+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283149165.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 8,
+      "timestamp_ms": 19724,
+      "wall_time": "2026-04-27T09:45:54.086303+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Hi Just Checking ",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Body",
+          "name": "Page 1 content",
+          "control_type": "Edit",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 550,
+            "top": 294,
+            "right": 1343,
+            "bottom": 890
+          },
+          "screen_x": 842,
+          "screen_y": 385,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:",
+            "Pane:Document1"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Body",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Page 1 content",
+                "type": "Edit"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 550,
+                "top": 294,
+                "right": 1343,
+                "bottom": 890
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Body",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Page 1 content",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Edit",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Page 1 content",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Edit",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+                        "Document:",
+                        "Pane:Document1"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 550,
+                        "top": 294,
+                        "right": 1343,
+                        "bottom": 890,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 842,
+                        "y": 385
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 842,
+              "screen_y": 385,
+              "selector_version": "2.3",
+              "recorded_at": 1777283149.1616473,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "f4ca5b2b554875a1",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 687,
+                "top": 367,
+                "right": 1679,
+                "bottom": 1113
+              },
+              "relative_to_window": {
+                "x": 696,
+                "y": 376,
+                "w": 992,
+                "h": 746,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 120,
+                "w": 992,
+                "h": 746
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 687,
+            "top": 367,
+            "right": 1679,
+            "bottom": 1113
+          },
+          "element_hash": "f4ca5b2b554875a1",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 696,
+            "y": 376,
+            "w": 992,
+            "h": 746,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 120,
+            "w": 992,
+            "h": 746
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 9,
+      "timestamp_ms": 21627,
+      "wall_time": "2026-04-27T09:45:55.986953+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 160,
+        "y": 62,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "TabInsert",
+          "name": "Insert",
+          "control_type": "TabItem",
+          "class_name": "NetUIRibbonTab",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 115,
+            "top": 34,
+            "right": 166,
+            "bottom": 65
+          },
+          "screen_x": 160,
+          "screen_y": 62,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "TabControl:Ribbon Tabs",
+            "Pane:Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "TabInsert",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Insert",
+                "type": "TabItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIRibbonTab",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 115,
+                "top": 34,
+                "right": 166,
+                "bottom": 65
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "TabInsert",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Insert",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "TabItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Insert",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "TabItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIRibbonTab",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "TabControl:Ribbon Tabs",
+                        "Pane:Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 115,
+                        "top": 34,
+                        "right": 166,
+                        "bottom": 65,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 160,
+                        "y": 62
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "tab",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 160,
+              "screen_y": 62,
+              "selector_version": "2.3",
+              "recorded_at": 1777283155.9869537,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Home",
+                  "control_type": "TabItem",
+                  "automation_id": null,
+                  "offset_x": -66,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Draw",
+                  "control_type": "TabItem",
+                  "automation_id": null,
+                  "offset_x": 63,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Design",
+                  "control_type": "TabItem",
+                  "automation_id": null,
+                  "offset_x": 132,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "86cc2466a0813f30",
+              "element_role": "tab",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 144,
+                "top": 43,
+                "right": 207,
+                "bottom": 81
+              },
+              "relative_to_window": {
+                "x": 153,
+                "y": 52,
+                "w": 63,
+                "h": 38,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 69,
+                "y": 0,
+                "w": 63,
+                "h": 38
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 144,
+            "top": 43,
+            "right": 207,
+            "bottom": 81
+          },
+          "element_hash": "86cc2466a0813f30",
+          "element_role": "tab",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 153,
+            "y": 52,
+            "w": 63,
+            "h": 38,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 69,
+            "y": 0,
+            "w": 63,
+            "h": 38
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 10,
+      "timestamp_ms": 21770,
+      "wall_time": "2026-04-27T09:45:56.129843+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283155986.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 11,
+      "timestamp_ms": 23860,
+      "wall_time": "2026-04-27T09:45:58.217235+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 341,
+        "y": 157,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "ShapesInsertGallery",
+          "name": "Shapes",
+          "control_type": "MenuItem",
+          "class_name": "NetUIAnchor",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 252,
+            "top": 67,
+            "right": 294,
+            "bottom": 137
+          },
+          "screen_x": 341,
+          "screen_y": 157,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Illustrations",
+            "GroupBox:Insert",
+            "Pane:Lower Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "ShapesInsertGallery",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Shapes",
+                "type": "MenuItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIAnchor",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 252,
+                "top": 67,
+                "right": 294,
+                "bottom": 137
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "ShapesInsertGallery",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Shapes",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "MenuItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Shapes",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "MenuItem",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIAnchor",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "GroupBox:Illustrations",
+                        "GroupBox:Insert",
+                        "Pane:Lower Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 252,
+                        "top": 67,
+                        "right": 294,
+                        "bottom": 137,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 341,
+                        "y": 157
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "menu",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 341,
+              "screen_y": 157,
+              "selector_version": "2.3",
+              "recorded_at": 1777283158.2172358,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Pictures",
+                  "control_type": "MenuItem",
+                  "automation_id": null,
+                  "offset_x": -55,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Icons",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 52,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "3D Models",
+                  "control_type": "SplitButton",
+                  "automation_id": null,
+                  "offset_x": 113,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "parent",
+                  "name": "Illustrations",
+                  "control_type": "GroupBox",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "ca7921b1972017d0",
+              "element_role": "menu",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 315,
+                "top": 84,
+                "right": 368,
+                "bottom": 171
+              },
+              "relative_to_window": {
+                "x": 324,
+                "y": 93,
+                "w": 53,
+                "h": 87,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 67,
+                "y": 2,
+                "w": 53,
+                "h": 87
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 315,
+            "top": 84,
+            "right": 368,
+            "bottom": 171
+          },
+          "element_hash": "ca7921b1972017d0",
+          "element_role": "menu",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 324,
+            "y": 93,
+            "w": 53,
+            "h": 87,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 67,
+            "y": 2,
+            "w": 53,
+            "h": 87
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 12,
+      "timestamp_ms": 24005,
+      "wall_time": "2026-04-27T09:45:58.366378+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283158217.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 13,
+      "timestamp_ms": 25932,
+      "wall_time": "2026-04-27T09:46:00.289122+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 390,
+        "y": 224,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Line Arrow",
+          "control_type": "ListItem",
+          "class_name": "NetUIGalleryButton",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 302,
+            "top": 162,
+            "right": 326,
+            "bottom": 186
+          },
+          "screen_x": 390,
+          "screen_y": 224,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:Recently Used Shapes",
+            "Menu:Shapes",
+            "Menu:Shapes",
+            "MenuItem:Shapes:ShapesInsertGallery",
+            "GroupBox:Illustrations",
+            "GroupBox:Insert",
+            "Pane:Lower Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Line Arrow",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIGalleryButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 302,
+                "top": 162,
+                "right": 326,
+                "bottom": 186
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Toolbar",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "MsoCommandBar",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:MsoDockLeft"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 0,
+                        "top": 157,
+                        "right": 350,
+                        "bottom": 890,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 390,
+                        "y": 224
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "generic",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.5625,
+              "screen_x": 390,
+              "screen_y": 224,
+              "selector_version": "2.3",
+              "recorded_at": 1777283160.2891228,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "parent",
+                  "name": "MsoDockLeft",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "12e78d7cdffa49b5",
+              "element_role": "container",
+              "confidence_level": "low",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 0,
+                "top": 196,
+                "right": 438,
+                "bottom": 1113
+              },
+              "relative_to_window": {
+                "x": 9,
+                "y": 205,
+                "w": 438,
+                "h": 917,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 438,
+                "h": 917
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "anchored_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 377,
+            "top": 202,
+            "right": 407,
+            "bottom": 232
+          },
+          "element_hash": "0411fe5544998c65",
+          "element_role": "list",
+          "confidence_level": "medium",
+          "visibility_score": "hidden",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 386,
+            "y": 211,
+            "w": 30,
+            "h": 30,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": null
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 14,
+      "timestamp_ms": 26097,
+      "wall_time": "2026-04-27T09:46:00.448350+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283160289.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 15,
+      "timestamp_ms": 27802,
+      "wall_time": "2026-04-27T09:46:02.163902+00:00",
+      "payload": {
+        "type": "mouse_drag",
+        "start_x": 1180,
+        "start_y": 384,
+        "end_x": 1464,
+        "end_y": 556,
+        "button": "left",
+        "start_target": {
+          "backend": "uia",
+          "automation_id": "Body",
+          "name": "Page 1 content",
+          "control_type": "Edit",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 550,
+            "top": 294,
+            "right": 1343,
+            "bottom": 890
+          },
+          "screen_x": 1180,
+          "screen_y": 384,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:Hi Just Checking ",
+            "Pane:Document1"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 687,
+            "top": 367,
+            "right": 1679,
+            "bottom": 1113
+          },
+          "element_hash": "f4ca5b2b554875a1",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 696,
+            "y": 376,
+            "w": 992,
+            "h": 746,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 120,
+            "w": 992,
+            "h": 746
+          }
+        },
+        "end_target": {
+          "backend": "uia",
+          "automation_id": "Body",
+          "name": "Page 1 content",
+          "control_type": "Edit",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 550,
+            "top": 294,
+            "right": 1343,
+            "bottom": 890
+          },
+          "screen_x": 1464,
+          "screen_y": 556,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:Hi Just Checking ",
+            "Pane:Document1"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 687,
+            "top": 367,
+            "right": 1679,
+            "bottom": 1113
+          },
+          "element_hash": "f4ca5b2b554875a1",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 696,
+            "y": 376,
+            "w": 992,
+            "h": 746,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 120,
+            "w": 992,
+            "h": 746
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 16,
+      "timestamp_ms": 32203,
+      "wall_time": "2026-04-27T09:46:06.562131+00:00",
+      "payload": {
+        "type": "mouse_drag",
+        "start_x": 1180,
+        "start_y": 381,
+        "end_x": 1511,
+        "end_y": 376,
+        "button": "left",
+        "start_target": {
+          "backend": "uia",
+          "automation_id": "Body",
+          "name": "Page 1 content",
+          "control_type": "Edit",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 550,
+            "top": 294,
+            "right": 1343,
+            "bottom": 890
+          },
+          "screen_x": 1180,
+          "screen_y": 381,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:￼Hi Just Checking ",
+            "Pane:Document1"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 687,
+            "top": 367,
+            "right": 1679,
+            "bottom": 1113
+          },
+          "element_hash": "f4ca5b2b554875a1",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 696,
+            "y": 376,
+            "w": 992,
+            "h": 746,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 120,
+            "w": 992,
+            "h": 746
+          }
+        },
+        "end_target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Straight Arrow Connector 1",
+          "control_type": "Image",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 1163,
+            "top": 301,
+            "right": 1208,
+            "bottom": 454
+          },
+          "screen_x": 1511,
+          "screen_y": 376,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Edit:Page 1 content:Body",
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:￼Hi Just Checking ",
+            "Pane:Document1"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1454,
+            "top": 376,
+            "right": 1510,
+            "bottom": 567
+          },
+          "element_hash": "fc0b7f20a258f271",
+          "element_role": "unknown",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1463,
+            "y": 385,
+            "w": 56,
+            "h": 191,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 767,
+            "y": 9,
+            "w": 56,
+            "h": 191
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 17,
+      "timestamp_ms": 35722,
+      "wall_time": "2026-04-27T09:46:10.072455+00:00",
+      "payload": {
+        "type": "mouse_drag",
+        "start_x": 1462,
+        "start_y": 550,
+        "end_x": 1052,
+        "end_y": 380,
+        "button": "left",
+        "start_target": {
+          "backend": "uia",
+          "automation_id": "Body",
+          "name": "Page 1 content",
+          "control_type": "Edit",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 550,
+            "top": 294,
+            "right": 1343,
+            "bottom": 890
+          },
+          "screen_x": 1462,
+          "screen_y": 550,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:￼Hi Just Checking ",
+            "Pane:Document1"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 687,
+            "top": 367,
+            "right": 1679,
+            "bottom": 1113
+          },
+          "element_hash": "f4ca5b2b554875a1",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 696,
+            "y": 376,
+            "w": 992,
+            "h": 746,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 120,
+            "w": 992,
+            "h": 746
+          }
+        },
+        "end_target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Straight Arrow Connector 1",
+          "control_type": "Image",
+          "class_name": null,
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 834,
+            "top": 298,
+            "right": 1208,
+            "bottom": 314
+          },
+          "screen_x": 1052,
+          "screen_y": 380,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Edit:Page 1 content:Body",
+            "Custom:Page 1:UIA_AutomationId_Word_Page_1",
+            "Document:￼Hi Just Checking ",
+            "Pane:Document1"
+          ],
+          "selectors": [],
+          "rich_selectors": [],
+          "confidence_score": 0.0,
+          "confidence_reason": null,
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1042,
+            "top": 372,
+            "right": 1510,
+            "bottom": 393
+          },
+          "element_hash": "fc0b7f20a258f271",
+          "element_role": "unknown",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1051,
+            "y": 381,
+            "w": 468,
+            "h": 21,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 355,
+            "y": 5,
+            "w": 468,
+            "h": 21
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 18,
+      "timestamp_ms": 38290,
+      "wall_time": "2026-04-27T09:46:12.644105+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1910,
+        "y": 23,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Close",
+          "control_type": "Button",
+          "class_name": "NetUIAppFrameHelper",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 1490,
+            "top": 0,
+            "right": 1536,
+            "bottom": 31
+          },
+          "screen_x": 1910,
+          "screen_y": 23,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:Ribbon"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Close",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIAppFrameHelper",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 1490,
+                "top": 0,
+                "right": 1536,
+                "bottom": 31
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Close",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Close",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIAppFrameHelper",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:Ribbon"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 1490,
+                        "top": 0,
+                        "right": 1536,
+                        "bottom": 31,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1910,
+                        "y": 23
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 1910,
+              "screen_y": 23,
+              "selector_version": "2.3",
+              "recorded_at": 1777283172.6441052,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Minimize",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -114,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "left",
+                  "name": "Restore Down",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -57,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "parent",
+                  "name": "Ribbon",
+                  "control_type": "Pane",
+                  "automation_id": null,
+                  "offset_x": 0,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "6e693d9dad9fee62",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 1863,
+                "top": 0,
+                "right": 1920,
+                "bottom": 39
+              },
+              "relative_to_window": {
+                "x": 1872,
+                "y": 9,
+                "w": 57,
+                "h": 39,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 1863,
+                "y": 0,
+                "w": 57,
+                "h": 39
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "anchored_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1863,
+            "top": 0,
+            "right": 1920,
+            "bottom": 39
+          },
+          "element_hash": "6e693d9dad9fee62",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1872,
+            "y": 9,
+            "w": 57,
+            "h": 39,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 1863,
+            "y": 0,
+            "w": 57,
+            "h": 39
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 19,
+      "timestamp_ms": 38442,
+      "wall_time": "2026-04-27T09:46:12.803687+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283172644.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 20,
+      "timestamp_ms": 40188,
+      "wall_time": "2026-04-27T09:46:14.542424+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1083,
+        "y": 712,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": "Don't Save",
+          "control_type": "Button",
+          "class_name": "NetUIButton",
+          "window_title": "Document1 - Word",
+          "process_name": "WINWORD.EXE",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 4131510,
+          "browser": null,
+          "bbox": {
+            "left": 799,
+            "top": 564,
+            "right": 887,
+            "bottom": 588
+          },
+          "screen_x": 1083,
+          "screen_y": 712,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Don't Save",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "NetUIButton",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 799,
+                "top": 564,
+                "right": 887,
+                "bottom": 588
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Don't Save",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Document1 - Word",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Don't Save",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Button",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "NetUIButton",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Pane:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 799,
+                        "top": 564,
+                        "right": 887,
+                        "bottom": 588,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1083,
+                        "y": 712
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "WINWORD.EXE",
+              "window_title": "Document1 - Word",
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.75,
+              "screen_x": 1083,
+              "screen_y": 712,
+              "selector_version": "2.3",
+              "recorded_at": 1777283174.542424,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [
+                {
+                  "direction": "left",
+                  "name": "Choose a Location",
+                  "control_type": "ComboBox",
+                  "automation_id": null,
+                  "offset_x": -93,
+                  "offset_y": -98
+                },
+                {
+                  "direction": "left",
+                  "name": "Save",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": -110,
+                  "offset_y": 0
+                },
+                {
+                  "direction": "right",
+                  "name": "Cancel",
+                  "control_type": "Button",
+                  "automation_id": null,
+                  "offset_x": 110,
+                  "offset_y": 0
+                }
+              ],
+              "element_hash": "00abcab0e048a9a0",
+              "element_role": "button",
+              "confidence_level": "medium",
+              "visibility_score": "full",
+              "window_handle": 4131510,
+              "raw_bbox": {
+                "left": 999,
+                "top": 705,
+                "right": 1109,
+                "bottom": 735
+              },
+              "relative_to_window": {
+                "x": 1008,
+                "y": 714,
+                "w": 110,
+                "h": 30,
+                "win_w": 1938,
+                "win_h": 1158
+              },
+              "relative_to_parent": {
+                "x": 317,
+                "y": 296,
+                "w": 110,
+                "h": 30
+              }
+            }
+          ],
+          "confidence_score": 0.85,
+          "confidence_reason": "anchored_selector",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 999,
+            "top": 705,
+            "right": 1109,
+            "bottom": 735
+          },
+          "element_hash": "00abcab0e048a9a0",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": false,
+          "relative_to_window": {
+            "x": 1008,
+            "y": 714,
+            "w": 110,
+            "h": 30,
+            "win_w": 1938,
+            "win_h": 1158
+          },
+          "relative_to_parent": {
+            "x": 317,
+            "y": 296,
+            "w": 110,
+            "h": 30
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 21,
+      "timestamp_ms": 40342,
+      "wall_time": "2026-04-27T09:46:14.703128+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283174542.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 22,
+      "timestamp_ms": 43845,
+      "wall_time": "2026-04-27T09:46:18.200402+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 817,
+        "y": 845,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2689716,
+          "browser": null,
+          "bbox": {
+            "left": 179,
+            "top": 179,
+            "right": 1074,
+            "bottom": 697
+          },
+          "screen_x": 817,
+          "screen_y": 845,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 179,
+                "top": 179,
+                "right": 1074,
+                "bottom": 697
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 179,
+                        "top": 179,
+                        "right": 1074,
+                        "bottom": 697,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 817,
+                        "y": 845
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 817,
+              "screen_y": 845,
+              "selector_version": "2.3",
+              "recorded_at": 1777283177.088288,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2689716,
+              "raw_bbox": {
+                "left": 224,
+                "top": 224,
+                "right": 1343,
+                "bottom": 871
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 224,
+            "top": 224,
+            "right": 1343,
+            "bottom": 871
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 23,
+      "timestamp_ms": 43852,
+      "wall_time": "2026-04-27T09:46:18.213540+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2689716,
+          "browser": null,
+          "bbox": {
+            "left": 179,
+            "top": 179,
+            "right": 1074,
+            "bottom": 697
+          },
+          "screen_x": 817,
+          "screen_y": 845,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 179,
+                "top": 179,
+                "right": 1074,
+                "bottom": 697
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 179,
+                        "top": 179,
+                        "right": 1074,
+                        "bottom": 697,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 817,
+                        "y": 845
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 817,
+              "screen_y": 845,
+              "selector_version": "2.3",
+              "recorded_at": 1777283177.088288,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2689716,
+              "raw_bbox": {
+                "left": 224,
+                "top": 224,
+                "right": 1343,
+                "bottom": 871
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 224,
+            "top": 224,
+            "right": 1343,
+            "bottom": 871
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 24,
+      "timestamp_ms": 43949,
+      "wall_time": "2026-04-27T09:46:18.312598+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777283178200.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 25,
+      "timestamp_ms": 44746,
+      "wall_time": "2026-04-27T09:46:19.108899+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2689716,
+          "browser": null,
+          "bbox": {
+            "left": 179,
+            "top": 179,
+            "right": 1074,
+            "bottom": 697
+          },
+          "screen_x": 817,
+          "screen_y": 845,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 179,
+                "top": 179,
+                "right": 1074,
+                "bottom": 697
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Select C:\\Users\\Girish\\Documen:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 179,
+                        "top": 179,
+                        "right": 1074,
+                        "bottom": 697,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 817,
+                        "y": 845
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "Select C:\\Users\\Girish\\Documents\\rpa_tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 817,
+              "screen_y": 845,
+              "selector_version": "2.3",
+              "recorded_at": 1777283177.088288,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2689716,
+              "raw_bbox": {
+                "left": 224,
+                "top": 224,
+                "right": 1343,
+                "bottom": 871
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 1.0,
+          "confidence_reason": "stable_selector",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 224,
+            "top": 224,
+            "right": 1343,
+            "bottom": 871
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    }
+  ],
+  "replay_history": [],
+  "session_settings": {
+    "screenshot_on_click": true,
+    "capture_scroll_events": true,
+    "replay_mode": "adaptive",
+    "failure_strategy": "retry",
+    "max_retries": 2,
+    "retry_interval_ms": 500,
+    "default_timeout_ms": 5000,
+    "use_ocr_fallback": true,
+    "use_image_fallback": true,
+    "use_bbox_fallback": true,
+    "speed_factor": 1.0
+  },
+  "stats": {
+    "total_events": 25,
+    "click_count": 0,
+    "typing_count": 0,
+    "scroll_count": 0,
+    "error_count": 0,
+    "avg_event_interval_ms": null
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true
+}

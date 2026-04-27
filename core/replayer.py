@@ -66,14 +66,13 @@ _MOD_NORMALIZE = {
 }
 _MOD_PREFIX = {"ctrl": "^", "alt": "%", "shift": "+"}
 
-# ── WinAPI constants for direct control I/O ──────────────────────────────────
+
 _WM_GETTEXT  = 0x000D
 _WM_SETTEXT  = 0x000C
 _WM_KEYDOWN  = 0x0100
 _WM_KEYUP    = 0x0101
 _VK_RETURN   = 0x0D
 
-# Per-process Name Box and Formula Bar HWND caches (excel_hwnd → child_hwnd)
 _NB_HWND_CACHE: dict[int, int] = {}
 _FB_HWND_CACHE: dict[int, int] = {}
 _HWND_CACHE_LOCK = threading.Lock()
@@ -106,7 +105,6 @@ def _winapi_press_enter(hwnd: int) -> None:
 
 
 def _enum_excel71_children(excel_hwnd: int) -> list[tuple[int, int]]:
-    """Return list of (hwnd, width) for all EXCEL71 child windows."""
     result: list[tuple[int, int]] = []
 
     def _cb(hwnd, _lp):
@@ -124,8 +122,7 @@ def _enum_excel71_children(excel_hwnd: int) -> list[tuple[int, int]]:
 
 
 def _get_namebox_hwnd(excel_hwnd: int) -> int:
-    """Return the Name Box HWND for an Excel main window (cached).
-    The Name Box is the NARROWEST EXCEL71 child control."""
+
     with _HWND_CACHE_LOCK:
         cached = _NB_HWND_CACHE.get(excel_hwnd, 0)
     if cached and _winapi_sendmsg_get(cached, 4) is not None:
@@ -159,19 +156,17 @@ def _get_formulabar_hwnd(excel_hwnd: int) -> int:
 
 
 def _read_namebox(excel_hwnd: int) -> str:
-    """Read the Name Box text — returns e.g. 'A1', 'B2:D5'."""
+ 
     return _winapi_sendmsg_get(_get_namebox_hwnd(excel_hwnd)).strip()
 
 
 def _read_formulabar(excel_hwnd: int) -> str:
-    """Read the Formula Bar text (current cell content)."""
+
     return _winapi_sendmsg_get(_get_formulabar_hwnd(excel_hwnd), 2048).strip()
 
 
 def _navigate_namebox_winapi(excel_hwnd: int, cell_ref: str) -> bool:
-    """Write cell_ref directly into the Name Box via WM_SETTEXT + VK_RETURN.
-    This is the fastest possible navigation: no UIA, no clipboard, no timing races.
-    Returns True if the Name Box confirmed we arrived at cell_ref."""
+  
     nb_hwnd = _get_namebox_hwnd(excel_hwnd)
     if not nb_hwnd:
         return False
@@ -200,7 +195,7 @@ _KEY_MAP = {
     "return":    "{ENTER}",
     "tab":       "{TAB}",
     "space":     " ",
-    "escape":    "{ESC}",          # ← CRITICAL: NOT {ESCAPE}
+    "escape":    "{ESC}",         
     "backspace": "{BACKSPACE}",
     "delete":    "{DELETE}",
     "insert":    "{INSERT}",
@@ -279,11 +274,6 @@ class ReplayEngine:
 
         logger.info("[REPLAY] Starting: '{}' ({} events)", session.name, total)
 
-        # ── Pre-processing: patch TypeText events missing cell_ref ────────────
-        # When the recorder flushes text on an idle timer (user pauses typing before
-        # clicking a cell), the TypeText has no cell_ref and a non-editable target
-        # (e.g. ListItem:'Blank workbook'). The following ExcelCellSelectEvent has the
-        # correct cell — so we look ahead to patch the cell_ref onto the TypeText.
         events_raw = self._patch_excel_typetext_lookahead(events_raw)
         # ─────────────────────────────────────────────────────────────────────
 
@@ -335,18 +325,7 @@ class ReplayEngine:
         )
 
     def _patch_excel_typetext_lookahead(self, events_raw: list) -> list:
-        """Two-pass pre-processing of the event list for Excel TypeText correctness:
 
-        Pass 1 — Lookahead patch:
-          TypeTextEvents with Excel target but no cell_ref (idle-flush before cell click)
-          borrow the cell_ref from the immediately following ExcelCellSelectEvent.
-
-        Pass 2 — Fragment merge:
-          Consecutive TypeTextEvents for the SAME cell_ref are merged into a single
-          event with concatenated text. This fixes the critical bug where WM_SETTEXT
-          (WinAPI formula bar write) is called for each fragment, replacing the previous
-          content each time and pressing Enter after each fragment (moving cursor down).
-        """
         try:
             # Parse all events once
             parsed: list[tuple[int, object, object]] = []  # (index, raw, payload_or_None)
@@ -390,7 +369,10 @@ class ReplayEngine:
                         break
 
             # ── Pass 2: Merge consecutive same-cell TypeText fragments ─────────
-            # Build new event list, merging adjacent TypeText events with same cell_ref
+            # Merge ONLY when fragments are truly continuations of the same cell:
+            # - Same cell_ref
+            # - No intervening KeyPressEvent (backspace/delete/enter breaks the chain)
+            # - No intervening ExcelCellSelectEvent for a DIFFERENT cell
             result_raw: list = []
             skip_indices: set = set()
 
@@ -416,9 +398,6 @@ class ReplayEngine:
                     result_raw.append(raw)
                     continue
 
-                # Look ahead: collect consecutive TypeText events with the same cell_ref
-                # Skip over ExcelCellSelectEvent for the same cell (they're redundant
-                # once we write the full text in one shot).
                 merged_text = p.text or ""
                 merged_indices = [idx]
                 cell_ref_norm = cell_ref.strip().upper()
@@ -430,15 +409,19 @@ class ReplayEngine:
                         break
                     np = next_ev.payload
 
-                    # Same-cell ExcelCellSelectEvent — skip it (we navigate once)
-                    if (isinstance(np, ExcelCellSelectEvent)
-                            and (np.cell_ref or "").strip().upper() == cell_ref_norm):
-                        merged_indices.append(j)
-                        j += 1
-                        continue
+                    if isinstance(np, KeyPressEvent):
+                        break
 
-                    # ScreenshotCheckpoint — skip over silently
+                    # KeyComboEvent — also a hard stop
+                    if isinstance(np, KeyComboEvent):
+                        break
+
+                    if isinstance(np, ExcelCellSelectEvent):
+                        break
+
+                   
                     if isinstance(np, ScreenshotCheckpointEvent):
+                        merged_indices.append(j)
                         j += 1
                         continue
 
@@ -454,7 +437,7 @@ class ReplayEngine:
                             j += 1
                             continue
 
-                    break  # Stop at first non-matching event
+                    break  # Any other event type — stop
 
                 if len(merged_indices) > 1:
                     type_count = sum(
@@ -466,7 +449,6 @@ class ReplayEngine:
                         "[REPLAY] Pre-merge: {} TypeText fragments for {} → '{}' ({} events merged)",
                         type_count, cell_ref_norm, merged_text[:40], len(merged_indices),
                     )
-                    # Patch the first event's text with merged content
                     p.text = merged_text
                     for skip_idx in merged_indices[1:]:
                         skip_indices.add(skip_idx)
@@ -589,10 +571,13 @@ class ReplayEngine:
         # ── Excel ──────────────────────────────────────────────────────
         if isinstance(p, ExcelCellSelectEvent):
             logger.info("[REPLAY] Excel cell: {} sheet={}", p.cell_ref, p.sheet_name)
-            self._excel_ensure_sheet(p.sheet_name, event.id)
-            self._excel_navigate_to_cell(p.cell_ref, event.id, p.sheet_name)
-            # FIX: update nav tracking so subsequent TypeText events for same cell skip re-nav
-            self._excel_last_cell_ref = (p.cell_ref or "").strip().upper()
+            norm = (p.cell_ref or "").strip().upper()
+            if norm and norm == self._excel_last_cell_ref:
+                logger.info("[REPLAY] Excel cell select {} — already there, skipping nav", norm)
+            else:
+                self._excel_ensure_sheet(p.sheet_name, event.id)
+                self._excel_navigate_to_cell(p.cell_ref, event.id, p.sheet_name)
+                self._excel_last_cell_ref = norm
             return
         if isinstance(p, ExcelRangeSelectEvent):
             logger.info("[REPLAY] Excel range: {} sheet={}", p.range_ref, p.sheet_name)
@@ -647,10 +632,7 @@ class ReplayEngine:
 
 
     def _excel_ensure_sheet(self, sheet_name: Optional[str], event_id: int) -> None:
-        """
-        REP-7: If sheet_name is specified, verify and switch to it before
-        doing any cell operation. Prevents writing to the wrong sheet.
-        """
+
         if not sheet_name or not UIA_OK:
             return
         current = self._excel_get_active_sheet_name(event_id)
@@ -690,10 +672,7 @@ class ReplayEngine:
             pass
         return None
 
-    # ──────────────────────────────────────────────────────────────────
-    # REP-1/2/3/6: Excel cell navigation — 5-strategy pipeline
-    # ──────────────────────────────────────────────────────────────────
-
+  
     def _excel_navigate_to_cell(self, cell_ref: str, event_id: int,
                                  sheet_name: Optional[str] = None) -> None:
         
@@ -1160,10 +1139,6 @@ class ReplayEngine:
         except Exception:
             pass
 
-    # ──────────────────────────────────────────────────────────────────
-    # Focus window by HWND
-    # ──────────────────────────────────────────────────────────────────
-
     def _focus_window_by_hwnd(self, hwnd: int) -> None:
         try:
             app = Application(backend="uia").connect(handle=hwnd)
@@ -1172,13 +1147,8 @@ class ReplayEngine:
         except Exception:
             pass
 
-    # ──────────────────────────────────────────────────────────────────
-    # Type with target validation
-    # ──────────────────────────────────────────────────────────────────
-
     def _do_type(self, p: TypeTextEvent, event_id: int) -> None:
-        # No target recorded — this happens for system search box text.
-        # Rather than refusing, type at current OS focus (the search box is focused).
+     
         if p.target is None:
             logger.info(
                 "[REPLAY] Event #{}: TypeTextEvent has no target — typing at OS focus. Text='{}'",
@@ -1187,10 +1157,7 @@ class ReplayEngine:
             self._type_at_current_focus(p.text)
             return
 
-        # FIX: If the event carries a cell_ref it was recorded against an Excel cell.
-        # Route straight to the Excel path — the recorded target.control_type may be
-        # 'ListItem' (splash screen) or any other non-editable type, which must NOT
-        # block execution; the cell_ref is authoritative.
+      
         cell_ref_direct = getattr(p, "cell_ref", None)
         if cell_ref_direct and (p.target is None or self._is_excel_target(p.target)):
             logger.info("[REPLAY] Event #{}: TypeText routed via cell_ref={} text='{}'",
@@ -1395,7 +1362,11 @@ class ReplayEngine:
                         time.sleep(0.08)
                         self._sendinput_click(cx, cy)
                         self._flash(cx, cy)
-                        self._validate_visual_change(pre_hash, event_id, "click_coord")
+                        if not self._validate_visual_change(pre_hash, event_id, "browser_click", require_change=True):
+                            raise ElementNotInteractableError(
+                                f"Event #{event_id}: browser click produced no detectable UI change",
+                                event_id,
+                            )
                         return
                 except ElementNotFoundError:
                     pass
@@ -1416,7 +1387,11 @@ class ReplayEngine:
                     elem.click_input()
                     self._flash(p.x, p.y)
                     time.sleep(0.06)
-                    self._validate_visual_change(pre_hash, event_id, "click")
+                    if not self._validate_visual_change(pre_hash, event_id, "click", require_change=True):
+                        raise ElementNotInteractableError(
+                            f"Event #{event_id}: click produced no detectable UI change",
+                            event_id,
+                        )
                     return
                 self._sendinput_click(*elem)
                 self._flash(*elem)
@@ -1440,17 +1415,20 @@ class ReplayEngine:
         return None
 
     def _validate_visual_change(self, pre_hash: Optional[str],
-                                 event_id: int, action: str) -> None:
+                                 event_id: int, action: str,
+                                 require_change: bool = False) -> bool:
         if pre_hash is None:
-            return
+            return True
         time.sleep(0.15)
         post_hash = self._capture_visual_hash()
         if post_hash is None:
-            return
-        if not self._capture.compare_visual_hash(pre_hash, post_hash):
-            logger.debug("[REPLAY] Event #{} {}: UI changed ✓", event_id, action)
-        else:
-            logger.warning("[REPLAY] Event #{} {}: UI DID NOT CHANGE", event_id, action)
+            return True
+        changed = not self._capture.compare_visual_hash(pre_hash, post_hash)
+        if changed:
+            logger.debug("[REPLAY] Event #{} {}: UI changed", event_id, action)
+            return True
+        logger.warning("[REPLAY] Event #{} {}: UI DID NOT CHANGE", event_id, action)
+        return False
 
     def _do_double_click(self, p: MouseDoubleClickEvent, event_id: int) -> None:
         if p.target:

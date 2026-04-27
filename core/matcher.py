@@ -1,17 +1,3 @@
-"""
-matcher.py — Element matcher with:
-  • Per-strategy hard timeout (was unbounded — could hang indefinitely)
-  • Two-phase matching: fast filter → deep scoring
-  • Fully thread-safe stats (lock used consistently on every read/write)
-  • Window handle + app object caching with staleness detection
-  • DPI mismatch handling unified (single _dpi_for_point source)
-  • Element hash based on automation_id + name (not bbox — bbox shifts)
-  • Deduplication before scoring
-  • Precondition checks (element enabled + visible before returning)
-  • Parallel strategy execution for self-heal phase
-  • FIX: Reduced timeouts for Excel operations
-  • FIX: Early success detection to stop waiting after element found
-"""
 from __future__ import annotations
 
 import concurrent.futures
@@ -418,6 +404,40 @@ def _active_window_bonus(target: UITarget) -> float:
     return 0.0
 
 
+_UNSAFE_CONTAINER_TYPES = {"Pane", "Group", "ToolBar", "StatusBar", "ScrollBar", "Window", "TitleBar", "MenuBar"}
+_PASSIVE_TEXT_TYPES = {"Text", "Label", "StaticText"}
+
+
+def _wrapper_text(wrapper) -> str:
+    try:
+        return wrapper.window_text() or ""
+    except Exception:
+        return ""
+
+
+def _wrapper_ctrl_type(wrapper) -> str:
+    try:
+        return (wrapper.friendly_class_name()
+                if callable(getattr(wrapper, "friendly_class_name", None)) else "") or ""
+    except Exception:
+        return ""
+
+
+def _target_anchor_names(target: UITarget) -> list[str]:
+    anchors = list(getattr(target, "anchor_elements", None) or [])
+    for rich in getattr(target, "rich_selectors", None) or []:
+        anchors.extend(getattr(rich, "anchor_elements", None) or [])
+
+    names: list[str] = []
+    for anchor in anchors:
+        name = getattr(anchor, "name", None)
+        if name is None and isinstance(anchor, dict):
+            name = anchor.get("name")
+        if name and name not in names:
+            names.append(str(name))
+    return names
+
+
 # ── App-cache staleness check ─────────────────────────────────────────────
 
 def _app_cache_valid(app_cache: dict, hwnd: int) -> bool:
@@ -435,10 +455,14 @@ def _app_cache_valid(app_cache: dict, hwnd: int) -> bool:
 
 class ElementMatcher:
 
-    STRICT_THRESHOLD    = 85.0
-    RELAXED_THRESHOLD   = 50.0
-    AMBIGUITY_MARGIN    = 10.0
-    REJECT_ON_AMBIGUOUS = False
+    STRICT_THRESHOLD          = 85.0
+    MIN_ACCEPT_SCORE         = 65.0
+    RELAXED_THRESHOLD        = 65.0
+    SELF_HEAL_ACCEPT_SCORE   = 65.0
+    SPATIAL_ACCEPT_SCORE     = 55.0
+    BROWSER_MIN_ACCEPT_SCORE = 70.0
+    AMBIGUITY_MARGIN         = 10.0
+    REJECT_ON_AMBIGUOUS      = True
 
     def __init__(
         self,
@@ -642,6 +666,17 @@ class ElementMatcher:
                 event_id,
             )
 
+        candidates = [
+            c for c in candidates
+            if c.visible and c.score >= self.BROWSER_MIN_ACCEPT_SCORE
+        ]
+        if not candidates:
+            raise ElementNotFoundError(
+                f"Event #{event_id}: browser candidates below confidence threshold "
+                f"({self.BROWSER_MIN_ACCEPT_SCORE:.0f})",
+                event_id,
+            )
+
         best = candidates[0]
         if len(candidates) >= 2:
             gap = candidates[0].score - candidates[1].score
@@ -651,7 +686,7 @@ class ElementMatcher:
                     event_id, candidates[0].score, candidates[1].score,
                 )
                 priority = {"xpath": 0, "css": 1, "aria": 2, "exact_text": 3, "partial_text": 4}
-                candidates.sort(key=lambda c: priority.get(c.strategy, 9))
+                candidates.sort(key=lambda c: (priority.get(c.strategy, 9), -c.score))
                 best = candidates[0]
 
         # If element is invisible or at (0,0) — likely an off-screen/async-loading element.
@@ -827,58 +862,46 @@ class ElementMatcher:
                 logger.info("[MATCH] Event #{} semantic '{}' ctrl={} → score={:.0f}",
                             event_id, (target.name or "")[:30], target.control_type, r.score)
 
-        # Deduplicate before picking
-        results = self._deduplicate(results)
+        # Deduplicate before picking. Strict strategies must pass full acceptance gates.
+        best_strict = self._select_accepted(results, target, event_id, strict_th, "STRICT")
+        if best_strict:
+            return self._wrap_safe(best_strict.element, target)
 
-        best_strict = self._pick_best(results, strict_th)
-        if best_strict and best_strict.is_wrapper:
-            if self._cross_validate(best_strict, target):
-                if self._stability_check(best_strict.element):
-                    raw = (best_strict.element.raw()
-                           if hasattr(best_strict.element, "raw") else best_strict.element)
-                    if _elem_enabled(raw):
-                        logger.info("[MATCH] Event #{} STRICT ✓ strategy={} score={:.0f}",
-                                    event_id, best_strict.strategy, best_strict.score)
-                        return self._wrap_safe(best_strict.element, target)
-                    else:
-                        logger.warning("[MATCH] Event #{} element found but DISABLED — continuing",
-                                       event_id)
-                else:
-                    logger.warning("[MATCH] Event #{} stability check FAILED — relaxing", event_id)
-                    results.clear()
-            else:
-                logger.warning("[MATCH] Event #{} cross-validation FAILED — relaxing", event_id)
-
-        # ── Phase 2: Relaxed strategies ────────────────────────────────────
-
+        # Phase 2: true fallback chain. Each tier gets a chance to pass its own gate
+        # before the next, weaker strategy is allowed to run.
         if target.name and "relaxed" in active_strategies:
+            tier_results: list[MatchResult] = []
             for r in run("relaxed", lambda: self._by_name_type(target, exact=False)):
                 r.score += active_bonus
-                results.append(r)
-                logger.info("[MATCH] Event #{} relaxed '{}' → score={:.0f}",
+                tier_results.append(r)
+                logger.info("[MATCH] Event #{} relaxed '{}' -> score={:.0f}",
                             event_id, (target.name or "")[:30], r.score)
+            best = self._select_accepted(tier_results, target, event_id,
+                                         self.RELAXED_THRESHOLD, "RELAXED")
+            if best:
+                return self._wrap_safe(best.element, target)
 
         if target.class_name and target.window_title and "classname" in active_strategies:
+            tier_results = []
             for r in run("classname", lambda: self._by_classname(target)):
                 r.score += active_bonus
-                results.append(r)
+                tier_results.append(r)
+            best = self._select_accepted(tier_results, target, event_id,
+                                         self.MIN_ACCEPT_SCORE, "CLASSNAME")
+            if best:
+                return self._wrap_safe(best.element, target)
 
         if target.ancestor_chain and "ancestor" in active_strategies:
+            tier_results = []
             for r in run("ancestor", lambda: self._by_ancestor(target)):
                 r.score += active_bonus
-                results.append(r)
+                tier_results.append(r)
+            best = self._select_accepted(tier_results, target, event_id,
+                                         self.MIN_ACCEPT_SCORE, "ANCESTOR")
+            if best:
+                return self._wrap_safe(best.element, target)
 
-        if action_intent:
-            results = self._intent_filter(results, action_intent)
-
-        results = self._deduplicate(results)
-        best = self._pick_best(results, self.RELAXED_THRESHOLD)
-        if best:
-            logger.info("[MATCH] Event #{} RELAXED ✓ strategy={} score={:.0f} unique={}",
-                        event_id, best.strategy, best.score, best.is_unique)
-            return self._wrap_safe(best.element, target)
-
-        # ── Self-heal ──────────────────────────────────────────────────────
+        # Self-heal
         # FIX: For Excel, use shorter self-heal timeout
         healed = self._self_heal(target, event_id, active_bonus, is_excel=is_excel)
         if healed is not None:
@@ -888,8 +911,11 @@ class ElementMatcher:
         if target.bbox:
             r = self._by_bbox(target)
             if r:
-                logger.info("[MATCH] Event #{} BBOX fallback", event_id)
-                return r.element
+                best = self._select_accepted([r], target, event_id,
+                                             self.SPATIAL_ACCEPT_SCORE, "BBOX")
+                if best:
+                    logger.info("[MATCH] Event #{} BBOX fallback accepted", event_id)
+                    return self._wrap_safe(best.element, target)
 
         # ── Screenshot ─────────────────────────────────────────────────────
         if getattr(target, "screenshot_ref", None) and self._scr_dir:
@@ -948,6 +974,111 @@ class ElementMatcher:
                     pass
             out.append(MatchResult(r.element, score, r.strategy, r.is_unique, r.elem_hash))
         return out
+
+
+    def _filter_candidates(
+        self,
+        results: list[MatchResult],
+        target: UITarget,
+        event_id: int,
+        phase: str,
+    ) -> list[MatchResult]:
+        filtered: list[MatchResult] = []
+        for r in results:
+            if not r.is_wrapper:
+                filtered.append(r)
+                continue
+
+            raw = r.element.raw() if hasattr(r.element, "raw") else r.element
+            if not _validate_wrapper(raw):
+                logger.warning("[MATCH] Event #{} {} reject {}: invalid wrapper", event_id, phase, r.strategy)
+                continue
+            if not _elem_visible(raw):
+                logger.warning("[MATCH] Event #{} {} reject {}: not visible", event_id, phase, r.strategy)
+                continue
+
+            score = r.score
+            ctrl = _wrapper_ctrl_type(raw)
+            text = _wrapper_text(raw)
+
+            if not _elem_enabled(raw):
+                score -= 35.0
+            if ctrl in _UNSAFE_CONTAINER_TYPES:
+                score -= 30.0
+            elif ctrl in _PASSIVE_TEXT_TYPES and getattr(target, "element_role", None) not in ("label", "text"):
+                score -= 15.0
+
+            target_ctrl = target.control_type or ""
+            if target_ctrl and ctrl and target_ctrl.lower() != ctrl.lower():
+                score -= 12.0
+
+            target_name = target.name or ""
+            if target_name and r.strategy not in ("automation_id", "automation_id_wide", "heal_hash"):
+                sim = _text_similarity(target_name, text)
+                if sim < 0.25:
+                    score -= 25.0
+                elif sim < 0.50:
+                    score -= 10.0
+
+            if score != r.score:
+                logger.debug(
+                    "[MATCH] Event #{} {} {} adjusted {:.0f}->{:.0f} ctrl={} text='{}'",
+                    event_id, phase, r.strategy, r.score, score, ctrl or "?", text[:30],
+                )
+
+            filtered.append(MatchResult(r.element, max(0.0, score), r.strategy, r.is_unique, r.elem_hash))
+        return filtered
+
+    def _select_accepted(
+        self,
+        results: list[MatchResult],
+        target: UITarget,
+        event_id: int,
+        threshold: float,
+        phase: str,
+    ) -> Optional[MatchResult]:
+        if not results:
+            return None
+        candidates = self._filter_candidates(results, target, event_id, phase)
+        candidates = self._deduplicate(candidates)
+        candidates = self._context_gate(candidates, target)
+        best = self._pick_best(candidates, threshold)
+        if not best:
+            if candidates:
+                top = max(candidates, key=lambda r: r.score)
+                logger.warning(
+                    "[MATCH] Event #{} {} low confidence top={:.0f} strategy={} threshold={:.0f}",
+                    event_id, phase, top.score, top.strategy, threshold,
+                )
+            return None
+
+        if best.score < threshold:
+            logger.warning(
+                "[MATCH] Event #{} {} rejected low score {:.0f} < {:.0f} strategy={}",
+                event_id, phase, best.score, threshold, best.strategy,
+            )
+            return None
+
+        if best.is_wrapper:
+            raw = best.element.raw() if hasattr(best.element, "raw") else best.element
+            if not _validate_wrapper(raw) or not _elem_visible(raw):
+                logger.warning("[MATCH] Event #{} {} rejected invalid/invisible wrapper", event_id, phase)
+                return None
+            if not _elem_enabled(raw):
+                logger.warning("[MATCH] Event #{} {} rejected disabled element", event_id, phase)
+                return None
+            if not self._cross_validate(best, target):
+                logger.warning("[MATCH] Event #{} {} rejected by cross-validation", event_id, phase)
+                return None
+            if not self._stability_check(best.element):
+                logger.warning("[MATCH] Event #{} {} rejected unstable element", event_id, phase)
+                return None
+
+        logger.info(
+            "[MATCH] Event #{} {} accepted strategy={} score={:.0f} unique={}",
+            event_id, phase, best.strategy, best.score, best.is_unique,
+        )
+        return best
 
     def _wrap_safe(self, element, target: UITarget):
         if isinstance(element, tuple):
@@ -1136,8 +1267,7 @@ class ElementMatcher:
 
         results    = []
         boost      = self._get_stats("ancestor").priority_boost
-        anch_names = [a.name for a in (getattr(t, "anchor_elements", None) or [])
-                      if getattr(a, "name", None)]
+        anch_names = _target_anchor_names(t)
         try:
             for hwnd in find_windows(title_re=f".*{re.escape(anc_text[:20])}.*"):
                 try:
@@ -1197,7 +1327,7 @@ class ElementMatcher:
                 if elem:
                     wrapper = elem.wrapper_object() if hasattr(elem, "wrapper_object") else elem
                     if _validate_wrapper(wrapper) and _elem_visible(wrapper):
-                        return MatchResult(wrapper, 30.0 + boost, "bbox")
+                        return MatchResult(wrapper, 55.0 + boost, "bbox")
             except Exception:
                 pass
         except Exception:
@@ -1413,8 +1543,7 @@ class ElementMatcher:
 
         def _heal_c():
             out = []
-            anchors      = getattr(target, "anchor_elements", None) or []
-            anchor_names = [a.name for a in anchors if getattr(a, "name", None)]
+            anchor_names = _target_anchor_names(target)
             if not anchor_names or not target.window_title or not UIA_OK:
                 return out
             try:
@@ -1445,30 +1574,43 @@ class ElementMatcher:
                 pass
             return out
 
-        # Run all three in parallel with shared timeout
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-            futures = {
-                pool.submit(_heal_a): "A",
-                pool.submit(_heal_b): "B",
-                pool.submit(_heal_c): "C",
-            }
-            for fut in concurrent.futures.as_completed(futures, timeout=heal_timeout):
-                try:
-                    results.extend(fut.result())
-                except Exception:
-                    pass
+        def _run_heal_tier(name: str, fn, threshold: float) -> Optional[object]:
+            holder = [[]]
+            done = threading.Event()
 
-        if not results:
+            def _execute():
+                try:
+                    holder[0] = fn()
+                except Exception as exc:
+                    logger.debug("[MATCH] Event #{} self-heal {} error: {}", event_id, name, exc)
+                finally:
+                    done.set()
+
+            th = threading.Thread(target=_execute, daemon=True)
+            th.start()
+            if not done.wait(timeout=heal_timeout):
+                logger.warning("[MATCH] Event #{} self-heal {} TIMED OUT", event_id, name)
+                return None
+
+            tier_results = self._context_gate(self._deduplicate(holder[0] or []), target)
+            best = self._select_accepted(tier_results, target, event_id, threshold, f"SELF_HEAL:{name}")
+            if best:
+                logger.info("[MATCH] Event #{} SELF-HEAL accepted strategy={} score={:.0f}",
+                            event_id, best.strategy, best.score)
+                return self._wrap_safe(best.element, target)
             return None
 
-        results = self._deduplicate(results)
-        results = self._context_gate(results, target)
-        best = self._pick_best(results, 30.0)
-        if best:
-            logger.info("[MATCH] Event #{} SELF-HEAL ✓ strategy={} score={:.0f}",
-                        event_id, best.strategy, best.score)
-            return self._wrap_safe(best.element, target)
+        for name, fn, threshold in (
+            ("hash", _heal_b, self.SELF_HEAL_ACCEPT_SCORE),
+            ("anchor", _heal_c, self.SELF_HEAL_ACCEPT_SCORE),
+            ("relaxed", _heal_a, self.RELAXED_THRESHOLD),
+        ):
+            healed = _run_heal_tier(name, fn, threshold)
+            if healed is not None:
+                return healed
+
         return None
+
 
     # ── Uniqueness check ──────────────────────────────────────────────────
 

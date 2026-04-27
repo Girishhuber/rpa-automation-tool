@@ -187,12 +187,11 @@ class EventPipeline:
             try:
                 self._q.get_nowait()
                 self._overflow_drops += 1
-                if self._overflow_drops % 10 == 1:   # log every 10th drop to avoid spam
-                    logger.warning(
-                        "[PIPELINE] Queue overflow — {} events dropped so far "
-                        "(QUEUE_MAX={}). Consider raising QUEUE_MAX or slowing input.",
-                        self._overflow_drops, self.QUEUE_MAX,
-                    )
+                logger.error(
+                    "[PIPELINE] EVENT LOST - QUEUE OVERFLOW: {} events dropped so far "
+                    "(QUEUE_MAX={}). Replay accuracy may be compromised.",
+                    self._overflow_drops, self.QUEUE_MAX,
+                )
             except queue.Empty:
                 pass
             try:
