@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import ctypes
@@ -210,6 +209,9 @@ class Recorder:
         self._search_mode:          bool            = False
         self._current_action_group: Optional[str]  = None
 
+        # Track last Excel cell clicked so TypeText can carry it (FIX: Excel cell recording)
+        self._last_excel_cell_ref:  Optional[str]  = None
+
         # ── Background threads ───────────────────────────────────────
         self._mouse_listener    = None
         self._kbd_listener      = None
@@ -394,7 +396,18 @@ class Recorder:
         # Build enriched target (single UIA call)
         target = self._build_target_at(x, y)
 
-        # Flush text buffer before processing this click
+        # ── Pre-flush: detect Excel cell BEFORE flushing the text buffer ──────
+        # This ensures TypeText('Name') typed before clicking A1 gets cell_ref=A1
+        if (target
+                and self._config.recorder.detect_excel_cells
+                and self._is_excel_target(target)
+                and target.backend == TargetBackend.UIA):
+            _pre_cell = detect_excel_cell(target.name or "", target.control_type or "")
+            if _pre_cell:
+                self._last_excel_cell_ref = _pre_cell
+                self._last_typing_target  = target
+
+        # Flush text buffer (will now have correct cell_ref if target is Excel cell)
         self._flush_text_buffer()
 
         # ── Filters ──────────────────────────────────────────────────
@@ -468,6 +481,10 @@ class Recorder:
             cell = detect_excel_cell(target.name or "", target.control_type or "")
             if cell:
                 logger.info("[RECORD] Excel cell click: {}", cell)
+                # FIX: update cell ref on every new cell click; _flush_text_buffer
+                # will now carry forward the ref for consecutive flushes in the same cell.
+                self._last_excel_cell_ref = cell
+                self._last_typing_target  = target
                 self._push(
                     ExcelCellSelectEvent(cell_ref=cell, target=target),
                     f"Excel cell: {cell}",
@@ -638,6 +655,22 @@ class Recorder:
     def _flush_if_idle(self) -> None:
         idle_ms = (time.perf_counter() - self._last_key_time) * 1000
         if idle_ms >= self._config.recorder.text_flush_idle_ms:
+            # FIX: If we're in an Excel context (last target is EXCEL.EXE) but no
+            # cell_ref has been set yet, the user typed before clicking any cell.
+            # Deferring the flush lets the upcoming cell click set the correct cell_ref,
+            # so the TypeText gets anchored to the right cell instead of being emitted
+            # as a non-editable ListItem event (which the replayer then skips entirely).
+            #
+            # We detect this as: last_target is Excel, control_type is non-editable
+            # (e.g. ListItem = splash screen), and no cell ref is known.
+            last = self._last_target
+            if (last
+                    and self._is_excel_target(last)
+                    and not self._last_excel_cell_ref
+                    and (last.control_type or "") in ("ListItem", "Pane", "Window")):
+                logger.debug("[RECORD] Idle flush deferred — Excel context, awaiting cell click")
+                return
+
             self._flush_text_buffer()
 
     def _flush_text_buffer(self) -> None:
@@ -658,7 +691,16 @@ class Recorder:
         log_label = f"Search: '{preview}'" if self._search_mode else f"Type: '{preview}'"
         self._search_mode = False
 
-        self._push(TypeTextEvent(text=text, target=target), log_label)
+        # FIX: For Excel, attach the cell_ref so the replayer navigates correctly.
+        # Do NOT reset _last_excel_cell_ref here — consecutive typing in the same cell
+        # produces multiple flush events (e.g. 'A' then 'ge' for 'Age'), all in the same cell.
+        # The ref is only reset when a new Excel cell is clicked (in _on_mouse_click).
+        type_event = TypeTextEvent(text=text, target=target)
+        if target and self._is_excel_target(target) and self._last_excel_cell_ref:
+            type_event.cell_ref = self._last_excel_cell_ref  # type: ignore[attr-defined]
+            logger.info("[RECORD] TypeText Excel cell_ref={}", self._last_excel_cell_ref)
+
+        self._push(type_event, log_label)
 
     def _emit_combo(self, combo: list[str]) -> None:
         self._push(
@@ -764,11 +806,8 @@ class Recorder:
 
         is_browser = False
         if target:
-            
             proc      = (target.process_name or "").lower()
-            print(proc)
             cls       = target.class_name or ""
-            print(cls)
             is_browser = proc in BROWSER_PROCS or cls in _ELECTRON_CLASS
 
         if is_browser and self._browser.is_connected:

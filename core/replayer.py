@@ -251,6 +251,8 @@ class ReplayEngine:
         self._last_mouse_pos: Optional[tuple[int, int]] = None
         # REP-7: track expected active sheet
         self._excel_expected_sheet: Optional[str] = None
+        # FIX: track last navigated Excel cell to skip redundant re-navigation
+        self._excel_last_cell_ref: Optional[str] = None
 
 
     def replay(self, session: Session) -> ReplayResult:
@@ -276,6 +278,14 @@ class ReplayEngine:
         start_ms   = self._now_ms()
 
         logger.info("[REPLAY] Starting: '{}' ({} events)", session.name, total)
+
+        # ── Pre-processing: patch TypeText events missing cell_ref ────────────
+        # When the recorder flushes text on an idle timer (user pauses typing before
+        # clicking a cell), the TypeText has no cell_ref and a non-editable target
+        # (e.g. ListItem:'Blank workbook'). The following ExcelCellSelectEvent has the
+        # correct cell — so we look ahead to patch the cell_ref onto the TypeText.
+        events_raw = self._patch_excel_typetext_lookahead(events_raw)
+        # ─────────────────────────────────────────────────────────────────────
 
         for i, raw in enumerate(events_raw):
             if self._abort.is_set():
@@ -323,6 +333,153 @@ class ReplayEngine:
             events_completed=completed,
             duration_ms=duration_ms,
         )
+
+    def _patch_excel_typetext_lookahead(self, events_raw: list) -> list:
+        """Two-pass pre-processing of the event list for Excel TypeText correctness:
+
+        Pass 1 — Lookahead patch:
+          TypeTextEvents with Excel target but no cell_ref (idle-flush before cell click)
+          borrow the cell_ref from the immediately following ExcelCellSelectEvent.
+
+        Pass 2 — Fragment merge:
+          Consecutive TypeTextEvents for the SAME cell_ref are merged into a single
+          event with concatenated text. This fixes the critical bug where WM_SETTEXT
+          (WinAPI formula bar write) is called for each fragment, replacing the previous
+          content each time and pressing Enter after each fragment (moving cursor down).
+        """
+        try:
+            # Parse all events once
+            parsed: list[tuple[int, object, object]] = []  # (index, raw, payload_or_None)
+            for i, raw in enumerate(events_raw):
+                try:
+                    ev = Event.model_validate(raw)
+                    parsed.append((i, raw, ev))
+                except Exception:
+                    parsed.append((i, raw, None))
+
+            # ── Pass 1: Lookahead cell_ref patch ──────────────────────────────
+            for idx, (i, raw, ev) in enumerate(parsed):
+                if ev is None:
+                    continue
+                p = ev.payload
+                if not isinstance(p, TypeTextEvent):
+                    continue
+                cell_ref = getattr(p, "cell_ref", None)
+                if cell_ref:
+                    continue
+                target = getattr(p, "target", None)
+                if not target or not self._is_excel_target(target):
+                    continue
+                ctrl = getattr(target, "control_type", "") or ""
+                if ctrl not in ("ListItem", "Pane", "Window", ""):
+                    continue
+                # Look ahead up to 5 events for ExcelCellSelectEvent
+                for j in range(idx + 1, min(idx + 6, len(parsed))):
+                    _, _, next_ev = parsed[j]
+                    if next_ev is None:
+                        continue
+                    np = next_ev.payload
+                    if isinstance(np, ExcelCellSelectEvent) and np.cell_ref:
+                        p.cell_ref = np.cell_ref  # type: ignore[attr-defined]
+                        logger.info(
+                            "[REPLAY] Pre-patch lookahead: TypeText #{} '{}' → cell_ref={}",
+                            ev.id, (p.text or "")[:20], np.cell_ref,
+                        )
+                        break
+                    if isinstance(np, TypeTextEvent):
+                        break
+
+            # ── Pass 2: Merge consecutive same-cell TypeText fragments ─────────
+            # Build new event list, merging adjacent TypeText events with same cell_ref
+            result_raw: list = []
+            skip_indices: set = set()
+
+            for idx, (i, raw, ev) in enumerate(parsed):
+                if idx in skip_indices:
+                    continue
+                if ev is None:
+                    result_raw.append(raw)
+                    continue
+                p = ev.payload
+                if not isinstance(p, TypeTextEvent):
+                    result_raw.append(raw)
+                    continue
+
+                cell_ref = getattr(p, "cell_ref", None)
+                if not cell_ref:
+                    result_raw.append(raw)
+                    continue
+
+                # Is this Excel?
+                target = getattr(p, "target", None)
+                if not target or not self._is_excel_target(target):
+                    result_raw.append(raw)
+                    continue
+
+                # Look ahead: collect consecutive TypeText events with the same cell_ref
+                # Skip over ExcelCellSelectEvent for the same cell (they're redundant
+                # once we write the full text in one shot).
+                merged_text = p.text or ""
+                merged_indices = [idx]
+                cell_ref_norm = cell_ref.strip().upper()
+
+                j = idx + 1
+                while j < len(parsed):
+                    _, _, next_ev = parsed[j]
+                    if next_ev is None:
+                        break
+                    np = next_ev.payload
+
+                    # Same-cell ExcelCellSelectEvent — skip it (we navigate once)
+                    if (isinstance(np, ExcelCellSelectEvent)
+                            and (np.cell_ref or "").strip().upper() == cell_ref_norm):
+                        merged_indices.append(j)
+                        j += 1
+                        continue
+
+                    # ScreenshotCheckpoint — skip over silently
+                    if isinstance(np, ScreenshotCheckpointEvent):
+                        j += 1
+                        continue
+
+                    # Another TypeText for the SAME cell — merge its text
+                    if isinstance(np, TypeTextEvent):
+                        next_cell = (getattr(np, "cell_ref", None) or "").strip().upper()
+                        next_target = getattr(np, "target", None)
+                        if (next_cell == cell_ref_norm
+                                and next_target
+                                and self._is_excel_target(next_target)):
+                            merged_text += (np.text or "")
+                            merged_indices.append(j)
+                            j += 1
+                            continue
+
+                    break  # Stop at first non-matching event
+
+                if len(merged_indices) > 1:
+                    type_count = sum(
+                        1 for mi in merged_indices
+                        if parsed[mi][2] is not None
+                        and isinstance(parsed[mi][2].payload, TypeTextEvent)
+                    )
+                    logger.info(
+                        "[REPLAY] Pre-merge: {} TypeText fragments for {} → '{}' ({} events merged)",
+                        type_count, cell_ref_norm, merged_text[:40], len(merged_indices),
+                    )
+                    # Patch the first event's text with merged content
+                    p.text = merged_text
+                    for skip_idx in merged_indices[1:]:
+                        skip_indices.add(skip_idx)
+
+                result_raw.append(raw)
+
+            logger.info("[REPLAY] Pre-processing: {} events → {} after Excel merge",
+                        len(events_raw), len(result_raw))
+            return result_raw
+
+        except Exception as exc:
+            logger.warning("[REPLAY] _patch_excel_typetext_lookahead failed: {}", exc)
+            return events_raw
 
     def abort(self) -> None:
         self._abort.set()
@@ -434,6 +591,8 @@ class ReplayEngine:
             logger.info("[REPLAY] Excel cell: {} sheet={}", p.cell_ref, p.sheet_name)
             self._excel_ensure_sheet(p.sheet_name, event.id)
             self._excel_navigate_to_cell(p.cell_ref, event.id, p.sheet_name)
+            # FIX: update nav tracking so subsequent TypeText events for same cell skip re-nav
+            self._excel_last_cell_ref = (p.cell_ref or "").strip().upper()
             return
         if isinstance(p, ExcelRangeSelectEvent):
             logger.info("[REPLAY] Excel range: {} sheet={}", p.range_ref, p.sheet_name)
@@ -1028,6 +1187,53 @@ class ReplayEngine:
             self._type_at_current_focus(p.text)
             return
 
+        # FIX: If the event carries a cell_ref it was recorded against an Excel cell.
+        # Route straight to the Excel path — the recorded target.control_type may be
+        # 'ListItem' (splash screen) or any other non-editable type, which must NOT
+        # block execution; the cell_ref is authoritative.
+        cell_ref_direct = getattr(p, "cell_ref", None)
+        if cell_ref_direct and (p.target is None or self._is_excel_target(p.target)):
+            logger.info("[REPLAY] Event #{}: TypeText routed via cell_ref={} text='{}'",
+                        event_id, cell_ref_direct, p.text[:30])
+            excel_hwnd = self._get_excel_hwnd(event_id) or 0
+            sheet_name = getattr(p, "sheet_name", None)
+            is_formula = p.text.startswith("=")
+
+            # Navigate only if cell changed (skip redundant nav for same-cell fragments)
+            norm_ref = cell_ref_direct.strip().upper()
+            if norm_ref != self._excel_last_cell_ref:
+                try:
+                    self._excel_ensure_sheet(sheet_name, event_id)
+                    self._excel_navigate_to_cell(cell_ref_direct, event_id, sheet_name)
+                    time.sleep(0.05)
+                    self._excel_last_cell_ref = norm_ref
+                except Exception as nav_exc:
+                    logger.warning("[REPLAY] Event #{}: pre-type nav failed: {}", event_id, nav_exc)
+            else:
+                logger.info("[REPLAY] Event #{}: Excel early-path already at {} — skipping nav",
+                            event_id, norm_ref)
+
+            if not is_formula and excel_hwnd:
+                fb_hwnd = _get_formulabar_hwnd(excel_hwnd)
+                if fb_hwnd and _winapi_sendmsg_set(fb_hwnd, p.text):
+                    time.sleep(0.02)
+                    _winapi_press_enter(fb_hwnd)
+                    time.sleep(0.08)
+                    logger.info("[REPLAY] Event #{}: Excel WinAPI type ✓ '{}' → {}",
+                                event_id, p.text[:30], cell_ref_direct)
+                    return
+            # Fallback: type at current focus (navigation already moved us to the right cell)
+            self._ensure_window_focus(p.target)
+            if is_formula:
+                self._type_formula(p.text)
+            elif WIN32_OK:
+                self._set_clipboard(p.text)
+                send_keys("^v")
+            else:
+                send_keys(self._escape_sk(p.text), with_spaces=True)
+            send_keys("{ENTER}")
+            return
+
         ctrl = getattr(p.target, "control_type", None) or ""
         if ctrl in _NON_EDITABLE_CONTROL_TYPES:
             logger.warning("[REPLAY] Non-editable target {} — skipping type", ctrl)
@@ -1046,117 +1252,122 @@ class ReplayEngine:
             excel_hwnd = self._get_excel_hwnd(event_id) or 0
 
             if cell_ref:
-                try:
-                    self._excel_ensure_sheet(sheet_name, event_id)
-                    self._excel_navigate_to_cell(cell_ref, event_id, sheet_name)
-                    time.sleep(0.08)
-                except Exception as nav_exc:
-                    logger.warning("[REPLAY] Event #{}: pre-type nav failed: {}",
-                                   event_id, nav_exc)
+                # FIX: Skip re-navigation if we're already at this cell (consecutive flushes
+                # of the same cell produce multiple TypeText events with the same cell_ref).
+                norm_ref = cell_ref.strip().upper()
+                if norm_ref != self._excel_last_cell_ref:
+                    try:
+                        self._excel_ensure_sheet(sheet_name, event_id)
+                        self._excel_navigate_to_cell(cell_ref, event_id, sheet_name)
+                        time.sleep(0.05)
+                        self._excel_last_cell_ref = norm_ref
+                    except Exception as nav_exc:
+                        logger.warning("[REPLAY] Event #{}: pre-type nav failed: {}",
+                                       event_id, nav_exc)
+                else:
+                    logger.info("[REPLAY] Event #{}: Excel already at {} — skipping nav",
+                                event_id, norm_ref)
+            else:
+                # No cell_ref — use the last navigated cell as anchor if available,
+                # otherwise read the active cell from the Name Box.
+                if self._excel_last_cell_ref:
+                    logger.info(
+                        "[REPLAY] Event #{}: TypeTextEvent has no cell_ref — "
+                        "using last navigated cell '{}' as anchor.",
+                        event_id, self._excel_last_cell_ref,
+                    )
+                    # Re-navigate to ensure we're still at the right cell
+                    try:
+                        self._excel_navigate_to_cell(
+                            self._excel_last_cell_ref, event_id, sheet_name)
+                        time.sleep(0.04)
+                    except Exception:
+                        pass
+                elif excel_hwnd:
+                    active_cell = _read_namebox(excel_hwnd)
+                    logger.warning(
+                        "[REPLAY] Event #{}: TypeTextEvent has no cell_ref and no nav history — "
+                        "writing to currently active cell '{}'. Check recorder Excel tracking.",
+                        event_id, active_cell or "?"
+                    )
 
             # Try WinAPI formula bar write first (fastest, most reliable for plain text)
+            # FIX: NEVER call matcher.find() for Excel — UIA cell lookup always times out.
+            # After navigation, the correct cell is already active; just write to it.
             if not is_formula and excel_hwnd:
                 fb_hwnd = _get_formulabar_hwnd(excel_hwnd)
                 if fb_hwnd and _winapi_sendmsg_set(fb_hwnd, p.text):
                     time.sleep(0.02)
                     _winapi_press_enter(fb_hwnd)
-                    time.sleep(0.10)
+                    time.sleep(0.08)
                     logger.info("[REPLAY] Event #{}: Excel WinAPI type ✓ '{}' → {}",
-                                event_id, p.text[:30], cell_ref)
+                                event_id, p.text[:30], cell_ref or "active")
                     return
 
-            # UIA element path (fallback)
-            try:
-                elem = self._matcher.find(p.target, event_id)
-                if not isinstance(elem, tuple):
-                    self._excel_type_into_cell(p.text, elem, event_id,
-                                               is_formula=is_formula,
-                                               force_plain_text=force_plain,
-                                               excel_hwnd=excel_hwnd)
-                    return
-            except ElementNotFoundError:
-                pass
-
-            # Element not found but navigation succeeded — type at current focus
+            # Fallback: SendKeys at current focus (cell already navigated to above)
             self._ensure_window_focus(p.target)
             send_keys("{F2}")
-            time.sleep(0.05)
+            time.sleep(0.04)
             if is_formula:
                 self._type_formula(p.text)
             elif WIN32_OK:
                 self._set_clipboard(p.text)
-                send_keys("^v")
+                send_keys("^a^v")
             else:
                 send_keys(self._escape_sk(p.text), with_spaces=True)
             send_keys("{ENTER}")
+            time.sleep(0.06)
+            logger.info("[REPLAY] Event #{}: Excel SendKeys type ✓ '{}' → {}",
+                        event_id, p.text[:30], cell_ref or "active")
             return
 
         # ── Standard UIA (non-Excel) ─────────────────────────────────────────────
         if p.target:
             try:
                 elem = self._matcher.find(p.target, event_id)
-                if not isinstance(elem, tuple):
-                    self._wait_ready(elem, event_id)
-                    if p.clear_first:
-                        try:
-                            elem.set_text("")
-                        except Exception:
-                            elem.triple_click_input(); time.sleep(0.04)
-                    try:
-                        elem.set_edit_text(p.text)
+                if isinstance(elem, tuple):
+                    # Browser target: matcher returned viewport (cx,cy) coords.
+                    # Click to focus the element, then type via CDP key events.
+                    if p.target.backend == TargetBackend.BROWSER:
+                        vx, vy = elem
+                        sx, sy = self._browser.viewport_to_screen(vx, vy)
+                        self._browser.bring_to_front()
+                        time.sleep(0.08)
+                        self._sendinput_click(sx, sy)
+                        time.sleep(0.12)
+                        self._browser.type_text_at(p.text, human_like=False)
+                        logger.info("[REPLAY] Event #{}: Browser type ✓ '{}' at viewport({},{})",
+                                    event_id, p.text[:30], vx, vy)
                         return
-                    except Exception:
-                        pass
-                    if WIN32_OK:
-                        self._set_clipboard(p.text)
-                        elem.click_input(); time.sleep(0.05)
-                        send_keys("^a^v")
-                        return
-                    elem.click_input(); time.sleep(0.04)
-                    send_keys(self._escape_sk(p.text), with_spaces=True)
+                    # Non-browser tuple fallback — type at raw coords
+                    self._sendinput_click(*elem)
+                    time.sleep(0.05)
+                    self._type_at_current_focus(p.text)
                     return
+                # UIA element
+                self._wait_ready(elem, event_id)
+                if p.clear_first:
+                    try:
+                        elem.set_text("")
+                    except Exception:
+                        elem.triple_click_input(); time.sleep(0.04)
+                try:
+                    elem.set_edit_text(p.text)
+                    return
+                except Exception:
+                    pass
+                if WIN32_OK:
+                    self._set_clipboard(p.text)
+                    elem.click_input(); time.sleep(0.05)
+                    send_keys("^a^v")
+                    return
+                elem.click_input(); time.sleep(0.04)
+                send_keys(self._escape_sk(p.text), with_spaces=True)
+                return
             except ElementNotFoundError:
                 pass
 
-        self._type_at_current_focus(p.text)
-
-        if is_formula:
-            self._type_formula(p.text)
-        elif WIN32_OK:
-            self._set_clipboard(p.text)
-            send_keys("^v")
-        else:
-            send_keys(self._escape_sk(p.text), with_spaces=True)
-        send_keys("{ENTER}")
-        return
-
-        # Standard UIA
-        if p.target:
-            try:
-                elem = self._matcher.find(p.target, event_id)
-                if not isinstance(elem, tuple):
-                    self._wait_ready(elem, event_id)
-                    if p.clear_first:
-                        try:
-                            elem.set_text("")
-                        except Exception:
-                            elem.triple_click_input(); time.sleep(0.04)
-                    try:
-                        elem.set_edit_text(p.text)
-                        return
-                    except Exception:
-                        pass
-                    if WIN32_OK:
-                        self._set_clipboard(p.text)
-                        elem.click_input(); time.sleep(0.05)
-                        send_keys("^a^v")
-                        return
-                    elem.click_input(); time.sleep(0.04)
-                    send_keys(self._escape_sk(p.text), with_spaces=True)
-                    return
-            except ElementNotFoundError:
-                pass
-
+        # Last resort: type at current OS focus
         self._type_at_current_focus(p.text)
 
     def _type_at_current_focus(self, text: str) -> None:
@@ -1172,7 +1383,31 @@ class ReplayEngine:
     def _do_click(self, p: MouseClickEvent, event_id: int) -> None:
         pre_hash = self._capture_visual_hash()
 
-        if p.target and p.target.backend != TargetBackend.BROWSER:
+        if p.target:
+            # ── Browser element: resolve via CDP, then SendInput at viewport coords ──
+            if p.target.backend == TargetBackend.BROWSER:
+                try:
+                    coords = self._matcher.find(p.target, event_id)
+                    if isinstance(coords, tuple):
+                        # coords are viewport-relative; convert to screen coords
+                        cx, cy = self._browser.viewport_to_screen(coords[0], coords[1])
+                        self._browser.bring_to_front()
+                        time.sleep(0.08)
+                        self._sendinput_click(cx, cy)
+                        self._flash(cx, cy)
+                        self._validate_visual_change(pre_hash, event_id, "click_coord")
+                        return
+                except ElementNotFoundError:
+                    pass
+                # Browser fallback: use recorded raw coords (already screen coords)
+                self._browser.bring_to_front()
+                time.sleep(0.08)
+                self._sendinput_click(p.x, p.y)
+                self._flash(p.x, p.y)
+                self._validate_visual_change(pre_hash, event_id, "click_coord")
+                return
+
+            # ── UIA / native element ──────────────────────────────────────────────
             try:
                 elem = self._matcher.find(p.target, event_id)
                 if not isinstance(elem, tuple):

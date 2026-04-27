@@ -106,7 +106,7 @@ class Session(BaseModel):
     replay_history: List[ReplayResult] = Field(default_factory=list)
     
     #setting
-    session_setings: SessionSettings= Field(default_factory=SessionSettings)
+    session_settings: SessionSettings= Field(default_factory=SessionSettings)
     
     stats:  SessionStats = Field(default_factory=SessionStats)  
     screenshot_on_click: bool = True

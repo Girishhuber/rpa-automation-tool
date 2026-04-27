@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import ctypes
@@ -226,13 +225,23 @@ class UIAEnricher:
         wrapper = self._get_wrapper_at(x, y)
         if wrapper is None:
             return None
-        return self._build_uia_target(wrapper, x, y)
+        target = self._build_uia_target(wrapper, x, y)
+        # For browser windows the recorder will enrich via BrowserBridge.
+        # Return the lightweight UIA target (process/class info) without a
+        # deep ancestor/tree walk — that is wasteful and incorrect for DOM content.
+        return target
 
     def get_selector_at(self, x: int, y: int) -> Optional[Selector]:
         if not PYWINAUTO_OK:
             return None
         wrapper = self._get_wrapper_at(x, y)
         if wrapper is None:
+            return None
+        # Skip selector building for browser targets — selectors come from BrowserBridge.
+        proc_name  = self._get_process_name(wrapper)
+        class_name = self._safe(wrapper, "class_name", critical=False) or ""
+        if (proc_name and proc_name.lower() in BROWSER_PROCS) or class_name in _ELECTRON_CLASS:
+            logger.debug("[ENRICHER] Skipping UIA selector build for browser window ({})", proc_name)
             return None
         return self._build_selector(wrapper, x, y)
 
@@ -346,13 +355,21 @@ class UIAEnricher:
         if not finished:
             logger.debug("UIA from_point({},{}) timed out — layer 3 focused fallback", x, y)
             fb = self._focused_element_fallback()
-            return fb if fb else self._last_wrapper
+            if fb:
+                return fb
+            # _last_wrapper is a stale fallback — log it clearly so it's not silent.
+            if self._last_wrapper:
+                logger.debug("UIA from_point({},{}) — returning stale _last_wrapper", x, y)
+            return self._last_wrapper
 
         if exc_holder[0]:
             logger.debug("UIA from_point({},{}) error: {} — layer 3", x, y, exc_holder[0])
             fb = self._focused_element_fallback()
             if fb:
                 return fb
+            # Same guard: log stale fallback explicitly.
+            if self._last_wrapper:
+                logger.debug("UIA from_point({},{}) error path — returning stale _last_wrapper", x, y)
             return self._last_wrapper
 
         wrapper = result[0]

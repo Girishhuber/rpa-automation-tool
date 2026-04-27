@@ -1,0 +1,2247 @@
+{
+  "id": "becdcee7-9be4-449b-9a04-11cf552cd5bc",
+  "name": "My workflow1",
+  "description": "",
+  "tags": [],
+  "created_at": "2026-04-26T10:49:14.838739+00:00",
+  "updated_at": "2026-04-26T10:49:56.797811+00:00",
+  "duration_ms": 41957,
+  "status": "complete",
+  "system_info": {
+    "os_version": "10.0.26200",
+    "screen_width": 1920,
+    "screen_height": 1080,
+    "dpi_scale": 1.25,
+    "monitor_count": 1,
+    "python_version": "3.11.0 (main, Oct 24 2022, 18:26:48) [MSC v.1933 64 bit (AMD64)]",
+    "machine_name": null,
+    "cpu_info": null,
+    "gpu_info": null,
+    "schema_version": "2.0"
+  },
+  "environment": null,
+  "events": [
+    {
+      "id": 1,
+      "timestamp_ms": 7276,
+      "wall_time": "2026-04-26T10:49:22.112235+00:00",
+      "payload": {
+        "type": "process_launch",
+        "executable": "chrome.exe",
+        "arguments": [],
+        "wait_for_window_title": "Chrome"
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 2,
+      "timestamp_ms": 10005,
+      "wall_time": "2026-04-26T10:49:24.845670+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1610,
+        "y": 200,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": null,
+          "name": null,
+          "control_type": "Pane",
+          "class_name": "Chrome_WidgetWin_1",
+          "window_title": "New Tab - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": null,
+          "bbox": {
+            "left": 0,
+            "top": 121,
+            "right": 1536,
+            "bottom": 816
+          },
+          "screen_x": 1610,
+          "screen_y": 200,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "class_name",
+              "value": "Chrome_WidgetWin_1",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 0,
+                "top": 121,
+                "right": 1536,
+                "bottom": 816
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.7,
+          "confidence_reason": "class_name",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 0,
+            "top": 151,
+            "right": 1920,
+            "bottom": 1020
+          },
+          "element_hash": "4ac6db227de4394e",
+          "element_role": "container",
+          "confidence_level": "low",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 9,
+            "y": 160,
+            "w": 1920,
+            "h": 869,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 1,
+            "w": 1920,
+            "h": 869
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 3,
+      "timestamp_ms": 10270,
+      "wall_time": "2026-04-26T10:49:25.109637+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200564847.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 4,
+      "timestamp_ms": 17306,
+      "wall_time": "2026-04-26T10:49:32.146251+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 115,
+        "y": 277,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": null,
+          "name": "Compose",
+          "control_type": "Button",
+          "class_name": "T-I T-I-KE L3",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": {
+            "xpath": "/html/body/div[6]/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]",
+            "css_selector": "div.nH:nth-of-type(3) > div.nH > div.nH.aqk:nth-of-type(2) > div.aeN.WR > div.aic > div.z0 > div.T-I.T-I-KE",
+            "aria_label": null,
+            "aria_role": "button",
+            "inner_text": "Compose",
+            "tag_name": "div",
+            "element_id": null,
+            "name_attr": null,
+            "placeholder": null,
+            "href": null,
+            "frame_xpath": null,
+            "tab_url": "chrome://newtab/"
+          },
+          "bbox": {
+            "left": 8,
+            "top": 193,
+            "right": 153,
+            "bottom": 249
+          },
+          "screen_x": 115,
+          "screen_y": 277,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:",
+            "GroupBox:",
+            "GroupBox:",
+            "Document:Inbox (331) - harishkrishna728:RootWebArea",
+            "Pane:"
+          ],
+          "selectors": [
+            {
+              "type": "xpath",
+              "value": "/html/body/div[6]/div[3]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Compose",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "T-I T-I-KE L3",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 8,
+                "top": 193,
+                "right": 153,
+                "bottom": 249
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.85,
+          "confidence_reason": "name_type",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 10,
+            "top": 241,
+            "right": 191,
+            "bottom": 311
+          },
+          "element_hash": "adbd01317eac9f30",
+          "element_role": "button",
+          "confidence_level": "medium",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 19,
+            "y": 250,
+            "w": 181,
+            "h": 70,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 10,
+            "y": 10,
+            "w": 181,
+            "h": 70
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 5,
+      "timestamp_ms": 17546,
+      "wall_time": "2026-04-26T10:49:32.385682+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200572148.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 6,
+      "timestamp_ms": 22112,
+      "wall_time": "2026-04-26T10:49:36.951573+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1258,
+        "y": 466,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": ":uc",
+          "name": "To recipients",
+          "control_type": "ComboBox",
+          "class_name": "agP aFw",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": {
+            "xpath": "//*[@id=\":qj\"]",
+            "css_selector": "#:qj",
+            "aria_label": null,
+            "aria_role": null,
+            "inner_text": null,
+            "tag_name": "div",
+            "element_id": ":qj",
+            "name_attr": null,
+            "placeholder": null,
+            "href": null,
+            "frame_xpath": null,
+            "tab_url": "chrome://newtab/"
+          },
+          "bbox": {
+            "left": 982,
+            "top": 356,
+            "right": 1407,
+            "bottom": 392
+          },
+          "screen_x": 1258,
+          "screen_y": 466,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Search Field",
+            "GroupBox:",
+            "GroupBox:To::r1",
+            "GroupBox:To Add Cc recipients ‪(Ctrl-Sh",
+            "GroupBox:",
+            "GroupBox:::o9",
+            "GroupBox:New Message::pl",
+            "Dialog:Compose: New Message"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": ":uc",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "xpath",
+              "value": "//*[@id=\":qj\"]",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "To recipients",
+                "type": "ComboBox"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "agP aFw",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 982,
+                "top": 356,
+                "right": 1407,
+                "bottom": 392
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 1227,
+            "top": 445,
+            "right": 1759,
+            "bottom": 490
+          },
+          "element_hash": "554ab3d8a7e83c98",
+          "element_role": "dropdown",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1236,
+            "y": 454,
+            "w": 532,
+            "h": 45,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 5,
+            "y": 0,
+            "w": 532,
+            "h": 45
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 7,
+      "timestamp_ms": 22317,
+      "wall_time": "2026-04-26T10:49:37.156232+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200576954.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 8,
+      "timestamp_ms": 23990,
+      "wall_time": "2026-04-26T10:49:38.829930+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "hari",
+        "target": {
+          "backend": "browser",
+          "automation_id": ":uc",
+          "name": "To recipients",
+          "control_type": "ComboBox",
+          "class_name": "agP aFw",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": {
+            "xpath": "//*[@id=\":qj\"]",
+            "css_selector": "#:qj",
+            "aria_label": null,
+            "aria_role": null,
+            "inner_text": null,
+            "tag_name": "div",
+            "element_id": ":qj",
+            "name_attr": null,
+            "placeholder": null,
+            "href": null,
+            "frame_xpath": null,
+            "tab_url": "chrome://newtab/"
+          },
+          "bbox": {
+            "left": 982,
+            "top": 356,
+            "right": 1407,
+            "bottom": 392
+          },
+          "screen_x": 1258,
+          "screen_y": 466,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:Search Field",
+            "GroupBox:",
+            "GroupBox:To::r1",
+            "GroupBox:To Add Cc recipients ‪(Ctrl-Sh",
+            "GroupBox:",
+            "GroupBox:::o9",
+            "GroupBox:New Message::pl",
+            "Dialog:Compose: New Message"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": ":uc",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "xpath",
+              "value": "//*[@id=\":qj\"]",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "To recipients",
+                "type": "ComboBox"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "agP aFw",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 982,
+                "top": 356,
+                "right": 1407,
+                "bottom": 392
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 1227,
+            "top": 445,
+            "right": 1759,
+            "bottom": 490
+          },
+          "element_hash": "554ab3d8a7e83c98",
+          "element_role": "dropdown",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1236,
+            "y": 454,
+            "w": 532,
+            "h": 45,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 5,
+            "y": 0,
+            "w": 532,
+            "h": 45
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 9,
+      "timestamp_ms": 25404,
+      "wall_time": "2026-04-26T10:49:40.244271+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1388,
+        "y": 511,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": ":vs",
+          "name": "harishfree777@gmail.com harishfree777@gmail.com",
+          "control_type": "ListItem",
+          "class_name": "agJ aFw bjE",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": {
+            "xpath": "//*[@id=\":rz\"]",
+            "css_selector": "#:rz",
+            "aria_label": "Message Body",
+            "aria_role": "textbox",
+            "inner_text": null,
+            "tag_name": "div",
+            "element_id": ":rz",
+            "name_attr": null,
+            "placeholder": null,
+            "href": null,
+            "frame_xpath": null,
+            "tab_url": "chrome://newtab/"
+          },
+          "bbox": {
+            "left": 982,
+            "top": 400,
+            "right": 1402,
+            "bottom": 452
+          },
+          "screen_x": 1388,
+          "screen_y": 511,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "ListBox:::vr",
+            "GroupBox:",
+            "ListItem:harishfree777@gmail.comharishf::vp",
+            "ListBox:hari::ud",
+            "GroupBox:",
+            "GroupBox:",
+            "GroupBox:",
+            "Document:Inbox (331) - harishkrishna728:RootWebArea"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": ":vs",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "xpath",
+              "value": "//*[@id=\":rz\"]",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "harishfree777@gmail.com harishfree777@gmail.com",
+                "type": "ListItem"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "agJ aFw bjE",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 982,
+                "top": 400,
+                "right": 1402,
+                "bottom": 452
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 0,
+                        "top": 0,
+                        "right": 0,
+                        "bottom": 0,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1388,
+                        "y": 511
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "python.exe",
+              "window_title": null,
+              "semantic_role": "list",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.3125,
+              "screen_x": 1388,
+              "screen_y": 511,
+              "selector_version": "2.3",
+              "recorded_at": 1777200580.2366788,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "fbd33f1dbdfbf8e4",
+              "element_role": "list",
+              "confidence_level": "low",
+              "visibility_score": "hidden",
+              "window_handle": null,
+              "raw_bbox": {
+                "left": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 0,
+                "h": 0,
+                "win_w": 0,
+                "win_h": 0
+              },
+              "relative_to_parent": null
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1227,
+            "top": 500,
+            "right": 1753,
+            "bottom": 565
+          },
+          "element_hash": "2edb7b9f17fdf2fc",
+          "element_role": "list",
+          "confidence_level": "high",
+          "visibility_score": "hidden",
+          "is_active_window": true,
+          "relative_to_window": null,
+          "relative_to_parent": null
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 10,
+      "timestamp_ms": 25625,
+      "wall_time": "2026-04-26T10:49:40.464509+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200580246.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 11,
+      "timestamp_ms": 28597,
+      "wall_time": "2026-04-26T10:49:43.432748+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1312,
+        "y": 582,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": ":rz",
+          "name": "\n",
+          "control_type": "Edit",
+          "class_name": "Am aiL Al editable LW-avf tS-tW",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": {
+            "xpath": "//*[@id=\":rz\"]",
+            "css_selector": "#:rz",
+            "aria_label": "Message Body",
+            "aria_role": "textbox",
+            "inner_text": null,
+            "tag_name": "div",
+            "element_id": ":rz",
+            "name_attr": null,
+            "placeholder": null,
+            "href": null,
+            "frame_xpath": null,
+            "tab_url": "chrome://newtab/"
+          },
+          "bbox": {
+            "left": 957,
+            "top": 444,
+            "right": 1459,
+            "bottom": 746
+          },
+          "screen_x": 1312,
+          "screen_y": 582,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:  ",
+            "GroupBox:",
+            "GroupBox:::oa",
+            "GroupBox:::ob",
+            "GroupBox:  ::o8",
+            "GroupBox:New Message::pl",
+            "Dialog:Compose: Draft saved"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": ":rz",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "xpath",
+              "value": "//*[@id=\":rz\"]",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "\n",
+                "type": "Edit"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "Am aiL Al editable LW-avf tS-tW",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 957,
+                "top": 444,
+                "right": 1459,
+                "bottom": 746
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 1196,
+            "top": 555,
+            "right": 1824,
+            "bottom": 933
+          },
+          "element_hash": "b0dd5d6350b26109",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1205,
+            "y": 564,
+            "w": 628,
+            "h": 378,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 13,
+            "w": 628,
+            "h": 378
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 12,
+      "timestamp_ms": 28813,
+      "wall_time": "2026-04-26T10:49:43.652446+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200583439.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 13,
+      "timestamp_ms": 32832,
+      "wall_time": "2026-04-26T10:49:47.670668+00:00",
+      "payload": {
+        "type": "type_text",
+        "text": "Hi Testing",
+        "target": {
+          "backend": "browser",
+          "automation_id": ":rz",
+          "name": "\n",
+          "control_type": "Edit",
+          "class_name": "Am aiL Al editable LW-avf tS-tW",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": {
+            "xpath": "//*[@id=\":rz\"]",
+            "css_selector": "#:rz",
+            "aria_label": "Message Body",
+            "aria_role": "textbox",
+            "inner_text": null,
+            "tag_name": "div",
+            "element_id": ":rz",
+            "name_attr": null,
+            "placeholder": null,
+            "href": null,
+            "frame_xpath": null,
+            "tab_url": "chrome://newtab/"
+          },
+          "bbox": {
+            "left": 957,
+            "top": 444,
+            "right": 1459,
+            "bottom": 746
+          },
+          "screen_x": 1312,
+          "screen_y": 582,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:  ",
+            "GroupBox:",
+            "GroupBox:::oa",
+            "GroupBox:::ob",
+            "GroupBox:  ::o8",
+            "GroupBox:New Message::pl",
+            "Dialog:Compose: Draft saved"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": ":rz",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "xpath",
+              "value": "//*[@id=\":rz\"]",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "\n",
+                "type": "Edit"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "Am aiL Al editable LW-avf tS-tW",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 957,
+                "top": 444,
+                "right": 1459,
+                "bottom": 746
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 1196,
+            "top": 555,
+            "right": 1824,
+            "bottom": 933
+          },
+          "element_hash": "b0dd5d6350b26109",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1205,
+            "y": 564,
+            "w": 628,
+            "h": 378,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 13,
+            "w": 628,
+            "h": 378
+          }
+        },
+        "clear_first": false,
+        "method": "keys",
+        "cell_ref": null,
+        "sheet_name": null,
+        "force_plain_text": false
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 14,
+      "timestamp_ms": 34461,
+      "wall_time": "2026-04-26T10:49:49.300116+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1240,
+        "y": 981,
+        "button": "left",
+        "target": {
+          "backend": "browser",
+          "automation_id": ":q7",
+          "name": "Send ‪(Ctrl-Enter)‬",
+          "control_type": "Button",
+          "class_name": "T-I J-J5-Ji aoO v7 T-I-atl L3 T-I-JW T-I-Je T-I-JO T-I-Zf-aw2",
+          "window_title": "Inbox (331) - harishkrishna728@gmail.com - Gmail - Google Chrome",
+          "process_name": "chrome.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 199748,
+          "browser": null,
+          "bbox": {
+            "left": 957,
+            "top": 766,
+            "right": 1030,
+            "bottom": 803
+          },
+          "screen_x": 1240,
+          "screen_y": 981,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "GroupBox:::q5",
+            "GroupBox:New Message::pl",
+            "Dialog:Compose: New Message"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": ":q7",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Send ‪(Ctrl-Enter)‬",
+                "type": "Button"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "class_name",
+              "value": "T-I J-J5-Ji aoO v7 T-I-atl L3 T-I-JW T-I-Je T-I-JO T-I-Zf-aw2",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 957,
+                "top": 766,
+                "right": 1030,
+                "bottom": 803
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 0,
+                        "top": 0,
+                        "right": 0,
+                        "bottom": 0,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1240,
+                        "y": 981
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "python.exe",
+              "window_title": null,
+              "semantic_role": "button",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.3125,
+              "screen_x": 1240,
+              "screen_y": 981,
+              "selector_version": "2.3",
+              "recorded_at": 1777200589.300116,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "a0d71a1e271ae094",
+              "element_role": "button",
+              "confidence_level": "low",
+              "visibility_score": "hidden",
+              "window_handle": null,
+              "raw_bbox": {
+                "left": 0,
+                "top": 0,
+                "right": 0,
+                "bottom": 0
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 0,
+                "h": 0,
+                "win_w": 0,
+                "win_h": 0
+              },
+              "relative_to_parent": null
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 1196,
+            "top": 958,
+            "right": 1287,
+            "bottom": 1004
+          },
+          "element_hash": "4ed35cb849c897e8",
+          "element_role": "button",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 1205,
+            "y": 967,
+            "w": 91,
+            "h": 46,
+            "win_w": 1938,
+            "win_h": 1038
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 13,
+            "w": 91,
+            "h": 46
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 15,
+      "timestamp_ms": 34687,
+      "wall_time": "2026-04-26T10:49:49.525797+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200589302.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 16,
+      "timestamp_ms": 38368,
+      "wall_time": "2026-04-26T10:49:53.207159+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 1426,
+        "y": 954,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": null,
+          "name": null,
+          "control_type": "Pane",
+          "class_name": "Windows.UI.Input.InputSite.WindowClass",
+          "window_title": null,
+          "process_name": "explorer.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 131770,
+          "browser": null,
+          "bbox": {
+            "left": 0,
+            "top": 0,
+            "right": 1229,
+            "bottom": 691
+          },
+          "screen_x": 1426,
+          "screen_y": 954,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:"
+          ],
+          "selectors": [
+            {
+              "type": "class_name",
+              "value": "Windows.UI.Input.InputSite.WindowClass",
+              "priority": 3,
+              "confidence": 0.7
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 0,
+                "top": 0,
+                "right": 1229,
+                "bottom": 691
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Pane",
+                      "score": 60
+                    },
+                    {
+                      "name": "class_name",
+                      "value": "Windows.UI.Input.InputSite.WindowClass",
+                      "score": 40
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 135,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 0,
+                        "top": 0,
+                        "right": 1229,
+                        "bottom": 691,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 1426,
+                        "y": 954
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "explorer.exe",
+              "window_title": null,
+              "semantic_role": "pane",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 0.5625,
+              "screen_x": 1426,
+              "screen_y": 954,
+              "selector_version": "2.3",
+              "recorded_at": 1777200593.197472,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "2190c7693835a40e",
+              "element_role": "container",
+              "confidence_level": "low",
+              "visibility_score": "full",
+              "window_handle": 131770,
+              "raw_bbox": {
+                "left": 0,
+                "top": 0,
+                "right": 1536,
+                "bottom": 864
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1536,
+                "h": 864,
+                "win_w": 1920,
+                "win_h": 1080
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1536,
+                "h": 864
+              }
+            }
+          ],
+          "confidence_score": 0.7,
+          "confidence_reason": "class_name",
+          "is_editable": false,
+          "raw_bbox": {
+            "left": 0,
+            "top": 0,
+            "right": 1536,
+            "bottom": 864
+          },
+          "element_hash": "2190c7693835a40e",
+          "element_role": "container",
+          "confidence_level": "low",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1536,
+            "h": 864,
+            "win_w": 1920,
+            "win_h": 1080
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1536,
+            "h": 864
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 17,
+      "timestamp_ms": 40886,
+      "wall_time": "2026-04-26T10:49:55.724110+00:00",
+      "payload": {
+        "type": "mouse_click",
+        "x": 841,
+        "y": 739,
+        "button": "left",
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2886380,
+          "browser": null,
+          "bbox": {
+            "left": 102,
+            "top": 102,
+            "right": 998,
+            "bottom": 620
+          },
+          "screen_x": 841,
+          "screen_y": 739,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 102,
+                "top": 102,
+                "right": 998,
+                "bottom": 620
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 102,
+                        "top": 102,
+                        "right": 998,
+                        "bottom": 620,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 841,
+                        "y": 739
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 841,
+              "screen_y": 739,
+              "selector_version": "2.3",
+              "recorded_at": 1777200595.2693098,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2886380,
+              "raw_bbox": {
+                "left": 128,
+                "top": 128,
+                "right": 1247,
+                "bottom": 775
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1247,
+            "bottom": 775
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 18,
+      "timestamp_ms": 40892,
+      "wall_time": "2026-04-26T10:49:55.727050+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2886380,
+          "browser": null,
+          "bbox": {
+            "left": 102,
+            "top": 102,
+            "right": 998,
+            "bottom": 620
+          },
+          "screen_x": 841,
+          "screen_y": 739,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 102,
+                "top": 102,
+                "right": 998,
+                "bottom": 620
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 102,
+                        "top": 102,
+                        "right": 998,
+                        "bottom": 620,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 841,
+                        "y": 739
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 841,
+              "screen_y": 739,
+              "selector_version": "2.3",
+              "recorded_at": 1777200595.2693098,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2886380,
+              "raw_bbox": {
+                "left": 128,
+                "top": 128,
+                "right": 1247,
+                "bottom": 775
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1247,
+            "bottom": 775
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 19,
+      "timestamp_ms": 41144,
+      "wall_time": "2026-04-26T10:49:55.983036+00:00",
+      "payload": {
+        "type": "screenshot_checkpoint",
+        "path": "screen_1777200595727.png",
+        "monitor_index": 0,
+        "label": null
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    },
+    {
+      "id": 20,
+      "timestamp_ms": 41548,
+      "wall_time": "2026-04-26T10:49:56.386910+00:00",
+      "payload": {
+        "type": "key_combo",
+        "keys": [
+          "ctrl",
+          "\u0003"
+        ],
+        "target": {
+          "backend": "uia",
+          "automation_id": "Text Area",
+          "name": "Text Area",
+          "control_type": "Document",
+          "class_name": null,
+          "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+          "process_name": "conhost.exe",
+          "framework_id": null,
+          "process_id": null,
+          "window_handle": 2886380,
+          "browser": null,
+          "bbox": {
+            "left": 102,
+            "top": 102,
+            "right": 998,
+            "bottom": 620
+          },
+          "screen_x": 841,
+          "screen_y": 739,
+          "monitor_index": 0,
+          "dpi_scale": 1.25,
+          "screenshot_ref": null,
+          "image_hash": null,
+          "template_path": null,
+          "ocr_text": null,
+          "ancestor_chain": [
+            "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+          ],
+          "selectors": [
+            {
+              "type": "automation_id",
+              "value": "Text Area",
+              "priority": 1,
+              "confidence": 0.95
+            },
+            {
+              "type": "name_type",
+              "value": {
+                "name": "Text Area",
+                "type": "Document"
+              },
+              "priority": 2,
+              "confidence": 0.85
+            },
+            {
+              "type": "bbox",
+              "value": {
+                "left": 102,
+                "top": 102,
+                "right": 998,
+                "bottom": 620
+              },
+              "priority": 5,
+              "confidence": 0.5
+            }
+          ],
+          "rich_selectors": [
+            {
+              "strategies": [
+                {
+                  "name": "strict",
+                  "attributes": [
+                    {
+                      "name": "automation_id",
+                      "value": "Text Area",
+                      "score": 100
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 150,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "semantic",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    },
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "window_title",
+                      "value": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+                      "score": 50
+                    }
+                  ],
+                  "total_score": 190,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "relaxed",
+                  "attributes": [
+                    {
+                      "name": "name",
+                      "value": "Text Area",
+                      "score": 80
+                    }
+                  ],
+                  "total_score": 80,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "ancestor",
+                  "attributes": [
+                    {
+                      "name": "control_type",
+                      "value": "Document",
+                      "score": 60
+                    },
+                    {
+                      "name": "ancestor_chain",
+                      "value": [
+                        "Dialog:Select C:\\Users\\GIRISH\\OneDriv:Console Window"
+                      ],
+                      "score": 35
+                    }
+                  ],
+                  "total_score": 95,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                },
+                {
+                  "name": "positional",
+                  "attributes": [
+                    {
+                      "name": "bbox",
+                      "value": {
+                        "left": 102,
+                        "top": 102,
+                        "right": 998,
+                        "bottom": 620,
+                        "dpi": 1.25
+                      },
+                      "score": 10
+                    },
+                    {
+                      "name": "screen_coord",
+                      "value": {
+                        "x": 841,
+                        "y": 739
+                      },
+                      "score": 5
+                    }
+                  ],
+                  "total_score": 15,
+                  "backend": "uia",
+                  "successes": 0,
+                  "failures": 0,
+                  "_score_boost": 0.0
+                }
+              ],
+              "process_name": "conhost.exe",
+              "window_title": "Select C:\\Users\\GIRISH\\OneDrive\\Documents\\rpa-automation-tool\\venv\\Scripts\\python.exe",
+              "semantic_role": "input",
+              "is_editable": false,
+              "is_clickable": true,
+              "confidence": 1.0,
+              "screen_x": 841,
+              "screen_y": 739,
+              "selector_version": "2.3",
+              "recorded_at": 1777200595.2693098,
+              "last_used_at": null,
+              "replay_successes": 0,
+              "replay_failures": 0,
+              "last_strategy_used": null,
+              "anchor_elements": [],
+              "element_hash": "c73a21d8a41e9e29",
+              "element_role": "input",
+              "confidence_level": "high",
+              "visibility_score": "full",
+              "window_handle": 2886380,
+              "raw_bbox": {
+                "left": 128,
+                "top": 128,
+                "right": 1247,
+                "bottom": 775
+              },
+              "relative_to_window": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647,
+                "win_w": 1119,
+                "win_h": 647
+              },
+              "relative_to_parent": {
+                "x": 0,
+                "y": 0,
+                "w": 1119,
+                "h": 647
+              }
+            }
+          ],
+          "confidence_score": 0.95,
+          "confidence_reason": "automation_id",
+          "is_editable": true,
+          "raw_bbox": {
+            "left": 128,
+            "top": 128,
+            "right": 1247,
+            "bottom": 775
+          },
+          "element_hash": "c73a21d8a41e9e29",
+          "element_role": "input",
+          "confidence_level": "high",
+          "visibility_score": "full",
+          "is_active_window": true,
+          "relative_to_window": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647,
+            "win_w": 1119,
+            "win_h": 647
+          },
+          "relative_to_parent": {
+            "x": 0,
+            "y": 0,
+            "w": 1119,
+            "h": 647
+          }
+        }
+      },
+      "note": null,
+      "intent": "system",
+      "action_group": null
+    }
+  ],
+  "replay_history": [],
+  "session_settings": {
+    "screenshot_on_click": true,
+    "capture_scroll_events": true,
+    "replay_mode": "adaptive",
+    "failure_strategy": "retry",
+    "max_retries": 2,
+    "retry_interval_ms": 500,
+    "default_timeout_ms": 5000,
+    "use_ocr_fallback": true,
+    "use_image_fallback": true,
+    "use_bbox_fallback": true,
+    "speed_factor": 1.0
+  },
+  "stats": {
+    "total_events": 20,
+    "click_count": 0,
+    "typing_count": 0,
+    "scroll_count": 0,
+    "error_count": 0,
+    "avg_event_interval_ms": null
+  },
+  "screenshot_on_click": true,
+  "capture_scroll_events": true
+}

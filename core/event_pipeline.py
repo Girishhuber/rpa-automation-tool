@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import queue
@@ -72,9 +71,6 @@ def _target_summary(target: Optional[UITarget]) -> str:
             parts.append(f"text='{bt.inner_text[:30]}'")
     return " | ".join(parts) if parts else "(unknown)"
 
-
-# ── Pipeline ───────────────────────────────────────────────────────────────
-
 _SENTINEL = object()   # signals worker to stop
 
 
@@ -101,6 +97,9 @@ class EventPipeline:
         self._worker_thread: Optional[threading.Thread] = None
         self._running = False
 
+        # Overflow metrics
+        self._overflow_drops: int = 0
+
         # Scroll accumulation (worker-thread only — no lock needed)
         self._pending_scroll: Optional[dict] = None
         self._last_scroll_ms: int = 0
@@ -120,15 +119,18 @@ class EventPipeline:
         logger.info("[PIPELINE] Started — session clock reset")
 
     def stop(self) -> None:
-        """Flush pending scroll, drain queue, stop worker, wait for join."""
+
         self._running = False
-        # Send sentinel so worker exits its blocking get()
+       
         try:
             self._q.put_nowait(_SENTINEL)
         except queue.Full:
             pass
         if self._worker_thread:
             self._worker_thread.join(timeout=5.0)
+        if self._overflow_drops:
+            logger.warning("[PIPELINE] {} events were dropped due to queue overflow during session.",
+                           self._overflow_drops)
         logger.info("[PIPELINE] Stopped — {} events emitted", self._event_id)
 
     # ── Public emit API (called from hook threads) ─────────────────────────
@@ -181,9 +183,16 @@ class EventPipeline:
         try:
             self._q.put_nowait(msg)
         except queue.Full:
-            # Back-pressure: drop the oldest message and retry
+            # Back-pressure: drop the oldest message, log the overflow, and retry once.
             try:
                 self._q.get_nowait()
+                self._overflow_drops += 1
+                if self._overflow_drops % 10 == 1:   # log every 10th drop to avoid spam
+                    logger.warning(
+                        "[PIPELINE] Queue overflow — {} events dropped so far "
+                        "(QUEUE_MAX={}). Consider raising QUEUE_MAX or slowing input.",
+                        self._overflow_drops, self.QUEUE_MAX,
+                    )
             except queue.Empty:
                 pass
             try:
@@ -289,8 +298,6 @@ class EventPipeline:
         self._emit_direct(MouseScrollEvent(
             x=s["x"], y=s["y"], dx=s["dx"], dy=s["dy"], target=s["target"]
         ))
-
-    # ── Core emitter (worker-thread only) ─────────────────────────────────
 
     def _emit_direct(self, payload) -> None:
         """Build Event, log it, call consumer. Runs only in worker thread."""

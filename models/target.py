@@ -153,9 +153,19 @@ class UITarget(BaseModel):
         # Browser
         if self.browser:
             if self.browser.xpath:
-                selectors.append(Selector("xpath", self.browser.xpath, 1, 0.95))
+                selectors.append(Selector(
+                    type="xpath",
+                    value=self.browser.xpath,
+                    priority=1,
+                    confidence=0.95,
+                ))
             elif self.browser.css_selector:
-                selectors.append(Selector("css", self.browser.css_selector, 2, 0.85))
+                selectors.append(Selector(
+                    type="css",
+                    value=self.browser.css_selector,
+                    priority=2,
+                    confidence=0.85,
+                ))
 
         # Geometry fallback
         if self.bbox:

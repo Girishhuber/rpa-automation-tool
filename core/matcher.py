@@ -654,9 +654,51 @@ class ElementMatcher:
                 candidates.sort(key=lambda c: priority.get(c.strategy, 9))
                 best = candidates[0]
 
+        # If element is invisible or at (0,0) — likely an off-screen/async-loading element.
+        # Wait up to 3s for it to become visible (e.g. Gmail compose body loads in an iframe).
+        if not best.visible or (best.cx == 0 and best.cy == 0):
+            logger.info(
+                "[MATCH] Event #{} browser element not yet visible (pos=({},{}) visible={}) — waiting",
+                event_id, best.cx, best.cy, best.visible,
+            )
+            deadline = time.time() + 3.0
+            while time.time() < deadline:
+                time.sleep(0.3)
+                retry_c = self._browser.find_candidates(bt, timeout_ms=2000)
+                if retry_c:
+                    rc = retry_c[0]
+                    if rc.visible and not (rc.cx == 0 and rc.cy == 0):
+                        best = rc
+                        logger.info(
+                            "[MATCH] Event #{} browser element now visible pos=({},{}) strategy={}",
+                            event_id, best.cx, best.cy, best.strategy,
+                        )
+                        break
+            else:
+                logger.warning(
+                    "[MATCH] Event #{} browser element still not visible after wait — "
+                    "using recorded screen coords as fallback",
+                    event_id,
+                )
+                # Return the recorded coords from the target (screen coords stored at record time)
+                # Let _do_click fall back to raw coords rather than clicking at (-9,230)
+                raise ElementNotFoundError(
+                    f"Event #{event_id}: browser element found but not visible/reachable",
+                    event_id,
+                )
+
         verification = self._browser.verify_element(bt)
         if not verification.get("found"):
-            logger.warning("[MATCH] Event #{} browser element stale — using coords", event_id)
+            logger.warning("[MATCH] Event #{} browser element stale — retrying query", event_id)
+            # One more attempt after DOM settle before giving up
+            self._browser.wait_for_dom_stable(stable_ms=300, max_wait_ms=2000)
+            retry_candidates = self._browser.find_candidates(bt, timeout_ms=4000)
+            if retry_candidates:
+                best = retry_candidates[0]
+                logger.info("[MATCH] Event #{} browser stale retry succeeded strategy={} pos=({},{})",
+                            event_id, best.strategy, best.cx, best.cy)
+            else:
+                logger.warning("[MATCH] Event #{} browser stale retry failed — using original coords", event_id)
 
         logger.info(
             "[MATCH] Event #{} BROWSER → strategy={} score={:.0f} pos=({},{}) visible={} text='{}'",

@@ -1,16 +1,3 @@
-"""
-BrowserBridge — CDP bridge with full reliability + structured debug logging.
-
-New in this version:
-  - find_candidates(): returns top-3 scored matches (not just first)
-  - verify_element(): re-checks text/tag/role before returning coords
-  - wait_for_dom_stable(): waits until no DOM mutations for ~300ms
-  - Detailed [BROWSER] log prefix on every action for debugging
-  - Viewport offset recomputed periodically (handles resize/move)
-  - Shadow DOM + iframe traversal retained
-  - Human-like typing retained
-"""
-
 from __future__ import annotations
 import json
 import queue
@@ -103,14 +90,18 @@ _JS_FIND_CANDIDATES = """\
 (function(xp, css, aria, txt, tagHint) {
   var candidates = [];
 
-  function tryEl(el, strategy, baseScore) {
+  function tryEl(el, strategy, baseScore, iframeOffsetX, iframeOffsetY) {
     if (!el) return;
-    el.scrollIntoView({behavior: 'instant', block: 'center'});
+    var ox = iframeOffsetX || 0;
+    var oy = iframeOffsetY || 0;
+    // Scroll into view so getBoundingClientRect returns real coords, not (0,0)
+    try { el.scrollIntoView({behavior: 'instant', block: 'nearest'}); } catch(e) {}
     var rc = el.getBoundingClientRect();
     var visible = rc.width > 0 && rc.height > 0;
+    var cx = Math.round(rc.left + rc.width/2 + ox);
+    var cy = Math.round(rc.top  + rc.height/2 + oy);
     candidates.push({
-      cx: Math.round(rc.left + rc.width/2),
-      cy: Math.round(rc.top + rc.height/2),
+      cx: cx, cy: cy,
       score: baseScore - (visible ? 0 : 20),
       strategy: strategy,
       tag: el.tagName.toLowerCase(),
@@ -119,14 +110,16 @@ _JS_FIND_CANDIDATES = """\
     });
   }
 
-  function searchIn(root, depth) {
+  function searchIn(root, depth, iframeOffsetX, iframeOffsetY) {
     if (depth > 4) return;
+    var ox = iframeOffsetX || 0;
+    var oy = iframeOffsetY || 0;
     // XPath
-    if (xp) { try { var r = root.evaluate(xp, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null); tryEl(r.singleNodeValue, 'xpath', 90); } catch(e){} }
+    if (xp) { try { var r = root.evaluate(xp, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null); tryEl(r.singleNodeValue, 'xpath', 90, ox, oy); } catch(e){} }
     // CSS
-    if (css) { try { tryEl(root.querySelector(css), 'css', 85); } catch(e){} }
+    if (css) { try { tryEl(root.querySelector(css), 'css', 85, ox, oy); } catch(e){} }
     // ARIA
-    if (aria) { try { tryEl(root.querySelector('[aria-label="'+aria+'"]'), 'aria', 80); } catch(e){} }
+    if (aria) { try { tryEl(root.querySelector('[aria-label="'+aria+'"]'), 'aria', 80, ox, oy); } catch(e){} }
     // Text match
     if (txt) {
       var tag = tagHint || '*';
@@ -135,8 +128,8 @@ _JS_FIND_CANDIDATES = """\
         var all = root.querySelectorAll(selector);
         for (var i = 0; i < all.length && candidates.length < 5; i++) {
           var t = (all[i].innerText || all[i].textContent || '').trim();
-          if (t === txt) { tryEl(all[i], 'exact_text', 75); }
-          else if (t.indexOf(txt) !== -1) { tryEl(all[i], 'partial_text', 55); }
+          if (t === txt) { tryEl(all[i], 'exact_text', 75, ox, oy); }
+          else if (txt.length > 3 && t.indexOf(txt) !== -1) { tryEl(all[i], 'partial_text', 55, ox, oy); }
         }
       } catch(e) {}
     }
@@ -144,20 +137,35 @@ _JS_FIND_CANDIDATES = """\
     try {
       var hosts = root.querySelectorAll ? root.querySelectorAll('*') : [];
       for (var j = 0; j < hosts.length; j++) {
-        if (hosts[j].shadowRoot) searchIn(hosts[j].shadowRoot, depth + 1);
+        if (hosts[j].shadowRoot) searchIn(hosts[j].shadowRoot, depth + 1, ox, oy);
       }
     } catch(e) {}
   }
 
-  searchIn(document, 0);
+  searchIn(document, 0, 0, 0);
 
-  // Search iframes
-  try {
-    var frames = document.querySelectorAll('iframe');
-    for (var f = 0; f < frames.length; f++) {
-      try { searchIn(frames[f].contentDocument, 0); } catch(e) {}
-    }
-  } catch(e) {}
+  // Recursively search ALL iframes at every nesting level (handles Gmail compose
+  // which injects compose windows as deeply nested dynamic iframes)
+  function searchAllFrames(doc, depth, ox, oy) {
+    if (depth > 5) return;
+    try {
+      var frames = doc.querySelectorAll('iframe');
+      for (var f = 0; f < frames.length; f++) {
+        try {
+          var cd = frames[f].contentDocument;
+          if (!cd) continue;
+          var frameRect = frames[f].getBoundingClientRect();
+          // Accumulate offset: this iframe's position + parent offsets
+          var fx = ox + frameRect.left;
+          var fy = oy + frameRect.top;
+          searchIn(cd, 0, fx, fy);
+          // Recurse into child iframes
+          searchAllFrames(cd, depth + 1, fx, fy);
+        } catch(e) {}
+      }
+    } catch(e) {}
+  }
+  searchAllFrames(document, 0, 0, 0);
 
   // Sort by score desc, deduplicate by cx+cy
   candidates.sort(function(a, b) { return b.score - a.score; });
@@ -191,22 +199,14 @@ _JS_SET_VALUE = """\
   return true;
 })"""
 
-# DOM mutation observer — resolves when no mutations for stable_ms
+# DOM stability check — synchronous poll of mutation count, no Promise, no CDP hang
 _JS_WAIT_DOM_STABLE = """\
 (function(stableMs) {
-  return new Promise(function(resolve) {
-    var timer = null;
-    var reset = function() {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(function() { observer.disconnect(); resolve(true); }, stableMs);
-    };
-    var observer = new MutationObserver(reset);
-    observer.observe(document.body || document.documentElement, {
-      childList: true, subtree: true, attributes: true
-    });
-    reset();
-    setTimeout(function() { observer.disconnect(); resolve(true); }, stableMs * 10);
-  });
+  /* Synchronous version: accept 'complete' or 'interactive' as stable.
+     SPAs (like Gmail) often stay at 'interactive' indefinitely after initial load.
+     We accept either state rather than waiting for 'complete' which may never come. */
+  var state = document.readyState;
+  return state === 'complete' || state === 'interactive';
 })"""
 
 _JS_VALIDATE_ELEMENT = """\
@@ -342,6 +342,32 @@ class BrowserBridge:
                      sx, sy, vx, vy, off["x"], off["y"])
         return vx, vy
 
+    def viewport_to_screen(self, vx: int, vy: int) -> tuple[int, int]:
+        """Convert CDP viewport coordinates back to screen coordinates.
+        Uses cached offset if available; falls back to a fresh offset computation
+        using the current foreground window rect."""
+        if self._vp_offset:
+            off = self._vp_offset
+        else:
+            # Best-effort: try to get the window rect from the active Chrome window
+            try:
+                import ctypes, ctypes.wintypes
+                hwnd = ctypes.windll.user32.GetForegroundWindow()
+                rect = ctypes.wintypes.RECT()
+                ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect))
+                win_rect = {
+                    "left": rect.left, "top": rect.top,
+                    "width": rect.right - rect.left, "height": rect.bottom - rect.top,
+                }
+                off = self._get_viewport_offset(win_rect)
+            except Exception:
+                off = {"x": 0, "y": 0}
+        sx = vx + off["x"]
+        sy = vy + off["y"]
+        logger.debug("[BROWSER] viewport({},{}) → screen({},{}) offset=({},{})",
+                     vx, vy, sx, sy, off["x"], off["y"])
+        return sx, sy
+
     def get_tab_list(self) -> list[dict]:
         try:
             return self._list_tabs()
@@ -474,14 +500,27 @@ class BrowserBridge:
         return False
 
     def wait_for_dom_stable(self, stable_ms: int = 300, max_wait_ms: int = 3000) -> None:
-        """Wait until DOM has no mutations for stable_ms. Prevents click-on-moving-element."""
+        """Wait until the page readyState is complete and stable_ms have elapsed.
+        Uses a synchronous JS check (no Promise) to avoid blocking the CDP WebSocket."""
         if not self._connected:
             return
-        try:
-            self._call_js(_JS_WAIT_DOM_STABLE, [stable_ms], timeout=max_wait_ms/1000 + 1)
+        deadline = time.time() + max_wait_ms / 1000
+        ready = False
+        while time.time() < deadline:
+            try:
+                result = self._call_js(_JS_WAIT_DOM_STABLE, [stable_ms], timeout=2.0)
+                if result is True:
+                    ready = True
+                    break
+            except Exception:
+                pass
+            time.sleep(stable_ms / 1000)
+        if ready:
+            # Extra pause to let any final animations settle
+            time.sleep(stable_ms / 1000)
             logger.debug("[BROWSER] DOM stable after wait ({}ms threshold)", stable_ms)
-        except Exception as exc:
-            logger.debug("[BROWSER] wait_for_dom_stable: {}", exc)
+        else:
+            logger.debug("[BROWSER] wait_for_dom_stable: page not ready after {}ms, proceeding", max_wait_ms)
 
     def click_at_viewport(self, vx: int, vy: int) -> None:
         self.bring_to_front()
@@ -618,11 +657,17 @@ class BrowserBridge:
             with self._pending_lock:
                 self._pending.pop(mid, None)
 
-    def _call_js(self, fn_body: str, args: list, timeout: float = 8.0) -> Any:
+    def _call_js(self, fn_body: str, args: list, timeout: float = 5.0) -> Any:
+        """Execute a JS function body with args via CDP Runtime.evaluate.
+
+        timeout is capped at 10 s to prevent hanging on a frozen DevTools session.
+        Raises TimeoutError (propagated from _send) if DevTools doesn't respond.
+        """
+        timeout = min(timeout, 10.0)   # hard cap — no infinite hangs
         args_json = json.dumps(args)[1:-1]
         expr      = f"({fn_body})({args_json})"
         result    = self._send("Runtime.evaluate", {
-            "expression": expr, "returnByValue": True, "awaitPromise": True,
+            "expression": expr, "returnByValue": True, "awaitPromise": False,
         }, timeout=timeout)
         if result.get("exceptionDetails"):
             logger.debug("[BROWSER] JS exception: {}", result["exceptionDetails"].get("text","?"))
