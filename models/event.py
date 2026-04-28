@@ -120,6 +120,7 @@ class MouseDragEvent(BaseModel):
     start_x: int; start_y: int
     end_x: int; end_y: int
     button: str = "left"
+    duration_ms: int = 0
     start_target: Optional[UITarget] = None
     end_target: Optional[UITarget] = None
 

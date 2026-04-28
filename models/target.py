@@ -48,6 +48,10 @@ class BrowserTarget(BaseModel):
     aria_role: Optional[str] = None
     inner_text: Optional[str] = None
     tag_name: Optional[str] = None
+    input_type: Optional[str] = None
+    value: Optional[str] = None
+    checked: Optional[bool] = None
+    selected: Optional[bool] = None
     element_id: Optional[str] = None
     name_attr: Optional[str] = None
     placeholder: Optional[str] = None
@@ -208,6 +212,18 @@ class UITarget(BaseModel):
         if not self.selectors:
             return None
         return sorted(self.selectors, key=lambda s: (s.priority, -s.confidence))[0]
+
+    def match_confidence(self) -> str:
+        """
+        Backward-compatible confidence label used by legacy tests/callers.
+        """
+        if self.automation_id:
+            return "automation_id"
+        if self.name and self.control_type:
+            return "name+type"
+        if self.bbox is not None:
+            return "bbox"
+        return "none"
 
 
 

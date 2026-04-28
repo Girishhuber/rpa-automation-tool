@@ -46,6 +46,8 @@ class ReplayConfig:
     screenshot_on_failure: bool = True
     browser_action_delay_ms: int = 150 
     excel_action_delay_ms: int = 150  
+    strict_targeting: bool = True
+    allow_coordinate_fallback: bool = True
 
 
 @dataclass

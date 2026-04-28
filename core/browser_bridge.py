@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 import json
 import queue
@@ -76,12 +75,16 @@ _JS_ELEMENT_AT = """\
   var rc = el.getBoundingClientRect();
   return {
     tag: el.tagName.toLowerCase(),
+    input_type: (el.getAttribute('type') || '').toLowerCase() || null,
     id: el.id || null,
     name: el.getAttribute('name') || null,
     placeholder: el.getAttribute('placeholder') || null,
     aria_label: el.getAttribute('aria-label') || null,
     aria_role: el.getAttribute('role') || null,
     href: el.getAttribute('href') || null,
+    value: (typeof el.value === 'string') ? el.value.substring(0, 200) : null,
+    checked: (typeof el.checked === 'boolean') ? el.checked : null,
+    selected: (typeof el.selected === 'boolean') ? el.selected : null,
     inner_text: (el.innerText || el.textContent || '').trim().substring(0, 200),
     xpath: xpath(el),
     css: cssPath(el),
@@ -300,6 +303,10 @@ class BrowserBridge:
             bt = BrowserTarget(
                 xpath        = result.get("xpath"),
                 css_selector = result.get("css"),
+                input_type   = result.get("input_type"),
+                value        = result.get("value"),
+                checked      = result.get("checked"),
+                selected     = result.get("selected"),
                 element_id   = result.get("id"),
                 name_attr    = result.get("name"),
                 placeholder  = result.get("placeholder"),
@@ -342,6 +349,39 @@ class BrowserBridge:
         logger.debug("[BROWSER] screen({},{}) → viewport({},{}) chrome_offset=({},{})",
                      sx, sy, vx, vy, off["x"], off["y"])
         return vx, vy
+
+    def viewport_to_screen(self, vx: int, vy: int) -> tuple[int, int]:
+        """Convert viewport coordinates back to screen coordinates using cached offset.
+
+        The offset is cached from the last screen_to_viewport call or freshly computed
+        from the active Chrome window geometry. Falls back to a raw identity transform
+        if no window rect is available yet.
+        """
+        if self._vp_offset is not None:
+            sx = vx + self._vp_offset["x"]
+            sy = vy + self._vp_offset["y"]
+        else:
+            # No cached offset yet — try to compute it from the active window
+            try:
+                import ctypes, ctypes.wintypes
+                hwnd = ctypes.windll.user32.GetForegroundWindow()
+                rect = ctypes.wintypes.RECT()
+                ctypes.windll.user32.GetWindowRect(hwnd, ctypes.byref(rect))
+                window_rect = {
+                    "left": rect.left, "top": rect.top,
+                    "width": rect.right - rect.left,
+                    "height": rect.bottom - rect.top,
+                }
+                off = self._compute_offset(window_rect)
+                self._vp_offset = off
+                self._vp_ts = __import__("time").time()
+                sx = vx + off["x"]
+                sy = vy + off["y"]
+            except Exception:
+                # Identity fallback — better than crashing
+                sx, sy = vx, vy
+        logger.debug("[BROWSER] viewport({},{}) → screen({},{})", vx, vy, sx, sy)
+        return sx, sy
 
     def get_tab_list(self) -> list[dict]:
         try:

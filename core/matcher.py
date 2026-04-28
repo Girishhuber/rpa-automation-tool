@@ -468,9 +468,13 @@ class ElementMatcher:
         self,
         screenshot_base_dir: Optional[Path] = None,
         browser = None,
+        strict_targeting: bool = True,
+        allow_coordinate_fallback: bool = True,
     ):
         self._scr_dir  = screenshot_base_dir
         self._browser  = browser
+        self._strict_targeting = strict_targeting
+        self._allow_coordinate_fallback = allow_coordinate_fallback
         self._stats:      dict[str, StrategyStats] = {}
         self._stats_lock  = threading.RLock()
         self._app_cache:  dict[int, object] = {}
@@ -783,10 +787,12 @@ class ElementMatcher:
         errors:  list[str]         = []
 
         # FIX: Excel gets reduced strategy set
-        active_strategies = self._ordered_strategies(
-            ["automation_id", "semantic", "relaxed", "classname", "ancestor"],
-            target
+        base_strategies = (
+            ["automation_id", "classname"]
+            if self._strict_targeting
+            else ["automation_id", "semantic", "relaxed", "classname", "ancestor"]
         )
+        active_strategies = self._ordered_strategies(base_strategies, target)
 
         # FIX: Excel gets reduced timeout
         strategy_timeout = EXCEL_STRATEGY_TIMEOUT_S if is_excel else STRATEGY_TIMEOUT_S
@@ -855,7 +861,7 @@ class ElementMatcher:
                 logger.info("[MATCH] Event #{} auto_id='{}' → score={:.0f}",
                             event_id, target.automation_id, r.score)
 
-        if target.name and target.control_type:
+        if (not self._strict_targeting) and target.name and target.control_type:
             for r in run("semantic", lambda: self._by_name_type(target, exact=True)):
                 r.score += active_bonus
                 results.append(r)
@@ -869,7 +875,7 @@ class ElementMatcher:
 
         # Phase 2: true fallback chain. Each tier gets a chance to pass its own gate
         # before the next, weaker strategy is allowed to run.
-        if target.name and "relaxed" in active_strategies:
+        if (not self._strict_targeting) and target.name and "relaxed" in active_strategies:
             tier_results: list[MatchResult] = []
             for r in run("relaxed", lambda: self._by_name_type(target, exact=False)):
                 r.score += active_bonus
@@ -891,7 +897,7 @@ class ElementMatcher:
             if best:
                 return self._wrap_safe(best.element, target)
 
-        if target.ancestor_chain and "ancestor" in active_strategies:
+        if (not self._strict_targeting) and target.ancestor_chain and "ancestor" in active_strategies:
             tier_results = []
             for r in run("ancestor", lambda: self._by_ancestor(target)):
                 r.score += active_bonus
@@ -903,9 +909,10 @@ class ElementMatcher:
 
         # Self-heal
         # FIX: For Excel, use shorter self-heal timeout
-        healed = self._self_heal(target, event_id, active_bonus, is_excel=is_excel)
-        if healed is not None:
-            return healed
+        if not self._strict_targeting:
+            healed = self._self_heal(target, event_id, active_bonus, is_excel=is_excel)
+            if healed is not None:
+                return healed
 
         # ── BBox ───────────────────────────────────────────────────────────
         if target.bbox:
@@ -925,7 +932,7 @@ class ElementMatcher:
                 return coords
 
         # ── Coordinate fallback ────────────────────────────────────────────
-        if target.screen_x is not None:
+        if self._allow_coordinate_fallback and target.screen_x is not None:
             logger.warning(
                 "[MATCH] Event #{} RAW COORD fallback pos=({},{}) — tried: {}",
                 event_id, target.screen_x, target.screen_y, " | ".join(errors[:4]),
@@ -1696,7 +1703,12 @@ class ElementMatcher:
     # ── Coordinate fallback ───────────────────────────────────────────────
 
     def _coord_fallback(self, t: UITarget, event_id: int):
-        
+        if not self._allow_coordinate_fallback:
+            raise ElementNotFoundError(
+                f"Event #{event_id}: coordinate fallback disabled by replay config",
+                event_id,
+            )
+
         if t.bbox:
             scale = _primary_dpi() / (t.dpi_scale or 1.0)
             cx    = int(((t.bbox.left + t.bbox.right)  / 2) * scale)

@@ -23,6 +23,8 @@ from models.event import (
     WindowFocusEvent,
     ExcelCellSelectEvent, ExcelRangeSelectEvent, ExcelSheetSwitchEvent,
     BrowserNavigateEvent,
+    DropdownSelectEvent, CheckboxToggleEvent, RadioSelectEvent,
+    DialogResponseEvent,
     ScreenshotCheckpointEvent,
     ProcessLaunchEvent,
 )
@@ -373,6 +375,9 @@ class Recorder:
             self._flush_text_buffer()
             t_start = self._enricher.get_target_at(*start_pos)
             t_end   = self._enricher.get_target_at(x, y)
+            drag_duration_ms = 0
+            if self._mouse_down_time:
+                drag_duration_ms = int(max(0.0, (now - self._mouse_down_time) * 1000))
 
            
             if t_start and self._is_excel_target(t_start):
@@ -394,6 +399,7 @@ class Recorder:
                 MouseDragEvent(
                     start_x=start_pos[0], start_y=start_pos[1],
                     end_x=x, end_y=y, button=btn,
+                    duration_ms=drag_duration_ms,
                     start_target=t_start, end_target=t_end,
                 ),
                 f"Drag ({start_pos[0]},{start_pos[1]})→({x},{y})",
@@ -438,6 +444,15 @@ class Recorder:
         # ── System UI (taskbar, search, launcher) ────────────────────
         if target and self._is_system_ui(target):
             self._handle_system_ui_click(target, x, y, btn)
+            return
+
+        # Browser semantic controls and clipboard-affecting context-menu actions.
+        semantic_payload = self._build_semantic_click_event(target, x, y, btn)
+        if semantic_payload is not None:
+            self._last_target = target
+            self._push(semantic_payload, f"Semantic {semantic_payload.type}")
+            self._maybe_screenshot(target)
+            self._sample_focused_element()
             return
 
         # ── Excel sheet tab click (v2.0) ─────────────────────────────
@@ -633,7 +648,10 @@ class Recorder:
             action = _CLIPBOARD_COMBOS.get(frozenset(combo))
 
             if action == "copy":
-                content = self._read_clipboard()
+                content = None
+                if self._last_target and self._last_target.backend == TargetBackend.BROWSER:
+                    content = self._browser.get_selected_text()
+                content = content or self._read_clipboard()
                 logger.info("[RECORD] Clipboard COPY: '{}'", (content or "")[:40])
                 self._push(ClipboardCopyEvent(content=content, target=self._last_target), "Copy")
                 return
@@ -700,9 +718,27 @@ class Recorder:
 
         text   = self._text_buffer
         target = self._text_buffer_target or self._get_typing_target() or self._last_target
+        if target is None:
+            # Hard guard: never save an unanchored TypeText event.
+            try:
+                target = self._enricher.get_focused_element(self._last_target)
+            except Exception:
+                target = None
 
         self._text_buffer        = ""
         self._text_buffer_target = None
+
+        if target is None:
+            # Keep taskbar/start-search typing events even when UIA focus resolution
+            # is missing; replay has a guarded system-search typing path for this.
+            if self._search_mode:
+                logger.warning(
+                    "[RECORD] TypeText has no target but search_mode is active — keeping text '{}'",
+                    text[:40],
+                )
+            else:
+                logger.warning("[RECORD] Dropping TypeText with no target: '{}'", text[:40])
+                return
 
         preview = text[:40] + ("…" if len(text) > 40 else "")
         logger.info("[RECORD] TypeText: '{}' into {}", preview, self._tlabel(target))
@@ -833,6 +869,55 @@ class Recorder:
             target.class_name = None
         return target
 
+    def _build_semantic_click_event(self, target: Optional[UITarget], x: int, y: int, btn: str):
+        if not target or btn != "left":
+            return None
+
+        # Taskbar / Start search needs to reset prior browser targets.
+        if self._is_system_search_target(target):
+            self._last_typing_target = None
+            self._text_buffer_target = None
+            self._search_mode = True
+            return None
+
+        # Browser-specific semantic capture.
+        if target.backend == TargetBackend.BROWSER and target.browser:
+            bt = target.browser
+            tag = (bt.tag_name or "").lower()
+            input_type = (bt.input_type or "").lower()
+            role = (bt.aria_role or "").lower()
+
+            # Context-menu copy in browser: emit a clipboard copy with selected text.
+            if "copy" in (target.name or "").lower():
+                content = self._browser.get_selected_text() or self._read_clipboard()
+                logger.info("[RECORD] Browser semantic COPY: '{}'", (content or "")[:60])
+                return ClipboardCopyEvent(content=content, target=target)
+
+            if input_type == "checkbox" or role == "checkbox":
+                return CheckboxToggleEvent(checked=not bool(bt.checked), target=target)
+
+            if input_type == "radio" or role == "radio":
+                option_text = bt.value or bt.inner_text or target.name or "option"
+                return RadioSelectEvent(option_text=option_text[:120], target=target)
+
+            if tag == "option":
+                option_text = bt.inner_text or bt.value or target.name or ""
+                return DropdownSelectEvent(selected_text=option_text[:120], target=target)
+
+            if tag == "select" or role == "combobox":
+                option_text = bt.value or bt.inner_text or target.name or ""
+                return DropdownSelectEvent(selected_text=option_text[:120], target=target)
+
+        # Excel save surface semantic capture.
+        if self._is_excel_save_surface_target(target):
+            name = (target.name or "").strip()
+            if target.control_type == "Button" and name in {"Save", "Don't Save", "Cancel"}:
+                return DialogResponseEvent(dialog_title=target.window_title or "Excel Save", response=name)
+            if target.control_type == "ListItem" and name in {"OneDrive", "Documents", "Browse", "This PC"}:
+                return DropdownSelectEvent(selected_text=name, target=target)
+
+        return None
+
     @staticmethod
     def _target_anchor_count(target: Optional[UITarget]) -> int:
         if not target:
@@ -929,6 +1014,22 @@ class Recorder:
             target.build_selectors()
             self._apply_recording_quality(target)
 
+            # Safety gate: reject weak UIA container-like targets and fall back to
+            # explicit coordinates in the event payload.
+            if (
+                target.backend == TargetBackend.UIA
+                and (target.confidence_level or "") == "low"
+                and not target.automation_id
+                and self._target_anchor_count(target) == 0
+                and (target.control_type or "") in (_WEAK_RECORDING_TYPES | _REPEATED_RECORDING_TYPES)
+            ):
+                logger.warning(
+                    "[RECORD] Dropping weak UIA target ctrl={} name='{}' -> coord-only event",
+                    target.control_type or "?",
+                    (target.name or "")[:40],
+                )
+                return None
+
         return target
 
     def _get_browser_window_rect(self, x: int, y: int) -> dict:
@@ -957,6 +1058,32 @@ class Recorder:
         proc = (target.process_name or "").lower()
         return win in _SYSTEM_UI_WINDOWS or proc in _SYSTEM_UI_PROCS
 
+    @staticmethod
+    def _is_system_search_target(target: UITarget) -> bool:
+        if not target:
+            return False
+        win = (target.window_title or "").lower()
+        proc = (target.process_name or "").lower()
+        name = (target.name or "").lower()
+        return (
+            proc in {"explorer.exe", "searchhost.exe", "searchapp.exe"}
+            or win in {"taskbar", "search"}
+            or "search" in name
+        )
+
+    @staticmethod
+    def _is_excel_save_surface_target(target: UITarget) -> bool:
+        if not target or (target.process_name or "").lower() != "excel.exe":
+            return False
+        name = (target.name or "").strip().lower()
+        ancestors = " | ".join(target.ancestor_chain or []).lower()
+        ctrl = (target.control_type or "").lower()
+        if "choose a location" in ancestors:
+            return True
+        if name in {"save", "don't save", "cancel", "documents", "onedrive", "browse", "this pc"}:
+            return ctrl in {"button", "listitem"}
+        return False
+
     def _handle_system_ui_click(
         self, target: UITarget, x: int, y: int, btn: str
     ) -> None:
@@ -979,6 +1106,9 @@ class Recorder:
         # Search bar / Taskbar search
         if "search" in name or win in ("Taskbar", "Search"):
             self._search_mode = True
+            self._last_typing_target = None
+            self._text_buffer_target = None
+            self._last_target = target
             self._push(
                 MouseClickEvent(x=x, y=y, button=btn, target=target),
                 "Click Search (system UI)",

@@ -24,7 +24,7 @@ from models.event import (
     BrowserNavigateEvent, BrowserTabSwitchEvent, BrowserBackEvent,
     BrowserForwardEvent, BrowserRefreshEvent, BrowserWaitLoadEvent,
     WindowFocusEvent, DialogResponseEvent, FileDialogEvent,
-    DropdownSelectEvent, CheckboxToggleEvent,
+    DropdownSelectEvent, CheckboxToggleEvent, RadioSelectEvent,
     ExcelCellSelectEvent, ExcelRangeSelectEvent, ExcelSheetSwitchEvent,
     ScreenshotCheckpointEvent, ExplicitWaitEvent, ProcessLaunchEvent,
 )
@@ -244,6 +244,7 @@ class ReplayEngine:
         self._capture: Optional[ScreenCapture]  = None
         self._current_hwnd: int = 0
         self._last_mouse_pos: Optional[tuple[int, int]] = None
+        self._allow_unanchored_typing_once: bool = False
         # REP-7: track expected active sheet
         self._excel_expected_sheet: Optional[str] = None
         # FIX: track last navigated Excel cell to skip redundant re-navigation
@@ -262,6 +263,8 @@ class ReplayEngine:
         self._matcher = ElementMatcher(
             screenshot_base_dir=scr_dir,
             browser=self._browser,
+            strict_targeting=self._config.replay.strict_targeting,
+            allow_coordinate_fallback=self._config.replay.allow_coordinate_fallback,
         )
 
         if self._overlay:
@@ -487,6 +490,11 @@ class ReplayEngine:
                         time.sleep(0.3)
                     self._dispatch(event)
                 else:
+                    if not self._config.replay.allow_coordinate_fallback:
+                        raise ElementNotFoundError(
+                            f"Event #{event.id}: coordinate fallback disabled",
+                            event.id,
+                        )
                     used_fallback = True
                     self._dispatch_coord_fallback(event)
 
@@ -558,6 +566,10 @@ class ReplayEngine:
 
         # Clipboard
         if isinstance(p, ClipboardCopyEvent):
+            if p.content is not None and WIN32_OK:
+                self._set_clipboard(p.content)
+                logger.info("[REPLAY] Clipboard COPY restored recorded content ({} chars)", len(p.content))
+                return
             self._send_combo(["ctrl", "c"]); return
         if isinstance(p, ClipboardCutEvent):
             self._send_combo(["ctrl", "x"]); return
@@ -598,6 +610,8 @@ class ReplayEngine:
             self._handle_dropdown(p, event.id); return
         if isinstance(p, CheckboxToggleEvent):
             self._handle_checkbox(p, event.id); return
+        if isinstance(p, RadioSelectEvent):
+            self._handle_radio(p, event.id); return
 
         # Keyboard
         if isinstance(p, KeyPressEvent):
@@ -617,6 +631,9 @@ class ReplayEngine:
 
         # Mouse
         if isinstance(p, MouseClickEvent):
+            self._allow_unanchored_typing_once = bool(
+                p.target is not None and self._is_system_search_target(p.target)
+            )
             logger.info("[REPLAY] Click @ ({},{}) target={}", p.x, p.y, self._tlabel(p.target))
             self._do_click(p, event.id); return
         if isinstance(p, MouseDoubleClickEvent):
@@ -624,11 +641,11 @@ class ReplayEngine:
         if isinstance(p, MouseRightClickEvent):
             self._do_right_click(p, event.id); return
         if isinstance(p, MouseScrollEvent):
-            self._move_mouse(p.x, p.y); self._scroll(p.dy); return
+            self._do_scroll(p, event.id); return
         if isinstance(p, MouseMiddleClickEvent):
             self._sendinput_middle_click(p.x, p.y); self._flash(p.x, p.y); return
         if isinstance(p, MouseDragEvent):
-            self._drag(p.start_x, p.start_y, p.end_x, p.end_y); return
+            self._do_drag(p, event.id); return
 
 
     def _excel_ensure_sheet(self, sheet_name: Optional[str], event_id: int) -> None:
@@ -715,8 +732,12 @@ class ReplayEngine:
             send_keys("^g")
             time.sleep(0.4)
             if WIN32_OK:
-                self._set_clipboard(ref)
-                send_keys("^a^v")
+                _clip = self._clipboard_guard_begin()
+                try:
+                    self._set_clipboard(ref)
+                    send_keys("^a^v")
+                finally:
+                    self._clipboard_guard_end(_clip)
             else:
                 send_keys(self._cell_ref_safe(ref))
             send_keys("{ENTER}")
@@ -801,8 +822,12 @@ class ReplayEngine:
 
             # Paste ref via clipboard (avoids send_keys escaping issues)
             if WIN32_OK:
-                self._set_clipboard(ref)
-                send_keys("^a^v")
+                _clip = self._clipboard_guard_begin()
+                try:
+                    self._set_clipboard(ref)
+                    send_keys("^a^v")
+                finally:
+                    self._clipboard_guard_end(_clip)
             else:
                 send_keys("^a")
                 time.sleep(0.04)
@@ -853,8 +878,12 @@ class ReplayEngine:
 
                 # Fallback: just type the ref and hit Enter
                 if WIN32_OK:
-                    self._set_clipboard(cell_ref)
-                    send_keys("^a^v")
+                    _clip = self._clipboard_guard_begin()
+                    try:
+                        self._set_clipboard(cell_ref)
+                        send_keys("^a^v")
+                    finally:
+                        self._clipboard_guard_end(_clip)
                 else:
                     send_keys(self._cell_ref_safe(cell_ref))
                 send_keys("{ENTER}")
@@ -883,8 +912,12 @@ class ReplayEngine:
                 send_keys("{ESC}")
                 return False
             if WIN32_OK:
-                self._set_clipboard(cell_ref)
-                send_keys("^a^v")
+                _clip = self._clipboard_guard_begin()
+                try:
+                    self._set_clipboard(cell_ref)
+                    send_keys("^a^v")
+                finally:
+                    self._clipboard_guard_end(_clip)
             else:
                 send_keys(self._cell_ref_safe(cell_ref))
             time.sleep(0.05)
@@ -960,8 +993,12 @@ class ReplayEngine:
                     elem.wrapper_object().click_input()
                     time.sleep(0.08)
                     if WIN32_OK:
-                        self._set_clipboard(range_ref)
-                        send_keys("^a^v")
+                        _clip = self._clipboard_guard_begin()
+                        try:
+                            self._set_clipboard(range_ref)
+                            send_keys("^a^v")
+                        finally:
+                            self._clipboard_guard_end(_clip)
                     else:
                         send_keys("^a{DELETE}")
                         send_keys(self._cell_ref_safe(range_ref))
@@ -1150,12 +1187,22 @@ class ReplayEngine:
     def _do_type(self, p: TypeTextEvent, event_id: int) -> None:
      
         if p.target is None:
-            logger.info(
-                "[REPLAY] Event #{}: TypeTextEvent has no target — typing at OS focus. Text='{}'",
+            if self._allow_unanchored_typing_once:
+                logger.warning(
+                    "[REPLAY] Event #{}: unanchored TypeText allowed for system search. Text='{}'",
+                    event_id, p.text[:30],
+                )
+                self._type_at_current_focus(p.text)
+                self._allow_unanchored_typing_once = False
+                return
+            logger.warning(
+                "[REPLAY] Event #{}: TypeTextEvent has no target — blocking unsafe typing. Text='{}'",
                 event_id, p.text[:30],
             )
-            self._type_at_current_focus(p.text)
-            return
+            raise ElementNotFoundError(
+                f"Event #{event_id}: TypeTextEvent has no target",
+                event_id,
+            )
 
       
         cell_ref_direct = getattr(p, "cell_ref", None)
@@ -1203,6 +1250,14 @@ class ReplayEngine:
 
         ctrl = getattr(p.target, "control_type", None) or ""
         if ctrl in _NON_EDITABLE_CONTROL_TYPES:
+            if self._is_system_search_target(p.target):
+                logger.warning(
+                    "[REPLAY] Event #{}: non-editable system-search target '{}' — typing at focused search box",
+                    event_id, ctrl,
+                )
+                self._type_at_current_focus(p.text)
+                self._allow_unanchored_typing_once = False
+                return
             logger.warning("[REPLAY] Non-editable target {} — skipping type", ctrl)
             raise ElementNotInteractableError(
                 f"Event #{event_id}: target control_type={ctrl} is not editable",
@@ -1313,6 +1368,11 @@ class ReplayEngine:
                     return
                 # UIA element
                 self._wait_ready(elem, event_id)
+                try:
+                    elem.set_focus()
+                    time.sleep(0.1)
+                except Exception:
+                    pass
                 if p.clear_first:
                     try:
                         elem.set_text("")
@@ -1323,11 +1383,7 @@ class ReplayEngine:
                     return
                 except Exception:
                     pass
-                if WIN32_OK:
-                    self._set_clipboard(p.text)
-                    elem.click_input(); time.sleep(0.05)
-                    send_keys("^a^v")
-                    return
+                # Fallback: click + send_keys (NO clipboard — avoids polluting Win+V history)
                 elem.click_input(); time.sleep(0.04)
                 send_keys(self._escape_sk(p.text), with_spaces=True)
                 return
@@ -1338,15 +1394,20 @@ class ReplayEngine:
         self._type_at_current_focus(p.text)
 
     def _type_at_current_focus(self, text: str) -> None:
+        """Type text at the currently focused OS element without touching the clipboard.
+
+        Using clipboard (Ctrl+V) for ordinary typing pollutes Windows clipboard history,
+        causing the clipboard viewer (Win+V) to show intermediate strings like cell
+        references and application names alongside the real content.  We now send keys
+        directly via pywinauto's send_keys for all plain-text typing.  The clipboard is
+        still used inside the Excel and formula-bar paths where it is the only reliable
+        way to insert content, and for ClipboardPasteEvent replays.
+        """
         if not UIA_OK:
             return
-        if WIN32_OK and len(text) > 3:
-            self._set_clipboard(text)
-            send_keys("^v")
-        else:
-            send_keys(self._escape_sk(text), with_spaces=True)
+        send_keys(self._escape_sk(text), with_spaces=True)
 
-  
+
     def _do_click(self, p: MouseClickEvent, event_id: int) -> None:
         pre_hash = self._capture_visual_hash()
 
@@ -1580,7 +1641,20 @@ class ReplayEngine:
             logger.warning("[REPLAY] File dialog failed: {}", exc)
 
     def _handle_dropdown(self, p, event_id: int) -> None:
-        if not p.target or not UIA_OK:
+        if not p.target:
+            return
+        if p.target.backend == TargetBackend.BROWSER:
+            try:
+                elem = self._matcher.find(p.target, event_id)
+                if isinstance(elem, tuple):
+                    sx, sy = self._browser.viewport_to_screen(elem[0], elem[1])
+                    self._browser.bring_to_front()
+                    time.sleep(0.08)
+                    self._sendinput_click(sx, sy)
+                    return
+            except ElementNotFoundError:
+                return
+        if not UIA_OK:
             return
         try:
             elem = self._matcher.find(p.target, event_id)
@@ -1593,7 +1667,20 @@ class ReplayEngine:
             pass
 
     def _handle_checkbox(self, p, event_id: int) -> None:
-        if not p.target or not UIA_OK:
+        if not p.target:
+            return
+        if p.target.backend == TargetBackend.BROWSER:
+            try:
+                elem = self._matcher.find(p.target, event_id)
+                if isinstance(elem, tuple):
+                    sx, sy = self._browser.viewport_to_screen(elem[0], elem[1])
+                    self._browser.bring_to_front()
+                    time.sleep(0.08)
+                    self._sendinput_click(sx, sy)
+                    return
+            except ElementNotFoundError:
+                return
+        if not UIA_OK:
             return
         try:
             elem = self._matcher.find(p.target, event_id)
@@ -1604,6 +1691,29 @@ class ReplayEngine:
                         elem.toggle()
                 except Exception:
                     elem.click_input()
+        except ElementNotFoundError:
+            pass
+
+    def _handle_radio(self, p, event_id: int) -> None:
+        if not p.target:
+            return
+        if p.target.backend == TargetBackend.BROWSER:
+            try:
+                elem = self._matcher.find(p.target, event_id)
+                if isinstance(elem, tuple):
+                    sx, sy = self._browser.viewport_to_screen(elem[0], elem[1])
+                    self._browser.bring_to_front()
+                    time.sleep(0.08)
+                    self._sendinput_click(sx, sy)
+                    return
+            except ElementNotFoundError:
+                return
+        if not UIA_OK:
+            return
+        try:
+            elem = self._matcher.find(p.target, event_id)
+            if not isinstance(elem, tuple):
+                elem.click_input()
         except ElementNotFoundError:
             pass
 
@@ -1658,6 +1768,194 @@ class ReplayEngine:
         self._last_mouse_pos = (x, y)
         time.sleep(0.02)
 
+    def _do_scroll(self, p: MouseScrollEvent, event_id: int) -> None:
+        """Replay a scroll event by re-issuing the accumulated wheel delta as
+        individual WHEEL_DELTA notches (120 units each).  Splitting the merged
+        delta back into per-notch SendInput calls gives applications the same
+        stream of WM_MOUSEWHEEL messages they saw at record time, rather than
+        one enormous single event that many apps either ignore or mis-handle.
+
+        Focus is ensured on the scroll target window before the first notch so
+        that scroll events land in the right window even when the replayer has
+        just finished interacting with a different application.
+        """
+        # Bring the target window into focus before scrolling
+        if p.target:
+            self._ensure_window_focus(p.target)
+            if p.target.backend == TargetBackend.BROWSER and self._browser:
+                self._browser.bring_to_front()
+                time.sleep(0.08)
+
+        self._move_mouse(p.x, p.y)
+        time.sleep(0.04)
+
+        # Split accumulated delta back into individual notches so applications
+        # receive the same stream of WM_MOUSEWHEEL messages as at record time.
+        dy = p.dy  # accumulated notches (positive = up, negative = down)
+        if dy == 0:
+            return
+
+        notches = abs(int(dy))
+        if notches == 0:
+            notches = 1
+        direction = 1 if dy > 0 else -1
+        wheel_delta = direction * 120  # WHEEL_DELTA per notch
+
+        # Use SendInput (INPUT struct) — more reliable than deprecated mouse_event,
+        # works with elevated processes and modern UWP applications.
+        INPUT_MOUSE   = 0
+        MOUSEEVENTF_WHEEL = 0x0800
+
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [
+                ("dx",          ctypes.c_long),
+                ("dy",          ctypes.c_long),
+                ("mouseData",   ctypes.c_ulong),
+                ("dwFlags",     ctypes.c_ulong),
+                ("time",        ctypes.c_ulong),
+                ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+            ]
+
+        class _INPUT_UNION(ctypes.Union):
+            _fields_ = [("mi", MOUSEINPUT)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", ctypes.c_ulong), ("_input", _INPUT_UNION)]
+
+        for _ in range(notches):
+            inp = INPUT()
+            inp.type = INPUT_MOUSE
+            inp._input.mi.dx = 0
+            inp._input.mi.dy = 0
+            inp._input.mi.mouseData = ctypes.c_ulong(wheel_delta & 0xFFFFFFFF)
+            inp._input.mi.dwFlags   = MOUSEEVENTF_WHEEL
+            inp._input.mi.time      = 0
+            inp._input.mi.dwExtraInfo = ctypes.cast(
+                ctypes.pointer(ctypes.c_ulong(0)),
+                ctypes.POINTER(ctypes.c_ulong)
+            )
+            ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+            time.sleep(0.02)  # ~50 notches/sec max — natural scroll pace
+
+        logger.debug("[REPLAY] Scroll: {} notches direction={} at ({},{})",
+                     notches, direction, p.x, p.y)
+
+    def _do_drag(self, p: MouseDragEvent, event_id: int) -> None:
+        """Replay a drag gesture using SendInput MOUSEEVENTF_MOVE events so that
+        each intermediate position generates a proper WM_MOUSEMOVE message.
+
+        Improvements over the old implementation:
+        - Window focus / browser bring-to-front before the drag starts.
+        - Step count scales with distance so both short and long drags have
+          smooth, proportional movement (min 10, max 60 steps).
+        - Per-step delay is derived from the recorded duration_ms so the drag
+          replays at roughly the same speed it was performed.
+        - Uses SendInput for mousedown/mouseup instead of deprecated mouse_event.
+        - A small settle delay after mousedown lets apps register the press
+          (needed for text-selection drags in Word/Chrome).
+        """
+        sx, sy = p.start_x, p.start_y
+        ex, ey = p.end_x,   p.end_y
+
+        # --- Focus the target window first ---
+        if p.start_target:
+            self._ensure_window_focus(p.start_target)
+            if p.start_target.backend == TargetBackend.BROWSER and self._browser:
+                self._browser.bring_to_front()
+                time.sleep(0.10)
+
+        # --- Compute steps and per-step delay ---
+        dist    = ((ex - sx) ** 2 + (ey - sy) ** 2) ** 0.5
+        steps   = max(10, min(60, int(dist / 8)))  # ~8px per step, clamped 10-60
+        dur_ms  = max(200, getattr(p, "duration_ms", 0) or 300)
+        step_ms = dur_ms / steps / 1000           # seconds per step
+
+        # SendInput structures
+        INPUT_MOUSE          = 0
+        MOUSEEVENTF_MOVE     = 0x0001
+        MOUSEEVENTF_LEFTDOWN = 0x0002
+        MOUSEEVENTF_LEFTUP   = 0x0004
+        MOUSEEVENTF_ABSOLUTE = 0x8000
+
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [
+                ("dx",          ctypes.c_long),
+                ("dy",          ctypes.c_long),
+                ("mouseData",   ctypes.c_ulong),
+                ("dwFlags",     ctypes.c_ulong),
+                ("time",        ctypes.c_ulong),
+                ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+            ]
+
+        class _INPUT_UNION(ctypes.Union):
+            _fields_ = [("mi", MOUSEINPUT)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", ctypes.c_ulong), ("_input", _INPUT_UNION)]
+
+        def _extra():
+            return ctypes.cast(
+                ctypes.pointer(ctypes.c_ulong(0)),
+                ctypes.POINTER(ctypes.c_ulong)
+            )
+
+        def _send_mouse_flag(flag: int, data: int = 0) -> None:
+            inp = INPUT()
+            inp.type = INPUT_MOUSE
+            inp._input.mi.dx          = 0
+            inp._input.mi.dy          = 0
+            inp._input.mi.mouseData   = ctypes.c_ulong(data)
+            inp._input.mi.dwFlags     = flag
+            inp._input.mi.time        = 0
+            inp._input.mi.dwExtraInfo = _extra()
+            ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+
+        # Get screen dimensions for ABSOLUTE coordinate normalisation
+        SM_CXSCREEN, SM_CYSCREEN = 0, 1
+        screen_w = ctypes.windll.user32.GetSystemMetrics(SM_CXSCREEN) or 1920
+        screen_h = ctypes.windll.user32.GetSystemMetrics(SM_CYSCREEN) or 1080
+
+        def _send_move_absolute(x: int, y: int) -> None:
+            # MOUSEEVENTF_ABSOLUTE coords must be in [0, 65535] normalised space
+            ax = int(x * 65535 / screen_w)
+            ay = int(y * 65535 / screen_h)
+            inp = INPUT()
+            inp.type = INPUT_MOUSE
+            inp._input.mi.dx          = ax
+            inp._input.mi.dy          = ay
+            inp._input.mi.mouseData   = 0
+            inp._input.mi.dwFlags     = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE
+            inp._input.mi.time        = 0
+            inp._input.mi.dwExtraInfo = _extra()
+            ctypes.windll.user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(inp))
+
+        # --- Execute drag ---
+        # 1. Move to start without button held
+        self._move_mouse(sx, sy)
+        time.sleep(0.06)
+
+        # 2. Press left button down
+        _send_mouse_flag(MOUSEEVENTF_LEFTDOWN)
+        time.sleep(0.08)   # settle — lets text editors register selection start
+
+        # 3. Glide to end position
+        for i in range(1, steps + 1):
+            nx = int(sx + (ex - sx) * i / steps)
+            ny = int(sy + (ey - sy) * i / steps)
+            _send_move_absolute(nx, ny)
+            time.sleep(max(step_ms, 0.008))
+
+        time.sleep(0.06)   # hold at end briefly
+
+        # 4. Release left button
+        _send_mouse_flag(MOUSEEVENTF_LEFTUP)
+        time.sleep(0.05)
+
+        self._last_mouse_pos = (ex, ey)
+        logger.debug("[REPLAY] Drag ({},{})→({},{}) steps={} dur={}ms",
+                     sx, sy, ex, ey, steps, dur_ms)
+
+    # kept for backward compat (called nowhere now but guard against subclass use)
     def _scroll(self, dy: int) -> None:
         ctypes.windll.user32.mouse_event(0x0800, 0, 0, dy * 120, 0)
 
@@ -1682,6 +1980,30 @@ class ReplayEngine:
             win32clipboard.CloseClipboard()
         except Exception as exc:
             logger.warning("[REPLAY] set_clipboard failed: {}", exc)
+
+    def _get_clipboard_text(self) -> Optional[str]:
+        if not WIN32_OK:
+            return None
+        try:
+            win32clipboard.OpenClipboard()
+            if win32clipboard.IsClipboardFormatAvailable(win32con.CF_UNICODETEXT):
+                return win32clipboard.GetClipboardData(win32con.CF_UNICODETEXT)
+        except Exception:
+            return None
+        finally:
+            try:
+                win32clipboard.CloseClipboard()
+            except Exception:
+                pass
+        return None
+
+    def _clipboard_guard_begin(self) -> Optional[str]:
+        return self._get_clipboard_text()
+
+    def _clipboard_guard_end(self, original: Optional[str]) -> None:
+        if original is None:
+            return
+        self._set_clipboard(original)
 
     # ──────────────────────────────────────────────────────────────────
     # Wait / validation
@@ -1725,6 +2047,19 @@ class ReplayEngine:
         return (target.process_name or "").lower() in _EXCEL_PROCS
 
     @staticmethod
+    def _is_system_search_target(target) -> bool:
+        if not target:
+            return False
+        proc = (getattr(target, "process_name", "") or "").lower()
+        win = (getattr(target, "window_title", "") or "").lower()
+        name = (getattr(target, "name", "") or "").lower()
+        if proc in {"explorer.exe", "searchhost.exe", "searchapp.exe"}:
+            return True
+        if win in {"taskbar", "search"}:
+            return True
+        return "search" in name
+
+    @staticmethod
     def _tlabel(target) -> str:
         if not target:
             return "(none)"
@@ -1756,4 +2091,4 @@ class ReplayEngine:
 
     @staticmethod
     def _now_ms() -> int:
-        return int(time.perf_counter() * 1000)
+        return int(time.perf_counter() * 1000)  

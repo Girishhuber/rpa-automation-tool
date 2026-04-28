@@ -6,6 +6,7 @@ pynput==1.7.7
 
 # UI Automation — element capture and replay injection
 pywinauto==0.6.8
+comtypes>=1.4.5
 
 # Windows API access (SendInput, clipboard, process info, DPI)
 # NOTE: pywin32 wheels are Python-version specific; 3.14+ currently ships newer wheels.

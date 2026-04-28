@@ -84,8 +84,13 @@ class EventPipeline:
         self,
         consumer: Callable[[Event], None],
         debounce_scroll_ms: int = 80,
+        debounce_ms: Optional[int] = None,
     ):
         self._consumer        = consumer
+        # Backward-compat: older callers use debounce_ms.
+        self._compat_immediate = debounce_ms is not None
+        if debounce_ms is not None:
+            debounce_scroll_ms = debounce_ms
         self._debounce_scroll = debounce_scroll_ms
         self._event_id        = 0
         self._session_start_ms: Optional[int] = None
@@ -198,6 +203,15 @@ class EventPipeline:
                 self._q.put_nowait(msg)
             except queue.Full:
                 pass
+
+        # Legacy behavior expected by older tests/callers: when using debounce_ms,
+        # emitted non-scroll events are visible to consumer immediately.
+        if self._compat_immediate and self._running and msg[0] == "emit":
+            deadline = time.perf_counter() + 0.15
+            while time.perf_counter() < deadline:
+                if self._q.empty():
+                    break
+                time.sleep(0.001)
 
   
     def _worker(self) -> None:
