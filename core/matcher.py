@@ -1389,7 +1389,13 @@ class ElementMatcher:
             res = cv2.matchTemplate(bgr, template, cv2.TM_CCOEFF_NORMED)
             _, max_val, _, max_loc = cv2.minMaxLoc(res)
             logger.debug("[MATCH] screenshot confidence={:.2%}", max_val)
-            if max_val < 0.80:
+            # FIX: threshold raised from 0.80 → 0.88.
+            # Small element crops (buttons, tabs) are only ~40-100px wide.
+            # At 0.80, the template can spuriously match similar-looking regions
+            # elsewhere on screen (e.g. another toolbar button), producing a
+            # false-positive click target.  0.88 keeps the match reliable without
+            # demanding pixel-perfect reproduction across DPI or theme changes.
+            if max_val < 0.88:
                 return None
             return (region["left"] + max_loc[0] + tw // 2,
                     region["top"]  + max_loc[1] + th // 2)

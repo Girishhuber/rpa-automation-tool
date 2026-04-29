@@ -242,6 +242,7 @@ class Recorder:
         self._start_ms = self._now_ms()
 
         scr_dir = self._sessions_dir / self._session.id / "screenshots"
+        self._scr_dir = scr_dir
         self._capture = ScreenCapture(scr_dir)
 
         browser_ok = self._browser.connect()
@@ -611,20 +612,20 @@ class Recorder:
         # Printable character → accumulate text buffer
         char = self._printable_char(key)
         if char:
-            # Capture the target on the very FIRST char of a typing run (v2.0)
-            if not self._text_buffer:
-                self._text_buffer_target = (
-                    self._get_typing_target() or self._last_target
-                )
+            # FIX: Do NOT freeze _text_buffer_target at first-char time.
+            # When the user clicks an element and starts typing immediately,
+            # the UIA enricher thread may still be resolving _last_target for
+            # the previous element.  Freezing here captures a stale target,
+            # causing the TypeText event to be attributed to the wrong control.
+            # Leaving _text_buffer_target as None lets _flush_text_buffer resolve
+            # the target at flush time (triggered by the next click or special key),
+            # by which point _last_target is always the correct focused element.
             self._text_buffer += char
             self._last_key_time = time.perf_counter()
             return
 
         if raw == "space" and not self._pressed_mods:
-            if not self._text_buffer:
-                self._text_buffer_target = (
-                    self._get_typing_target() or self._last_target
-                )
+            # FIX: same rationale as above — do not freeze target at first space.
             self._text_buffer += " "
             self._last_key_time = time.perf_counter()
             return
@@ -1323,3 +1324,6 @@ class Recorder:
     @staticmethod
     def _now_ms() -> int:
         return int(time.perf_counter() * 1000)
+    
+from .recorder_visual_patch import apply_visual_patch
+apply_visual_patch(Recorder)

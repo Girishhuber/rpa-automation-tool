@@ -204,14 +204,8 @@ class EventPipeline:
             except queue.Full:
                 pass
 
-        # Legacy behavior expected by older tests/callers: when using debounce_ms,
-        # emitted non-scroll events are visible to consumer immediately.
         if self._compat_immediate and self._running and msg[0] == "emit":
-            deadline = time.perf_counter() + 0.15
-            while time.perf_counter() < deadline:
-                if self._q.empty():
-                    break
-                time.sleep(0.001)
+            time.sleep(0.01)
 
   
     def _worker(self) -> None:

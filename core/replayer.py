@@ -1356,7 +1356,10 @@ class ReplayEngine:
                         self._browser.bring_to_front()
                         time.sleep(0.08)
                         self._sendinput_click(sx, sy)
-                        time.sleep(0.12)
+                        # FIX: 120ms was insufficient after Gmail compose field click;
+                        # Gmail's React re-render can steal focus back briefly.
+                        # 200ms lets the DOM settle before CDP key injection.
+                        time.sleep(0.20)
                         self._browser.type_text_at(p.text, human_like=False)
                         logger.info("[REPLAY] Event #{}: Browser type ✓ '{}' at viewport({},{})",
                                     event_id, p.text[:30], vx, vy)
@@ -1384,7 +1387,9 @@ class ReplayEngine:
                 except Exception:
                     pass
                 # Fallback: click + send_keys (NO clipboard — avoids polluting Win+V history)
-                elem.click_input(); time.sleep(0.04)
+                # FIX: increased settle time from 40ms→120ms to prevent cursor-race
+                # that causes characters to type backwards or mid-word.
+                elem.click_input(); time.sleep(0.12)
                 send_keys(self._escape_sk(p.text), with_spaces=True)
                 return
             except ElementNotFoundError:
@@ -1402,9 +1407,15 @@ class ReplayEngine:
         directly via pywinauto's send_keys for all plain-text typing.  The clipboard is
         still used inside the Excel and formula-bar paths where it is the only reliable
         way to insert content, and for ClipboardPasteEvent replays.
+
+        FIX: Added 80 ms settle delay before sending keys to prevent cursor position
+        races that cause characters to be inserted mid-word or in reverse order when
+        focus has just changed (e.g. after a click or window switch).
         """
         if not UIA_OK:
             return
+        # Ensure any pending focus-change animations have settled before typing.
+        time.sleep(0.08)
         send_keys(self._escape_sk(text), with_spaces=True)
 
 
@@ -1480,7 +1491,10 @@ class ReplayEngine:
                                  require_change: bool = False) -> bool:
         if pre_hash is None:
             return True
-        time.sleep(0.15)
+        # FIX: was 150ms — some apps (Gmail, Windows Explorer) animate for 200-400ms
+        # after a click before the DOM/UI tree actually updates, causing false
+        # "UI DID NOT CHANGE" verdicts and false-positive retry clicks.
+        time.sleep(0.30)
         post_hash = self._capture_visual_hash()
         if post_hash is None:
             return True
@@ -1488,7 +1502,12 @@ class ReplayEngine:
         if changed:
             logger.debug("[REPLAY] Event #{} {}: UI changed", event_id, action)
             return True
-        logger.warning("[REPLAY] Event #{} {}: UI DID NOT CHANGE", event_id, action)
+        if require_change:
+            logger.warning("[REPLAY] Event #{} {}: UI DID NOT CHANGE — may be false click",
+                           event_id, action)
+        else:
+            logger.debug("[REPLAY] Event #{} {}: UI unchanged (expected for this action)",
+                         event_id, action)
         return False
 
     def _do_double_click(self, p: MouseDoubleClickEvent, event_id: int) -> None:
@@ -2091,4 +2110,4 @@ class ReplayEngine:
 
     @staticmethod
     def _now_ms() -> int:
-        return int(time.perf_counter() * 1000)  
+        return int(time.perf_counter() * 1000)
