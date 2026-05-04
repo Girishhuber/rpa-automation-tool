@@ -163,12 +163,37 @@ class UITarget(BaseModel):
                     priority=1,
                     confidence=0.95,
                 ))
-            elif self.browser.css_selector:
+            if self.browser.css_selector:
                 selectors.append(Selector(
                     type="css",
                     value=self.browser.css_selector,
                     priority=2,
                     confidence=0.85,
+                ))
+            # FIX: aria_label and inner_text are more stable than dynamic
+            # XPath/CSS IDs across sessions (e.g., Gmail uses :qj, :rz).
+            # Adding them as explicit selectors ensures the matcher can
+            # fall back to them when the dynamic selectors become stale.
+            if self.browser.aria_label:
+                selectors.append(Selector(
+                    type="aria_label",
+                    value=self.browser.aria_label,
+                    priority=2,
+                    confidence=0.80,
+                ))
+            if self.browser.placeholder:
+                selectors.append(Selector(
+                    type="placeholder",
+                    value=self.browser.placeholder,
+                    priority=3,
+                    confidence=0.78,
+                ))
+            if self.browser.inner_text and len(self.browser.inner_text.strip()) > 2:
+                selectors.append(Selector(
+                    type="inner_text",
+                    value=self.browser.inner_text[:120],
+                    priority=3,
+                    confidence=0.70,
                 ))
 
         # Geometry fallback

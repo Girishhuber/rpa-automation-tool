@@ -663,6 +663,43 @@ class ElementMatcher:
 
         self._browser.wait_for_dom_stable(stable_ms=250, max_wait_ms=2000)
         candidates = self._browser.find_candidates(bt, timeout_ms=8000)
+
+        # ── Semantic fallback: re-query using only stable attributes ─────────
+        # Gmail, Outlook Web, and other React/SPA apps use session-specific
+        # dynamic IDs (e.g., ":qj", ":rz") in their XPath and CSS selectors
+        # that change on every page load.  When the primary query fails,
+        # construct a new BrowserTarget using only the stable attributes
+        # (aria_label, inner_text, name, placeholder) and try again.
+        if not candidates:
+            has_stable = (bt.aria_label or bt.inner_text or bt.name_attr or bt.placeholder)
+            if has_stable:
+                logger.info(
+                    "[MATCH] Event #{} browser primary query failed — trying semantic fallback "
+                    "(aria='{}', text='{}', name='{}', ph='{}')",
+                    event_id, bt.aria_label or "", (bt.inner_text or "")[:30],
+                    bt.name_attr or "", bt.placeholder or "",
+                )
+                from models.target import BrowserTarget as BT
+                semantic_bt = BT(
+                    xpath=None,          # strip dynamic XPath
+                    css_selector=None,   # strip dynamic CSS
+                    aria_label=bt.aria_label,
+                    inner_text=bt.inner_text,
+                    tag_name=bt.tag_name,
+                    name_attr=bt.name_attr,
+                    placeholder=bt.placeholder,
+                    aria_role=bt.aria_role,
+                    input_type=bt.input_type,
+                    element_id=None,     # strip dynamic ID
+                    tab_url=bt.tab_url,
+                )
+                candidates = self._browser.find_candidates(semantic_bt, timeout_ms=5000)
+                if candidates:
+                    logger.info(
+                        "[MATCH] Event #{} browser SEMANTIC FALLBACK found {} candidate(s)",
+                        event_id, len(candidates),
+                    )
+
         if not candidates:
             raise ElementNotFoundError(
                 f"Event #{event_id}: browser element not found "
@@ -1691,6 +1728,10 @@ class ElementMatcher:
                         pass
 
                 if self.REJECT_ON_AMBIGUOUS and not unique:
+                    if viable[0].score >= 90:
+                        logger.info("[MATCH] Ambiguity at high confidence ({:.0f}) — accepting top match",
+                                    viable[0].score)
+                        return viable[0]
                     logger.error("[MATCH] Ambiguity unresolved — REJECT_ON_AMBIGUOUS set")
                     return None
 

@@ -278,6 +278,7 @@ class ReplayEngine:
         logger.info("[REPLAY] Starting: '{}' ({} events)", session.name, total)
 
         events_raw = self._patch_excel_typetext_lookahead(events_raw)
+        events_raw = self._patch_browser_typetext_merge(events_raw)
         # ─────────────────────────────────────────────────────────────────────
 
         for i, raw in enumerate(events_raw):
@@ -464,6 +465,120 @@ class ReplayEngine:
 
         except Exception as exc:
             logger.warning("[REPLAY] _patch_excel_typetext_lookahead failed: {}", exc)
+            return events_raw
+
+    def _patch_browser_typetext_merge(self, events_raw: list) -> list:
+        """Merge consecutive browser TypeText events targeting the same element.
+
+        Problem: the recorder's idle-flush timer splits long text inputs into
+        multiple TypeText events (e.g., 'harish' + 'free' + '777@gmail.com').
+        During replay each fragment independently clicks the browser element
+        to focus it, but between fragments Gmail's autocomplete DOM changes
+        can shift focus, causing characters to land in the wrong field.
+
+        Solution: detect consecutive TypeText events that target the same
+        browser element (matched by xpath + css_selector) and merge them into
+        a single event with concatenated text.  This makes the replay perform
+        one click + one atomic type operation.
+        """
+        try:
+            parsed: list[tuple[int, object, object]] = []
+            for i, raw in enumerate(events_raw):
+                try:
+                    ev = Event.model_validate(raw)
+                    parsed.append((i, raw, ev))
+                except Exception:
+                    parsed.append((i, raw, None))
+
+            def _browser_key(target) -> str:
+                """Build a stable identity key from browser target selectors."""
+                if not target or not getattr(target, 'browser', None):
+                    return ""
+                bt = target.browser
+                parts = []
+                # Prefer stable attributes over dynamic IDs
+                if bt.aria_label:
+                    parts.append(f"aria:{bt.aria_label}")
+                if bt.name_attr:
+                    parts.append(f"name:{bt.name_attr}")
+                if bt.placeholder:
+                    parts.append(f"ph:{bt.placeholder}")
+                if bt.xpath:
+                    parts.append(f"xp:{bt.xpath}")
+                if bt.css_selector:
+                    parts.append(f"css:{bt.css_selector}")
+                return "|".join(parts) if parts else ""
+
+            result_raw: list = []
+            skip_indices: set = set()
+
+            for idx, (i, raw, ev) in enumerate(parsed):
+                if idx in skip_indices:
+                    continue
+                if ev is None:
+                    result_raw.append(raw)
+                    continue
+                p = ev.payload
+                if not isinstance(p, TypeTextEvent):
+                    result_raw.append(raw)
+                    continue
+
+                target = getattr(p, 'target', None)
+                if not target or target.backend != TargetBackend.BROWSER:
+                    result_raw.append(raw)
+                    continue
+
+                bkey = _browser_key(target)
+                if not bkey:
+                    result_raw.append(raw)
+                    continue
+
+                # Scan ahead for consecutive browser TypeText events to same element
+                merged_text = p.text or ""
+                merged_count = 1
+                j = idx + 1
+                while j < len(parsed):
+                    _, _, next_ev = parsed[j]
+                    if next_ev is None:
+                        break
+                    np = next_ev.payload
+
+                    # Skip over ScreenshotCheckpointEvents (they're no-ops)
+                    if isinstance(np, ScreenshotCheckpointEvent):
+                        skip_indices.add(j)
+                        j += 1
+                        continue
+
+                    # Another TypeText to the same browser element → merge
+                    if isinstance(np, TypeTextEvent):
+                        nt = getattr(np, 'target', None)
+                        if nt and nt.backend == TargetBackend.BROWSER:
+                            nkey = _browser_key(nt)
+                            if nkey == bkey:
+                                merged_text += (np.text or "")
+                                merged_count += 1
+                                skip_indices.add(j)
+                                j += 1
+                                continue
+                    break  # Any other event type stops the merge
+
+                if merged_count > 1:
+                    p.text = merged_text
+                    logger.info(
+                        "[REPLAY] Browser TypeText pre-merge: {} fragments → '{}' ({}→1 events)",
+                        merged_count, merged_text[:50], merged_count,
+                    )
+
+                result_raw.append(raw)
+
+            merged_total = len(events_raw) - len(result_raw)
+            if merged_total > 0:
+                logger.info("[REPLAY] Browser TypeText merge: {} events → {} ({} merged)",
+                            len(events_raw), len(result_raw), merged_total)
+            return result_raw
+
+        except Exception as exc:
+            logger.warning("[REPLAY] _patch_browser_typetext_merge failed: {}", exc)
             return events_raw
 
     def abort(self) -> None:
@@ -1258,11 +1373,53 @@ class ReplayEngine:
                 self._type_at_current_focus(p.text)
                 self._allow_unanchored_typing_once = False
                 return
-            logger.warning("[REPLAY] Non-editable target {} — skipping type", ctrl)
-            raise ElementNotInteractableError(
-                f"Event #{event_id}: target control_type={ctrl} is not editable",
-                event_id,
+
+            # FIX: Instead of immediately rejecting, try to find the currently
+            # focused editable element.  This handles the common case where the
+            # user clicks a non-editable launcher (e.g., "Blank document" ListItem)
+            # which opens an editor — by replay time, focus has already shifted to
+            # the editable element.  Only reject if no editable element is focused.
+            logger.info(
+                "[REPLAY] Event #{}: non-editable target '{}' — attempting to type at focused editable element",
+                event_id, ctrl,
             )
+            if UIA_OK:
+                try:
+                    from pywinauto import Desktop
+                    desktop = Desktop(backend="uia")
+                    focused = desktop.get_focus()
+                    if focused:
+                        focused_ctrl = ""
+                        try:
+                            focused_ctrl = (focused.friendly_class_name()
+                                          if callable(getattr(focused, "friendly_class_name", None))
+                                          else "") or ""
+                        except Exception:
+                            pass
+                        if focused_ctrl in _EDITABLE_CONTROL_TYPES:
+                            logger.info(
+                                "[REPLAY] Event #{}: found focused editable element '{}' — typing there",
+                                event_id, focused_ctrl,
+                            )
+                            try:
+                                focused.set_edit_text(p.text)
+                                return
+                            except Exception:
+                                focused.click_input()
+                                time.sleep(0.1)
+                                send_keys(self._escape_sk(p.text), with_spaces=True)
+                                return
+                except Exception as exc:
+                    logger.debug("[REPLAY] Event #{}: focused element lookup failed: {}", event_id, exc)
+
+            # Fallback: type at current OS focus (the element may already be focused
+            # even if we couldn't identify it via UIA)
+            logger.warning(
+                "[REPLAY] Event #{}: non-editable target '{}' — falling back to type at current focus",
+                event_id, ctrl,
+            )
+            self._type_at_current_focus(p.text)
+            return
 
         is_formula  = p.text.startswith("=")
         force_plain = getattr(p, "force_plain_text", not is_formula)
@@ -1349,17 +1506,63 @@ class ReplayEngine:
                 elem = self._matcher.find(p.target, event_id)
                 if isinstance(elem, tuple):
                     # Browser target: matcher returned viewport (cx,cy) coords.
-                    # Click to focus the element, then type via CDP key events.
                     if p.target.backend == TargetBackend.BROWSER:
                         vx, vy = elem
+                        bt = getattr(p.target, 'browser', None)
+
+                        # ── Strategy A: CDP set_value (atomic, immune to autocomplete) ──
+                        # For editable fields (input, textarea, contenteditable),
+                        # directly inject the value into the DOM element.  This bypasses
+                        # all focus/autocomplete/re-render race conditions.
+                        if bt and self._browser:
+                            tag = (bt.tag_name or "").lower()
+                            input_type = (bt.input_type or "").lower()
+                            is_editable_input = tag in ('input', 'textarea') or (
+                                tag == 'div' and bt.aria_role in ('textbox', 'combobox'))
+                            # Don't use set_value for password fields or file inputs
+                            if is_editable_input and input_type not in ('file', 'submit', 'button'):
+                                try:
+                                    ok = self._browser.set_value(bt, p.text)
+                                    if ok:
+                                        logger.info(
+                                            "[REPLAY] Event #{}: Browser set_value ✓ '{}' tag={}",
+                                            event_id, p.text[:30], tag,
+                                        )
+                                        return
+                                except Exception as sv_exc:
+                                    logger.debug(
+                                        "[REPLAY] Event #{}: set_value failed ({}), falling back to key events",
+                                        event_id, sv_exc,
+                                    )
+
+                        # ── Strategy B: Click + wait DOM stable + CDP key events ──
                         sx, sy = self._browser.viewport_to_screen(vx, vy)
                         self._browser.bring_to_front()
                         time.sleep(0.08)
                         self._sendinput_click(sx, sy)
-                        # FIX: 120ms was insufficient after Gmail compose field click;
-                        # Gmail's React re-render can steal focus back briefly.
-                        # 200ms lets the DOM settle before CDP key injection.
-                        time.sleep(0.20)
+
+                        # Wait for DOM to stabilize after click (Gmail compose fields
+                        # re-render via React, which can steal focus)
+                        self._browser.wait_for_dom_stable(stable_ms=200, max_wait_ms=1500)
+
+                        # Re-focus guard: verify the element still has focus.
+                        # If a React re-render moved focus, click again.
+                        if bt and self._browser:
+                            try:
+                                state = self._browser.verify_element(bt)
+                                if not state.get('visible', False):
+                                    logger.warning(
+                                        "[REPLAY] Event #{}: target not visible after click, re-clicking",
+                                        event_id,
+                                    )
+                                    time.sleep(0.15)
+                                    self._sendinput_click(sx, sy)
+                                    time.sleep(0.15)
+                            except Exception:
+                                pass
+
+                        # Additional settle time for React-based apps
+                        time.sleep(0.15)
                         self._browser.type_text_at(p.text, human_like=False)
                         logger.info("[REPLAY] Event #{}: Browser type ✓ '{}' at viewport({},{})",
                                     event_id, p.text[:30], vx, vy)
@@ -1464,6 +1667,12 @@ class ReplayEngine:
                             f"Event #{event_id}: click produced no detectable UI change",
                             event_id,
                         )
+                    # FIX: If this button is a known file-dialog trigger (Attach, Upload,
+                    # Browse…), pause here until the native file picker appears so that
+                    # the next event (FileDialogEvent) doesn't execute before the OS
+                    # dialog is ready to receive input.
+                    if self._is_file_trigger_name(p.target):
+                        self._wait_for_file_dialog_open(event_id)
                     return
                 self._sendinput_click(*elem)
                 self._flash(*elem)
@@ -1558,6 +1767,49 @@ class ReplayEngine:
         except Exception as exc:
             logger.debug("[REPLAY] smart_focus '{}': {}", title, exc)
 
+    @staticmethod
+    def _is_file_trigger_name(target) -> bool:
+        """Return True when a UIA button is known to open a native file dialog."""
+        if not target:
+            return False
+        name = (getattr(target, "name", None) or "").lower()
+        aid  = (getattr(target, "automation_id", None) or "").lower()
+        _kw  = {"attach", "upload", "browse", "choose file", "insert file", "add attachment", "open file"}
+        return any(k in name for k in _kw) or any(k in aid for k in _kw)
+
+    def _wait_for_file_dialog_open(self, event_id: int, timeout_s: float = 10.0) -> None:
+        """Block until a native Win32 file dialog appears.
+
+        Called after clicking a file-trigger button so that the subsequent
+        FileDialogEvent doesn't attempt to type a path before the OS picker is
+        ready.  Exits early on success or silently after timeout.
+
+        FIX: expanded class set to match NativeHWNDHost (Win10/11 IFileDialog),
+        tightened poll interval from 200ms → 100ms, and increased post-detection
+        settle time from 300ms → 500ms so the dialog is fully rendered.
+        """
+        if not UIA_OK:
+            return
+        logger.debug("[REPLAY] Event #{}: waiting for file dialog to appear (up to {}s)",
+                     event_id, timeout_s)
+        _DIALOG_CLASSES = ("#32770", "NativeHWNDHost", "FileOpenDialog",
+                           "FileSaveDialog", "ImmersiveDialogWindow")
+        deadline = time.time() + timeout_s
+        while time.time() < deadline:
+            for cls in _DIALOG_CLASSES:
+                try:
+                    found = find_windows(class_name=cls, visible_only=True)
+                    if found:
+                        logger.debug("[REPLAY] Event #{}: file dialog appeared (class={})",
+                                     event_id, cls)
+                        time.sleep(0.5)   # FIX: was 300ms — let dialog fully render
+                        return
+                except Exception:
+                    pass
+            time.sleep(0.1)   # FIX: was 200ms — tighter polling
+        logger.warning("[REPLAY] Event #{}: file dialog did not appear within {}s",
+                       event_id, timeout_s)
+
     def _ensure_window_focus(self, target) -> None:
         if not UIA_OK or not target or not target.window_title:
             return
@@ -1630,34 +1882,107 @@ class ReplayEngine:
             logger.warning("[REPLAY] Dialog failed: {}", exc)
 
     def _handle_file_dialog(self, p, event_id: int) -> None:
+        """Replay a FileDialogEvent by typing the recorded path into the
+        Windows file-open dialog and confirming.
+
+        Supports both the legacy #32770 dialog class and the modern
+        IFileDialog (Windows 10/11) which may use a different hierarchy
+        but still exposes auto_id 1148 or 1001 for the filename Edit.
+
+        FIX: Increased wait timeout from 5 s → 10 s (Gmail / Outlook can
+        take several seconds to open the native picker after clicking Attach).
+        Added fallback: if UIA lookup of the Edit fails, type the path via
+        SendKeys after focusing the dialog with Alt+D (address-bar shortcut
+        that also works in the filename box on most Windows dialogs).
+        """
         if not UIA_OK:
             return
-        time.sleep(0.4)
-        deadline = time.time() + 5
-        handles  = []
+
+        # Wait longer — browsers can be slow to hand off to the OS file picker
+        time.sleep(0.6)
+        deadline = time.time() + 10.0
+        handles: list = []
+        _DIALOG_CLASSES = ("#32770", "NativeHWNDHost", "FileOpenDialog",
+                           "FileSaveDialog", "ImmersiveDialogWindow")
         while time.time() < deadline:
-            handles = find_windows(class_name="#32770")
+            # Search all known dialog classes (was only #32770 + NativeHWNDHost + ImmersiveDialogWindow)
+            for cls in _DIALOG_CLASSES:
+                try:
+                    from pywinauto.findwindows import find_windows
+                    found = find_windows(class_name=cls, visible_only=True)
+                    if found:
+                        handles = found
+                        break
+                except Exception:
+                    pass
             if handles:
                 break
-            time.sleep(0.2)
+            time.sleep(0.25)
+
         if not handles:
+            logger.warning("[REPLAY] Event #{}: file dialog never appeared — skipping", event_id)
             return
+
+        path = getattr(p, "path", "") or ""
+        if not path:
+            logger.warning("[REPLAY] Event #{}: FileDialogEvent has no path", event_id)
+            return
+
+        hwnd = handles[0]
+        logger.info("[REPLAY] Event #{}: file dialog found (hwnd={:#x}) — typing '{}'",
+                    event_id, hwnd, path)
+
         try:
-            app = Application(backend="uia").connect(handle=handles[0])
-            win = app.window(handle=handles[0])
+            from pywinauto import Application
+            app = Application(backend="uia").connect(handle=hwnd)
+            win = app.window(handle=hwnd)
+            typed = False
             for aid in ("1148", "1001"):
                 try:
                     descs = win.descendants(auto_id=aid, control_type="Edit")
                     if descs:
                         wrapper = descs[0].wrapper_object() if hasattr(descs[0], "wrapper_object") else descs[0]
-                        wrapper.set_edit_text(p.path)
+                        wrapper.set_focus()
                         time.sleep(0.1)
+                        wrapper.set_edit_text(path)
+                        time.sleep(0.15)
                         send_keys("{ENTER}")
+                        time.sleep(0.3)
+                        # Confirm a second time — some dialogs need two Enters
+                        # (once to accept the typed path, once to close)
+                        send_keys("{ENTER}")
+                        typed = True
+                        logger.info("[REPLAY] Event #{}: file dialog → path typed via auto_id={}",
+                                    event_id, aid)
                         return
                 except Exception:
                     pass
+
+            if not typed:
+                # Fallback: focus the dialog, press Alt+D to move caret to
+                # filename field (works on both legacy and modern dialog),
+                # then paste the path.
+                try:
+                    win.set_focus()
+                    time.sleep(0.15)
+                    send_keys("%d")   # Alt+D = focus filename/address bar
+                    time.sleep(0.15)
+                    if WIN32_OK:
+                        self._set_clipboard(path)
+                        send_keys("^a^v")
+                    else:
+                        send_keys(self._escape_sk(path), with_spaces=True)
+                    time.sleep(0.15)
+                    send_keys("{ENTER}")
+                    time.sleep(0.3)
+                    send_keys("{ENTER}")
+                    logger.info("[REPLAY] Event #{}: file dialog → path typed via Alt+D fallback",
+                                event_id)
+                except Exception as exc2:
+                    logger.warning("[REPLAY] Event #{}: file dialog Alt+D fallback failed: {}",
+                                   event_id, exc2)
         except Exception as exc:
-            logger.warning("[REPLAY] File dialog failed: {}", exc)
+            logger.warning("[REPLAY] Event #{}: file dialog failed: {}", event_id, exc)
 
     def _handle_dropdown(self, p, event_id: int) -> None:
         if not p.target:
@@ -2023,10 +2348,6 @@ class ReplayEngine:
         if original is None:
             return
         self._set_clipboard(original)
-
-    # ──────────────────────────────────────────────────────────────────
-    # Wait / validation
-    # ──────────────────────────────────────────────────────────────────
 
     def _wait_ready(self, elem, event_id: int) -> None:
         deadline = time.perf_counter() + self._config.replay.wait_timeout_ms / 1000

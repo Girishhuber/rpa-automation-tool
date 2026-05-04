@@ -24,7 +24,7 @@ from models.event import (
     ExcelCellSelectEvent, ExcelRangeSelectEvent, ExcelSheetSwitchEvent,
     BrowserNavigateEvent,
     DropdownSelectEvent, CheckboxToggleEvent, RadioSelectEvent,
-    DialogResponseEvent,
+    DialogResponseEvent, FileDialogEvent,
     ScreenshotCheckpointEvent,
     ProcessLaunchEvent,
 )
@@ -221,6 +221,11 @@ class Recorder:
         # Track last Excel cell clicked so TypeText can carry it (FIX: Excel cell recording)
         self._last_excel_cell_ref:  Optional[str]  = None
 
+        # ── File dialog guard (FIX: prevents native dialog clicks being recorded as browser clicks) ──
+        # When True, _on_mouse_click suppresses events — the file-dialog watcher
+        # thread is monitoring the dialog and will emit a FileDialogEvent on close.
+        self._in_file_dialog: bool = False
+
         # ── Background threads ───────────────────────────────────────
         self._mouse_listener    = None
         self._kbd_listener      = None
@@ -356,6 +361,15 @@ class Recorder:
         if pressed:
             self._mouse_down_pos  = (x, y)
             self._mouse_down_time = time.perf_counter()
+            return
+
+        # FIX: Suppress ALL click events while a native file dialog is open.
+        # Without this, every click inside the Windows file picker (Downloads
+        # panel, navigation tree, filename box, Open button) gets mis-recorded
+        # as a browser or UIA event because _build_target_at still sees
+        # chrome.exe as the process owner and fires a CDP lookup.
+        if self._in_file_dialog:
+            logger.debug("[RECORD] Click suppressed — file dialog active @ ({},{})", x, y)
             return
 
         now  = time.perf_counter()
@@ -543,6 +557,15 @@ class Recorder:
                 f"Click {self._tlabel(target)}",
             )
             self._sample_focused_element()
+            # FIX: Detect file-attach / file-open buttons and spawn a background
+            # watcher that suppresses clicks inside the native dialog and emits a
+            # single FileDialogEvent with the chosen path when the dialog closes.
+            if self._is_file_trigger_target(target):
+                logger.info("[RECORD] File trigger detected — spawning dialog watcher")
+                threading.Thread(
+                    target=self._watch_file_dialog, daemon=True,
+                    name="FileDialogWatcher",
+                ).start()
 
         self._maybe_screenshot(target)
 
@@ -632,6 +655,19 @@ class Recorder:
 
         if raw in _SPECIAL_KEYS:
             self._flush_text_buffer()
+
+            # FIX: When navigation keys (Tab, Enter, arrows) are pressed in Excel,
+            # the active cell changes. Reset _last_excel_cell_ref so the next
+            # TypeText event doesn't inherit the old cell's ref.
+            # Without this, 'Email' typed in L8 + Tab + 'Girish' typed in M8
+            # would both get cell_ref=L8 and merge incorrectly to 'EmailGirish'.
+            _EXCEL_NAV_KEYS = {"enter", "return", "tab", "down", "up", "left", "right"}
+            if (raw in _EXCEL_NAV_KEYS
+                    and self._last_target
+                    and self._is_excel_target(self._last_target)):
+                logger.debug("[RECORD] Excel nav key '{}' — clearing cell_ref={}", raw, self._last_excel_cell_ref)
+                self._last_excel_cell_ref = None
+
             if self._pressed_mods:
                 combo = sorted(self._pressed_mods) + [raw]
                 logger.info("[RECORD] Key combo: {}", "+".join(combo))
@@ -988,15 +1024,32 @@ class Recorder:
             cls       = target.class_name or ""
             is_browser = proc in BROWSER_PROCS or cls in _ELECTRON_CLASS
 
-        if is_browser and self._browser.is_connected:
-            win_rect = self._get_browser_window_rect(x, y)
-            vx, vy   = self._browser.screen_to_viewport(x, y, win_rect)
-            bt = self._browser.get_element_at(vx, vy)
-            if bt:
-                if target is None:
-                    target = UITarget(backend=TargetBackend.BROWSER)
-                target.backend = TargetBackend.BROWSER
-                target.browser = bt
+        # FIX: Before firing CDP get_element_at, check whether a native Win32
+        # dialog (class="#32770", e.g. Windows file-open/save dialog) is the
+        # actual window under the cursor.  When the user clicks inside a file
+        # dialog that opened on top of Chrome, _enricher.get_target_at returns
+        # a UIA element whose process_name is still "chrome.exe" (the dialog
+        # is owned by the browser process).  Without this guard, we then call
+        # _browser.get_element_at which reaches THROUGH the native dialog into
+        # the underlying Gmail DOM and returns a Gmail element — causing the
+        # "Downloads (pinned)" click to be recorded as a browser 'Compose'
+        # click and the "Open" button to be recorded as an inbox email click.
+        # FIX: also check self._in_file_dialog as a secondary guard — if the
+        # watcher has already flagged that a file dialog is open, never call
+        # CDP regardless of what _is_native_dialog_at says.  This catches the
+        # case where the dialog window class is not in our known-classes list.
+        if is_browser and self._browser.is_connected and not self._in_file_dialog:
+            native_dialog_active = self._is_native_dialog_at(x, y)
+            if not native_dialog_active:
+                win_rect = self._get_browser_window_rect(x, y)
+                vx, vy   = self._browser.screen_to_viewport(x, y, win_rect)
+                bt = self._browser.get_element_at(vx, vy)
+                if bt:
+                    if target is None:
+                        target = UITarget(backend=TargetBackend.BROWSER)
+                    target.backend = TargetBackend.BROWSER
+                    target.browser = bt
+            # else: leave as UIA-only — the native dialog UIA target is correct
 
         # v2.0: sanitize unstable selectors, enrich, then score target quality.
         if target:
@@ -1033,6 +1086,107 @@ class Recorder:
 
         return target
 
+    @staticmethod
+    def _is_native_dialog_at(x: int, y: int) -> bool:
+        """Return True when the window directly under (x, y) is a native Win32
+        file dialog — e.g. a file open/save dialog opened on top of Chrome.
+
+        FIXED: The original implementation only checked GA_ROOT (the top-level
+        ancestor).  On Chrome 90+ and Windows 10/11, Chrome hosts the IFileDialog
+        as a CHILD of its own Chrome_WidgetWin_1 window, so GA_ROOT walks straight
+        past the #32770 dialog frame and returns Chrome's root HWND.  This caused
+        every click INSIDE the file picker (Downloads, Open button, etc.) to
+        bypass the native-dialog guard and get mis-recorded as a browser element.
+
+        New strategy:
+          1. WindowFromPoint → walk EVERY ancestor (not just GA_ROOT), checking
+             each window class against known dialog and interior-control classes.
+          2. Also check the root window title for file-dialog keywords.
+          3. Scan all top-level windows: if ANY #32770 / NativeHWNDHost is
+             visible on screen, treat any click below the Chrome tab strip
+             (y > 130) as being inside the dialog.
+        """
+        try:
+            import ctypes, ctypes.wintypes
+
+            _DIALOG_CLASSES = {
+                "#32770",
+                "NativeHWNDHost",
+                "FileOpenDialog",
+                "FileSaveDialog",
+                "ImmersiveDialogWindow",
+                "Chrome_MessageBoxExtra",
+            }
+            _INTERIOR_CLASSES = {
+                "SysListView32", "SysTreeView32", "ComboBoxEx32",
+                "DirectUIHWND", "SHELLDLL_DefView", "ShellTabWindowClass",
+                "SysHeader32", "ToolbarWindow32",
+            }
+
+            buf  = ctypes.create_unicode_buffer(256)
+            hwnd = ctypes.windll.user32.WindowFromPoint(
+                ctypes.wintypes.POINT(x, y)
+            )
+            if not hwnd:
+                return False
+
+            # Strategy A: walk every ancestor, check class at each level
+            cur   = hwnd
+            depth = 0
+            while cur and depth < 20:
+                ctypes.windll.user32.GetClassNameW(cur, buf, 256)
+                cls = buf.value
+                if cls in _DIALOG_CLASSES:
+                    return True
+                if cls in _INTERIOR_CLASSES:
+                    p = ctypes.windll.user32.GetParent(cur)
+                    if p and p != cur:
+                        ctypes.windll.user32.GetClassNameW(p, buf, 256)
+                        if buf.value in _DIALOG_CLASSES:
+                            return True
+                        gp = ctypes.windll.user32.GetParent(p)
+                        if gp and gp != p:
+                            ctypes.windll.user32.GetClassNameW(gp, buf, 256)
+                            if buf.value in _DIALOG_CLASSES:
+                                return True
+                parent = ctypes.windll.user32.GetParent(cur)
+                if not parent or parent == cur:
+                    break
+                cur = parent
+                depth += 1
+
+            # Strategy B: check root window title for dialog keywords
+            root = ctypes.windll.user32.GetAncestor(hwnd, 2)
+            if root:
+                title_buf = ctypes.create_unicode_buffer(512)
+                ctypes.windll.user32.GetWindowTextW(root, title_buf, 512)
+                title = (title_buf.value or "").lower()
+                if any(kw in title for kw in ("open", "save", "upload", "attach", "choose", "select file", "browse")):
+                    return True
+
+            # Strategy C: scan all top-level windows for any visible dialog.
+            # If one exists and the click is below the Chrome tab strip (y > 130),
+            # it's almost certainly inside the file picker overlaying Chrome.
+            result = [False]
+            scan_buf = ctypes.create_unicode_buffer(64)
+
+            def _scan_cb(w, _):
+                ctypes.windll.user32.GetClassNameW(w, scan_buf, 64)
+                if scan_buf.value in _DIALOG_CLASSES:
+                    if ctypes.windll.user32.IsWindowVisible(w):
+                        result[0] = True
+                        return False
+                return True
+
+            WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+            ctypes.windll.user32.EnumWindows(WNDENUMPROC(_scan_cb), 0)
+            if result[0] and y > 130:
+                return True
+
+        except Exception:
+            pass
+        return False
+
     def _get_browser_window_rect(self, x: int, y: int) -> dict:
         try:
             hwnd = ctypes.windll.user32.WindowFromPoint(ctypes.wintypes.POINT(x, y))
@@ -1054,7 +1208,162 @@ class Recorder:
 
  
     @staticmethod
-    def _is_system_ui(target: UITarget) -> bool:
+    def _is_file_trigger_target(target: Optional["UITarget"]) -> bool:
+        """Return True when clicking this UIA target is known to open a file dialog.
+
+        Matches common file-attachment and file-open button signatures.
+        Intentionally broad — false positives just mean we spawn a watcher
+        that finds no dialog and exits quietly.
+        """
+        if not target:
+            return False
+        name = (target.name or "").lower()
+        aid  = (target.automation_id or "").lower()
+        ctrl = (target.control_type or "").lower()
+        if ctrl not in ("button", "splitbutton", "custom"):
+            return False
+        _triggers = {
+            "attach", "attach file", "upload", "browse", "choose file",
+            "insert file", "add attachment", "open file",
+        }
+        return any(t in name for t in _triggers) or any(t in aid for t in _triggers)
+
+    def _watch_file_dialog(self) -> None:
+        """Background thread: waits for a native file-open dialog to appear and
+        close, then emits a FileDialogEvent with the chosen path.
+
+        FIXED:
+        - _in_file_dialog is set to True IMMEDIATELY on watcher start (not after
+          finding the dialog). The original had a race window where clicks inside
+          the file picker were not suppressed while watcher was still polling.
+        - _find_dialog now scans NativeHWNDHost (Win10/11 IFileDialog host) in
+          addition to legacy #32770.
+        - Clipboard fallback for path capture when UIA edit-box read fails.
+
+        Strategy:
+         0. Set _in_file_dialog = True immediately.
+         1. Poll for a dialog window for up to 8 seconds.
+         2. While dialog is present → suppress clicks, sample filename box.
+         3. When dialog disappears → capture path, clear guard.
+         4. Emit FileDialogEvent(path=…).
+        """
+        import ctypes, ctypes.wintypes
+
+        # FIX: suppress ALL clicks immediately — before the OS dialog appears.
+        # Chrome can take 500ms-2s to open the picker after the button click.
+        self._in_file_dialog = True
+        logger.debug("[RECORD] File dialog watcher started — click suppression ON")
+
+        _DIALOG_CLASSES = ("#32770", "NativeHWNDHost", "FileOpenDialog",
+                           "FileSaveDialog", "ImmersiveDialogWindow")
+
+        def _find_dialog() -> int:
+            """Return HWND of the topmost visible file-dialog window, or 0.
+            FIX: now scans NativeHWNDHost (modern IFileDialog) in addition to
+            the legacy #32770 class that was checked before.
+            """
+            result = [0]
+            buf = ctypes.create_unicode_buffer(64)
+
+            def _cb(hwnd, _):
+                ctypes.windll.user32.GetClassNameW(hwnd, buf, 64)
+                if buf.value in _DIALOG_CLASSES and ctypes.windll.user32.IsWindowVisible(hwnd):
+                    result[0] = hwnd
+                    return False
+                return True
+
+            WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+            ctypes.windll.user32.EnumWindows(WNDENUMPROC(_cb), 0)
+            return result[0]
+
+        def _read_filename(hwnd: int) -> Optional[str]:
+            """Try to read the filename edit-box text from dialog hwnd."""
+            if not UIA_OK:
+                return None
+            try:
+                from pywinauto import Application
+                app = Application(backend="uia").connect(handle=hwnd)
+                win = app.window(handle=hwnd)
+                for aid in ("1148", "1001", "FileNameControlHost"):
+                    try:
+                        edits = win.descendants(auto_id=aid, control_type="Edit")
+                        if edits:
+                            w = edits[0].wrapper_object() if hasattr(edits[0], "wrapper_object") else edits[0]
+                            txt = w.window_text() or ""
+                            if txt:
+                                return txt
+                    except Exception:
+                        pass
+                # Fallback: any Edit control with a non-empty value
+                edits = win.descendants(control_type="Edit")
+                for e in edits[:10]:
+                    try:
+                        w = e.wrapper_object() if hasattr(e, "wrapper_object") else e
+                        txt = w.window_text() or ""
+                        if txt and len(txt) > 2:
+                            return txt
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+            return None
+
+        try:
+            # Step 1 — wait for dialog to appear (up to 8 s, was 6 s)
+            deadline = time.time() + 8.0
+            dialog_hwnd = 0
+            while time.time() < deadline and self._running:
+                dialog_hwnd = _find_dialog()
+                if dialog_hwnd:
+                    break
+                time.sleep(0.1)   # was 0.15 — tighter polling reduces miss window
+
+            if not dialog_hwnd:
+                logger.debug("[RECORD] File dialog watcher: no dialog appeared — exiting")
+                return
+
+            logger.info("[RECORD] File dialog detected (hwnd={:#x}) — suppressing native clicks", dialog_hwnd)
+
+            # Step 2+3 — wait for dialog to close (up to 120 s), sample filename box
+            last_path: Optional[str] = None
+            deadline2 = time.time() + 120.0
+            while time.time() < deadline2 and self._running:
+                if not ctypes.windll.user32.IsWindow(dialog_hwnd):
+                    break
+                p = _read_filename(dialog_hwnd)
+                if p:
+                    last_path = p
+                time.sleep(0.2)
+
+            # FIX: clipboard fallback — some modern pickers don't expose a
+            # readable filename Edit until just before close; grab clipboard too.
+            if not last_path:
+                try:
+                    cb_text = self._read_clipboard()
+                    if cb_text and len(cb_text) > 3 and ("\\" in cb_text or "/" in cb_text):
+                        last_path = cb_text
+                        logger.debug("[RECORD] File dialog path from clipboard: '{}'", last_path)
+                except Exception:
+                    pass
+
+            # Step 4 — emit FileDialogEvent
+            if last_path:
+                logger.info("[RECORD] File dialog closed — path='{}'", last_path)
+                self._push(
+                    FileDialogEvent(path=last_path),
+                    f"File: {last_path}",
+                )
+            else:
+                logger.warning("[RECORD] File dialog closed — no path captured (dialog may have been cancelled)")
+
+        except Exception as exc:
+            logger.warning("[RECORD] File dialog watcher error: {}", exc)
+        finally:
+            self._in_file_dialog = False
+            logger.debug("[RECORD] File dialog watcher exited")
+
+    @staticmethod
+    def _is_system_ui(target: "UITarget") -> bool:
         win  = (target.window_title or "").strip()
         proc = (target.process_name or "").lower()
         return win in _SYSTEM_UI_WINDOWS or proc in _SYSTEM_UI_PROCS
